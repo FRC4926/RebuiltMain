@@ -13,5 +13,7 @@ public class AutonConstants {
         public static final PIDController objectDetectionRotationPIDController = new PIDController(0.04, 0, 0);
         public static final double objectDetectionRotationTolerance = 0.1;
 
+        public static final double timeThres = 1;
+
 
 }

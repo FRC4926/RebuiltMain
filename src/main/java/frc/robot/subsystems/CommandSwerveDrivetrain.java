@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
+import com.ctre.phoenix6.swerve.SwerveRequest.RobotCentric;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -307,13 +308,39 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SmartDashboard.putNumber("Angle to Hub", angle);
         double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
         SmartDashboard.putNumber("Point to Hub Rot Rate", rotRate);
-        return drive.withVelocityX(y.get() * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(x.get() * DriveConstants.MaxSpeed) // Drive left with negative X (left)
+        return drive.withVelocityX(-y.get() * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-x.get() * DriveConstants.MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(rotRate); // Drive counterclockwise with negative X (left)
     }
+
+    public FieldCentric snapToHub(FieldCentric drive) {
+        double desiredX = FieldConstants.hubCenter.getX();
+        double desiredY = FieldConstants.hubCenter.getY();
+        double currentX = getState().Pose.getX();
+        double currentY = getState().Pose.getY();
+        double currentAngle = getState().Pose.getRotation().getRadians();
+        double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
+        SmartDashboard.putNumber("Angle to Hub", angle);
+        double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
+        SmartDashboard.putNumber("Point to Hub Rot Rate", rotRate);
+        return drive.withRotationalRate(rotRate); // Drive counterclockwise with negative X (left)
+    }
+
     public Command snapToHubCommand(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
         
         return this.applyRequest(() -> snapToHub(drive, x, y));
+    }
+
+    public Command snapToHuAutonCommand(FieldCentric drive) {
+        
+        return this.applyRequest(() -> snapToHub(drive));
+    }
+
+    public RobotCentric zeroDrive(RobotCentric drive) {
+       return drive
+            .withRotationalRate(0)
+            .withVelocityX(0)
+            .withVelocityY(0);
 
     }
 

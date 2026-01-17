@@ -8,8 +8,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.AutonConstants;
 import frc.robot.util.LimelightHelpers;
@@ -27,7 +29,6 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     private Pose2d targetPose = new Pose2d();
 
     private Timer flickerTimer = new Timer();
-    private double timeThres = 0.2;
 
     public ObjectDetectionSubsytem() {
         flickerTimer.start();
@@ -36,8 +37,24 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         LimelightHelpers.setPipelineIndex("", 0);
     }
 
-    public RobotCentric driveToObject(CommandSwerveDrivetrain drivetrain, RobotCentric drive) {
+    public RobotCentric autoDriveToObject(CommandSwerveDrivetrain drivetrain, RobotCentric drive) 
+    {
+            // double driveMeasurement = getTY();
+            // double driveSetpoint = -27;
 
+            double rotMeasurement = getTX();
+            double rotSetpoint = 0;
+
+            // double driveCalculation = driveController.calculate(driveMeasurement, driveSetpoint);
+            double rotCalculation = rotationController.calculate(rotMeasurement, rotSetpoint);
+
+
+            return drive
+                .withVelocityX(1.75) //-driveCalculation)* Math.max(0.1, (Math.min(1, 0.1 / Math.abs(rotCalculation)))))
+                .withRotationalRate(rotCalculation);
+    }
+
+    public RobotCentric driveToObject(CommandSwerveDrivetrain drivetrain, RobotCentric drive)     {
         if (hasTarget)
         {
             // double driveMeasurement = getTY();
@@ -56,10 +73,18 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         } else
         {
             return drive
-            .withVelocityX(0)
-            .withVelocityY(0)
-            .withRotationalRate(0);
+                .withVelocityX(0)
+                .withVelocityY(0)
+                .withRotationalRate(0);
         }
+    }
+
+    public RobotCentric zeroDrive(RobotCentric drive) {
+       return drive
+            .withRotationalRate(0)
+            .withVelocityX(0)
+            .withVelocityY(0);
+
     }
 
     public boolean rotFinished()
@@ -72,7 +97,16 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         return drivetrain.applyRequest(() -> driveToObject(drivetrain, drive));
     }
 
+    public Command autoTrackAutonCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
+    {
+        return drivetrain.applyRequest(() -> autoDriveToObject(drivetrain, drive)).until(this::notHasTarget);
+    }
 
+    public Command autonObjectDetect(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
+    {
+        return autoTrackAutonCommand(drivetrain, drive)
+            .andThen(new InstantCommand(() -> zeroDrive(drive)));
+    }
     public double getTX()
     {
         return tX;
@@ -88,8 +122,15 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         return hasTarget;
     }
 
+    public boolean notHasTarget()
+    {
+        return !hasTarget || getTY() < -25.5;
+    }
+
     @Override
     public void periodic() {
+
+
         if (LimelightHelpers.getTV(""))
         {
             flickerTimer.restart();
@@ -98,7 +139,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
             tA = LimelightHelpers.getTA("");
         }
 
-        hasTarget = flickerTimer.get() <= timeThres;
+        hasTarget = flickerTimer.get() <= AutonConstants.timeThres;
 
         if (!hasTarget)
         {   
@@ -107,6 +148,6 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
             tA = 0;
         }
 
-        
+        SmartDashboard.putBoolean("HasTarget", hasTarget);
     }
 }

@@ -9,12 +9,14 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -50,11 +52,16 @@ public class RobotContainer {
 
     
 
-    public RobotContainer() {
+    public RobotContainer() 
+    {
+        NamedCommands.registerCommand("autoTrackCommand", detectionSubsystem.autonObjectDetect(drivetrain, relativeDrive));
+        NamedCommands.registerCommand("autoFaceHub", drivetrain.snapToHuAutonCommand(drive));
+        NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
+        // NamedCommands.registerCommand("test", new InstantCommand(() -> System.out.println("Worked")));
 
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Autonomous", autonChooser);
-
+        
         configureBindings();
     }
 
@@ -64,8 +71,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(driverController.getLeftY() * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(driverController.getLeftX() * DriveConstants.MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(-driverController.getLeftY() * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-driverController.getLeftX() * DriveConstants.MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-driverController.getRightX() * DriveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
