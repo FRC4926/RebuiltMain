@@ -299,8 +299,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
     public FieldCentric snapToHub(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
-        double desiredX = FieldConstants.hubPose.getX();
-        double desiredY = FieldConstants.hubPose.getY();
+        double desiredX = FieldConstants.hubCenter.getX();
+        double desiredY = FieldConstants.hubCenter.getY();
         double currentX = getState().Pose.getX();
         double currentY = getState().Pose.getY();
         double currentAngle = getState().Pose.getRotation().getRadians();
