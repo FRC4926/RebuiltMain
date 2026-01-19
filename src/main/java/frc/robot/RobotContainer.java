@@ -10,6 +10,8 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.events.PointTowardsZoneTrigger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -54,6 +56,9 @@ public class RobotContainer {
 
     public RobotContainer() 
     {
+        new EventTrigger("PointToHub").onTrue(drivetrain.overrideRot());
+        new EventTrigger("PointToHub").onFalse(drivetrain.clearOverride());
+
         NamedCommands.registerCommand("autoTrackCommand", detectionSubsystem.autonObjectDetect(drivetrain, relativeDrive));
         NamedCommands.registerCommand("autoFaceHub", drivetrain.snapToHuAutonCommand(drive));
         NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
