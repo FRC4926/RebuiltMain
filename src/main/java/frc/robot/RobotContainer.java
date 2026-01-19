@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -26,6 +27,7 @@ import frc.robot.constants.DriveConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ObjectDetectionSubsytem;
+import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -45,12 +47,13 @@ public class RobotContainer {
 
     private final CommandXboxController driverController = new CommandXboxController(0);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public static SendableChooser<Command> autonChooser;
 
     //subsystems
     public final static ObjectDetectionSubsytem detectionSubsystem = new ObjectDetectionSubsytem();
+    public final static VisionSubsystem visionSubsystem = new VisionSubsystem();
 
     
 
@@ -81,6 +84,10 @@ public class RobotContainer {
                     .withRotationalRate(-driverController.getRightX() * DriveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
+
+        visionSubsystem.setDefaultCommand(new RunCommand(() -> {
+            visionSubsystem.addVisionMeasurements(drivetrain);
+        }, visionSubsystem));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.

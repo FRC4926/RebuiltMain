@@ -300,7 +300,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
     }
-    public FieldCentric snapToHub(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
+    public FieldCentric snapToHubStatic(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
         double desiredX = FieldConstants.hubCenter.getX();
         double desiredY = FieldConstants.hubCenter.getY();
         double currentX = getState().Pose.getX();
@@ -315,7 +315,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     .withRotationalRate(rotRate); // Drive counterclockwise with negative X (left)
     }
 
-    public FieldCentric snapToHub(FieldCentric drive) {
+    public FieldCentric snapToHubStatic(FieldCentric drive) {
         double desiredX = FieldConstants.hubCenter.getX();
         double desiredY = FieldConstants.hubCenter.getY();
         double currentX = getState().Pose.getX();
@@ -327,7 +327,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return drive.withRotationalRate(rotRate); // Drive counterclockwise with negative X (left)
     }
 
-    public double snapToHubPID() {
+    public double snapToHubStaticPID() {
         double desiredX = FieldConstants.hubCenter.getX();
         double desiredY = FieldConstants.hubCenter.getY();
         double currentX = getState().Pose.getX();
@@ -342,18 +342,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command snapToHubCommand(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
         
-        return this.applyRequest(() -> snapToHub(drive, x, y));
+        return this.applyRequest(() -> snapToHubStatic(drive, x, y));
     }
 
     public Command snapToHuAutonCommand(FieldCentric drive) {
         
-        return this.applyRequest(() -> snapToHub(drive));
+        return this.applyRequest(() -> snapToHubStatic(drive));
     }
 
     public Command overrideRot()
     {
         return new InstantCommand(() -> PPHolonomicDriveController.overrideRotationFeedback(() -> {
-            return snapToHubPID();
+            return snapToHubStaticPID();
         }));
     }
 
