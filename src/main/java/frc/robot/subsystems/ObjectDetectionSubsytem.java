@@ -1,11 +1,17 @@
 package frc.robot.subsystems;
 
+import java.util.List;
 import java.util.function.IntSupplier;
+
+import org.photonvision.simulation.VisionTargetSim;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.RobotCentric;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,62 +19,49 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.constants.AutonConstants;
+import frc.robot.constants.VisionConstants;
+import frc.robot.util.CameraWrapper;
 import frc.robot.util.LimelightHelpers;
 
+
 public class ObjectDetectionSubsytem extends SubsystemBase {
+    private final PIDController driveController = VisionConstants.objectDetectionDrivePIDController;
+    private final PIDController rotationController = VisionConstants.objectDetectionRotationPIDController;
 
-    private double tX = LimelightHelpers.getTX("");
-    private double tY = LimelightHelpers.getTY("");
-    private double tA = LimelightHelpers.getTA("");
-    private boolean hasTarget = LimelightHelpers.getTV("");
+    private CameraWrapper camera = null;
+    private double yaw = 0;
+    private double pitch = 0;
 
-    private final PIDController driveController = AutonConstants.objectDetectionDrivePIDController;
-    private final PIDController rotationController = AutonConstants.objectDetectionRotationPIDController;
-
-    private Pose2d targetPose = new Pose2d();
-
-    private Timer flickerTimer = new Timer();
+    PhotonTrackedTarget targetFuel = null;
+    private double fuelNumber = 0;
 
     public ObjectDetectionSubsytem() {
-        flickerTimer.start();
+        for (var cam : RobotContainer.visionSubsystem.getCameras()) {
+            if (cam.getCamera().getName().equals("ArducamColor")) {
+                camera = cam;
+                break;
+            }
+        }
+
         driveController.setTolerance(0);
-        rotationController.setTolerance(AutonConstants.objectDetectionRotationTolerance);
-        LimelightHelpers.setPipelineIndex("", 0);
+        rotationController.setTolerance(VisionConstants.objectDetectionRotationTolerance);
+        rotationController.enableContinuousInput(-180, 180);
     }
 
-    public RobotCentric autoDriveToObject(CommandSwerveDrivetrain drivetrain, RobotCentric drive) 
-    {
-            // double driveMeasurement = getTY();
-            // double driveSetpoint = -27;
-
-            double rotMeasurement = getTX();
-            double rotSetpoint = 0;
-
-            // double driveCalculation = driveController.calculate(driveMeasurement, driveSetpoint);
-            double rotCalculation = rotationController.calculate(rotMeasurement, rotSetpoint);
-
-
-            return drive
-                .withVelocityX(1.75) //-driveCalculation)* Math.max(0.1, (Math.min(1, 0.1 / Math.abs(rotCalculation)))))
-                .withRotationalRate(rotCalculation);
-    }
 
     public RobotCentric driveToObject(CommandSwerveDrivetrain drivetrain, RobotCentric drive)     {
-        if (hasTarget)
+        if (targetFuel != null)
         {
-            // double driveMeasurement = getTY();
-            // double driveSetpoint = -27;
-
-            double rotMeasurement = getTX();
+            double rotMeasurement = getYaw();
             double rotSetpoint = 0;
 
-            // double driveCalculation = driveController.calculate(driveMeasurement, driveSetpoint);
             double rotCalculation = rotationController.calculate(rotMeasurement, rotSetpoint);
 
 
             return drive
-                .withVelocityX(1.75) //-driveCalculation)* Math.max(0.1, (Math.min(1, 0.1 / Math.abs(rotCalculation)))))
+                .withVelocityX(1.75)
                 .withRotationalRate(rotCalculation);
         } else
         {
@@ -87,67 +80,86 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
 
     }
 
+    public double getYaw()
+    {
+        return yaw;
+    }
+
     public boolean rotFinished()
     {
         return rotationController.atSetpoint();
     }
 
-    public Command autoTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
+    public Command objectTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
     {
         return drivetrain.applyRequest(() -> driveToObject(drivetrain, drive));
     }
 
-    public Command autoTrackAutonCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
+    public Command autonObjectTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
     {
-        return drivetrain.applyRequest(() -> autoDriveToObject(drivetrain, drive)).until(this::notHasTarget);
+          return drivetrain.applyRequest(() -> driveToObject(drivetrain, drive)).until(this::objectDone);
     }
 
     public Command autonObjectDetect(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
     {
-        return autoTrackAutonCommand(drivetrain, drive)
+        return autonObjectTrackCommand(drivetrain, drive)
             .andThen(new InstantCommand(() -> zeroDrive(drive)));
     }
-    public double getTX()
+
+    public boolean objectDone()
     {
-        return tX;
+        return targetFuel == null;
     }
 
-    public double getTY()
+    public boolean validObject(PhotonTrackedTarget object)
     {
-        return tY;
-    }
-
-    public boolean hasTarget()
-    {
-        return hasTarget;
-    }
-
-    public boolean notHasTarget()
-    {
-        return !hasTarget || getTY() < -25.5;
+        return object.getPitch() <= VisionConstants.objectDetectHorizonPitch;
     }
 
     @Override
     public void periodic() {
+        if ((camera == null) || !camera.isConnected()) {
+            SmartDashboard.putBoolean("COULD NOT CONNECT COLOR", true);
+            targetFuel = null;
+            return;
+        }
 
+        List<PhotonTrackedTarget> results = camera.getLatestResult().getTargets();
+        PhotonTrackedTarget bestTarget = null;
 
-        if (LimelightHelpers.getTV(""))
+        for (int i = results.size() - 1; i >= 0; i--)
         {
-            flickerTimer.restart();
-            tX = LimelightHelpers.getTX("");
-            tY = LimelightHelpers.getTY("");
-            tA = LimelightHelpers.getTA("");
+            PhotonTrackedTarget currentObject = results.get(i);
+            if (!validObject(currentObject))
+            {
+                results.remove(i);
+                continue;
+            }
+
+            if (bestTarget == null)
+            {
+                bestTarget = currentObject;
+            } else if (currentObject.getArea() > bestTarget.getArea())
+            {
+                bestTarget = currentObject;
+            }
         }
 
-        hasTarget = flickerTimer.get() <= AutonConstants.timeThres;
-
-        if (!hasTarget)
-        {   
-            tX = 0;
-            tY = 0;
-            tA = 0;
+        if (bestTarget != null) {
+            targetFuel = bestTarget;
+            yaw = targetFuel.getYaw();
+            pitch = targetFuel.getPitch();
+            fuelNumber = results.size();
+        } 
+        else {
+           targetFuel = null;  
+           fuelNumber = 0;
+           yaw = 0;
+           pitch = 0;   
         }
 
-        SmartDashboard.putBoolean("HasTarget", hasTarget);
+        SmartDashboard.putBoolean("Has Target", targetFuel != null);
+        SmartDashboard.putNumber("Best object ID:", targetFuel.objDetectId); //TODO: test with pitch/yaw instead
+        SmartDashboard.putNumber("# of Fuel", fuelNumber);
     }
 }

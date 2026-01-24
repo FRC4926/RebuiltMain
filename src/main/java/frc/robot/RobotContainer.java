@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 import com.pathplanner.lib.events.PointTowardsZoneTrigger;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,6 +28,7 @@ import frc.robot.constants.DriveConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ObjectDetectionSubsytem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
@@ -47,13 +49,21 @@ public class RobotContainer {
 
     private final CommandXboxController driverController = new CommandXboxController(0);
 
-    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
     public static SendableChooser<Command> autonChooser;
 
+    public static double translationRateLimit = 1.15;
+    public SlewRateLimiter driveX = new SlewRateLimiter(translationRateLimit);
+    public SlewRateLimiter driveY = new SlewRateLimiter(translationRateLimit);
+    public SlewRateLimiter rot = new SlewRateLimiter(2);
+
     //subsystems
-    public final static ObjectDetectionSubsytem detectionSubsystem = new ObjectDetectionSubsytem();
+    public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
     public final static VisionSubsystem visionSubsystem = new VisionSubsystem();
+    public final static ObjectDetectionSubsytem detectionSubsystem = new ObjectDetectionSubsytem();
+    
+    public final static ShooterSubsystem shooterSubsytem = new ShooterSubsystem();
+
 
     
 
@@ -62,10 +72,9 @@ public class RobotContainer {
         new EventTrigger("PointToHub").onTrue(drivetrain.overrideRot());
         new EventTrigger("PointToHub").onFalse(drivetrain.clearOverride());
 
-        NamedCommands.registerCommand("autoTrackCommand", detectionSubsystem.autonObjectDetect(drivetrain, relativeDrive));
-        NamedCommands.registerCommand("autoFaceHub", drivetrain.snapToHuAutonCommand(drive));
+        NamedCommands.registerCommand("AutoTrackCommand", detectionSubsystem.autonObjectDetect(drivetrain, relativeDrive));
+        NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
         NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
-        // NamedCommands.registerCommand("test", new InstantCommand(() -> System.out.println("Worked")));
 
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Autonomous", autonChooser);
@@ -79,9 +88,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-driverController.getLeftY() * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-driverController.getLeftX() * DriveConstants.MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-driverController.getRightX() * DriveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-driveY.calculate(driverController.getLeftY()) * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-driveX.calculate(driverController.getLeftX()) * DriveConstants.MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-rot.calculate(driverController.getRightX()) * DriveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -98,7 +107,7 @@ public class RobotContainer {
 
         driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
-        driverController.a().whileTrue(detectionSubsystem.autoTrackCommand(drivetrain, relativeDrive));
+        driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         // ));
