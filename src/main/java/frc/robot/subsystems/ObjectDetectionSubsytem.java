@@ -159,7 +159,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         }
 
         SmartDashboard.putBoolean("Has Target", targetFuel != null);
-        SmartDashboard.putNumber("Best object ID:", targetFuel.objDetectId); //TODO: test with pitch/yaw instead
         SmartDashboard.putNumber("# of Fuel", fuelNumber);
+        SmartDashboard.putNumber("Best object Pitch:", pitch);
     }
 }
