@@ -1,29 +1,19 @@
 package frc.robot.subsystems;
 
 import java.util.List;
-import java.util.function.IntSupplier;
 
-import org.photonvision.simulation.VisionTargetSim;
-import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.RobotCentric;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
-import frc.robot.constants.AutonConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.util.CameraWrapper;
-import frc.robot.util.LimelightHelpers;
 
 
 public class ObjectDetectionSubsytem extends SubsystemBase {
@@ -31,8 +21,8 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     private final PIDController rotationController = VisionConstants.objectDetectionRotationPIDController;
 
     private CameraWrapper camera = null;
-    private double yaw = 0;
     private double pitch = 0;
+    private double bias = 0;
 
     PhotonTrackedTarget targetFuel = null;
     private double fuelNumber = 0;
@@ -52,16 +42,11 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
 
 
     public RobotCentric driveToObject(CommandSwerveDrivetrain drivetrain, RobotCentric drive)     {
-        if (targetFuel != null)
+        if (getBias() != 0)
         {
-            double rotMeasurement = getYaw();
-            double rotSetpoint = 0;
-
-            double rotCalculation = rotationController.calculate(rotMeasurement, rotSetpoint);
-
-
+            double rotCalculation = rotationController.calculate(getBias(), 0);
             return drive
-                .withVelocityX(1.75)
+                .withVelocityX(0)
                 .withRotationalRate(rotCalculation);
         } else
         {
@@ -79,12 +64,9 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
             .withVelocityY(0);
 
     }
-
-    public double getYaw()
-    {
-        return yaw;
+    public double getBias() {
+        return bias;
     }
-
     public boolean rotFinished()
     {
         return rotationController.atSetpoint();
@@ -113,53 +95,30 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
 
     public boolean validObject(PhotonTrackedTarget object)
     {
-        return object.getPitch() <= VisionConstants.objectDetectHorizonPitch;
+        return true;
+        //return object.getPitch() <= VisionConstants.objectDetectHorizonPitch;
     }
 
     @Override
     public void periodic() {
         if ((camera == null) || !camera.isConnected()) {
             SmartDashboard.putBoolean("COULD NOT CONNECT COLOR", true);
-            targetFuel = null;
             return;
         }
 
         List<PhotonTrackedTarget> results = camera.getLatestResult().getTargets();
-        PhotonTrackedTarget bestTarget = null;
+        
+        bias = 0.0;
 
-        for (int i = results.size() - 1; i >= 0; i--)
+        for (PhotonTrackedTarget object: results)
         {
-            PhotonTrackedTarget currentObject = results.get(i);
-            if (!validObject(currentObject))
-            {
-                results.remove(i);
-                continue;
-            }
-
-            if (bestTarget == null)
-            {
-                bestTarget = currentObject;
-            } else if (currentObject.getArea() > bestTarget.getArea())
-            {
-                bestTarget = currentObject;
-            }
+            bias += Math.signum(object.getYaw())*(object.getArea()*VisionConstants.areaWeight + Math.abs(object.getYaw())*VisionConstants.yawWeight)/results.size();
         }
 
-        if (bestTarget != null) {
-            targetFuel = bestTarget;
-            yaw = targetFuel.getYaw();
-            pitch = targetFuel.getPitch();
-            fuelNumber = results.size();
-        } 
-        else {
-           targetFuel = null;  
-           fuelNumber = 0;
-           yaw = 0;
-           pitch = 0;   
-        }
 
-        SmartDashboard.putBoolean("Has Target", targetFuel != null);
-        SmartDashboard.putNumber("# of Fuel", fuelNumber);
-        SmartDashboard.putNumber("Best object Pitch:", pitch);
+        //TODO: look at edge cases like if there is no fuel
+
+        SmartDashboard.putNumber("Bias", bias);
+        SmartDashboard.putNumber("# of Fuel", results.size());
     }
 }

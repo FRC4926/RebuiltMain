@@ -21,5 +21,5 @@ public class FieldConstants {
 
         public static final Rectangle2d fieldRect = new Rectangle2d(new Translation2d(), new Translation2d(fieldLength, fieldWidth));
 
-        public static final Translation2d hubCenter = new Translation2d(4.6256194, 4.0346376);
+        public static final Translation2d hubCenter = new Translation2d(4.6256194, 4.0346376); //TODO Flip hub
 }
