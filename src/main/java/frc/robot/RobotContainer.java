@@ -64,6 +64,8 @@ public class RobotContainer {
     
     public final static ShooterSubsystem shooterSubsytem = new ShooterSubsystem();
 
+    private int aFlag = 0;
+
 
     
 
@@ -109,6 +111,9 @@ public class RobotContainer {
         driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
         driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
+       
+       
+
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         // ));

@@ -15,20 +15,21 @@ import frc.robot.RobotContainer;
 import frc.robot.constants.VisionConstants;
 import frc.robot.util.CameraWrapper;
 
-
 public class ObjectDetectionSubsytem extends SubsystemBase {
-    private final PIDController driveController = VisionConstants.objectDetectionDrivePIDController;
-    private final PIDController rotationController = VisionConstants.objectDetectionRotationPIDController;
 
-    private CameraWrapper camera = null;
-    private double pitch = 0;
-    private double bias = 0;
-    private double softBias = 0;
+    private final PIDController driveController =
+            VisionConstants.objectDetectionDrivePIDController;
+    private final PIDController rotationController =
+            VisionConstants.objectDetectionRotationPIDController;
 
-    PhotonTrackedTarget targetFuel = null;
-    private double fuelNumber = 0;
+    private CameraWrapper camera;
+
+    private double bias = 0.0;
+    private double softBias = 0.0;
+    private boolean state = false;
 
     public ObjectDetectionSubsytem() {
+
         for (var cam : RobotContainer.visionSubsystem.getCameras()) {
             if (cam.getCamera().getName().equals("ArducamColor")) {
                 camera = cam;
@@ -41,95 +42,124 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         rotationController.enableContinuousInput(-180, 180);
     }
 
+    public RobotCentric driveToObject(RobotCentric drive) {
 
-    public RobotCentric driveToObject(CommandSwerveDrivetrain drivetrain, RobotCentric drive)     {
-        if (getBias() != 0)
-        {
-            double rotCalculation = rotationController.calculate(getBias(), 0);
+        boolean hasTarget =
+            !camera.getCamera().getLatestResult().getTargets().isEmpty();
+
+        if (hasTarget && Math.abs(bias) > 0.1) {
+            double rot = rotationController.calculate(bias, 0);
+
             return drive
-                .withVelocityX(0.5/Math.abs(rotCalculation/5))
-                .withRotationalRate(rotCalculation);
-        } else
-        {
-            return drive
-                .withVelocityX(0)
+                .withVelocityX(2 / (1 + Math.abs(rot / 5)))
                 .withVelocityY(0)
-                .withRotationalRate(0);
+                .withRotationalRate(rot);
         }
+
+        return zeroDrive(drive);
     }
 
     public RobotCentric zeroDrive(RobotCentric drive) {
-       return drive
-            .withRotationalRate(0)
+        return drive
             .withVelocityX(0)
-            .withVelocityY(0);
+            .withVelocityY(0)
+            .withRotationalRate(0);
+    }
 
+    public Command objectTrackCommand(
+            CommandSwerveDrivetrain drivetrain,
+            RobotCentric drive) {
+
+        return drivetrain.applyRequest(() -> driveToObject(drive))
+            .beforeStarting(() -> state = true)
+            .finallyDo(interrupted -> state = false);
     }
+
+    public Command autonObjectTrackCommand(
+            CommandSwerveDrivetrain drivetrain,
+            RobotCentric drive) {
+
+        return objectTrackCommand(drivetrain, drive)
+            .until(this::objectDone);
+    }
+
+    public Command autonObjectDetect(
+            CommandSwerveDrivetrain drivetrain,
+            RobotCentric drive) {
+
+        return autonObjectTrackCommand(drivetrain, drive)
+            .andThen(new InstantCommand(() -> drivetrain.applyRequest(() -> zeroDrive(drive))));
+    }
+
+    public boolean isTracking() {
+        return state;
+    }
+
     public double getBias() {
-        return softBias;
+        return bias;
     }
-    public boolean rotFinished()
-    {
+
+    public boolean rotFinished() {
         return rotationController.atSetpoint();
     }
 
-    public Command objectTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
-    {
-        return drivetrain.applyRequest(() -> driveToObject(drivetrain, drive));
-    }
-
-    public Command autonObjectTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
-    {
-          return drivetrain.applyRequest(() -> driveToObject(drivetrain, drive)).until(this::objectDone);
-    }
-
-    public Command autonObjectDetect(CommandSwerveDrivetrain drivetrain, RobotCentric drive)
-    {
-        return autonObjectTrackCommand(drivetrain, drive)
-            .andThen(new InstantCommand(() -> zeroDrive(drive)));
-    }
-
-    public boolean objectDone()
-    {
-        return targetFuel == null;
-    }
-
-    public boolean validObject(PhotonTrackedTarget object)
-    {
-        return true;
-        //return object.getPitch() <= VisionConstants.objectDetectHorizonPitch;
+    public boolean objectDone() {
+        if (camera == null || !camera.isConnected()) {
+            return true;
+        }
+        return camera.getLatestResult().getTargets().isEmpty();
     }
 
     @Override
     public void periodic() {
-        if ((camera == null) || !camera.isConnected()) {
-            SmartDashboard.putBoolean("COULD NOT CONNECT COLOR", true);
+
+        if (camera == null || !camera.isConnected()) {
+            SmartDashboard.putBoolean("Color Camera Connected", false);
+            bias = 0;
+            softBias = 0;
             return;
         }
 
-        List<PhotonTrackedTarget> results = camera.getLatestResult().getTargets();
-        
+        SmartDashboard.putBoolean("Color Camera Connected", true);
+
+        List<PhotonTrackedTarget> targets =
+                camera.getLatestResult().getTargets();
+
         bias = 0.0;
 
-        for (PhotonTrackedTarget object: results){
-            bias += Math.signum(object.getYaw())*(object.getArea()*VisionConstants.areaWeight + Math.abs(object.getYaw())*VisionConstants.yawWeight)/results.size();
+        if (!targets.isEmpty()) {
+            for (PhotonTrackedTarget target : targets) {
+
+                double area = target.getArea();
+                double yaw = target.getYaw();
+
+                if (area <= 0 || Double.isNaN(area) || Double.isNaN(yaw)) {
+                    continue;
+                }
+
+                double distanceFactor = 1.0 + area * 0.02;
+                distanceFactor = Math.max(0.8, Math.min(1.2, distanceFactor));
+
+                bias += Math.signum(yaw)
+                        * (area * VisionConstants.areaWeight
+                        + Math.abs(yaw) * VisionConstants.yawWeight)
+                        * distanceFactor;
+            }
+            bias /= targets.size();
         }
 
-        if (softBias == 0.0){
+        if (softBias == 0.0) {
             softBias = bias;
         }
-
         softBias = (softBias * 0.9) + (bias * 0.1);
 
-        if (bias == 0.0){
-            softBias = 0;
+        if (bias == 0.0) {
+            softBias = 0.0;
         }
-        
 
-
-        //TODO: look at edge cases like if there is no fuel
-
-        SmartDashboard.putNumber("Bias", bias);
-        SmartDashboard.putNumber("# of Fuel", results.size());
+        SmartDashboard.putNumber("Object Bias", bias);
+        SmartDashboard.putNumber("Soft Bias", softBias);
+        SmartDashboard.putBoolean("Object Tracking Active", state);
+        SmartDashboard.putNumber("Objects Detected", targets.size());
     }
 }
