@@ -23,6 +23,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     private CameraWrapper camera = null;
     private double pitch = 0;
     private double bias = 0;
+    private double softBias = 0;
 
     PhotonTrackedTarget targetFuel = null;
     private double fuelNumber = 0;
@@ -46,7 +47,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         {
             double rotCalculation = rotationController.calculate(getBias(), 0);
             return drive
-                .withVelocityX(0)
+                .withVelocityX(0.5/Math.abs(rotCalculation/5))
                 .withRotationalRate(rotCalculation);
         } else
         {
@@ -65,7 +66,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
 
     }
     public double getBias() {
-        return bias;
+        return softBias;
     }
     public boolean rotFinished()
     {
@@ -110,10 +111,20 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         
         bias = 0.0;
 
-        for (PhotonTrackedTarget object: results)
-        {
+        for (PhotonTrackedTarget object: results){
             bias += Math.signum(object.getYaw())*(object.getArea()*VisionConstants.areaWeight + Math.abs(object.getYaw())*VisionConstants.yawWeight)/results.size();
         }
+
+        if (softBias == 0.0){
+            softBias = bias;
+        }
+
+        softBias = (softBias * 0.9) + (bias * 0.1);
+
+        if (bias == 0.0){
+            softBias = 0;
+        }
+        
 
 
         //TODO: look at edge cases like if there is no fuel
