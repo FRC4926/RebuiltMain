@@ -4,28 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import frc.robot.Robot;
-import frc.robot.constants.VisionConstants;
-import frc.robot.constants.FieldConstants;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Robot;
+import frc.robot.constants.VisionConstants;
 
 public class CameraWrapper {
     private final PhotonCamera camera;
@@ -122,7 +120,6 @@ public class CameraWrapper {
             }
             return Optional.empty();
         } 
-
         List<PhotonTrackedTarget> betterTargets = new ArrayList<>();
         for (PhotonTrackedTarget target : latestResult.targets)
         {
@@ -132,10 +129,11 @@ public class CameraWrapper {
             }
         }
         PhotonPipelineResult betterResult = new PhotonPipelineResult(latestResult.metadata.sequenceID, latestResult.metadata.captureTimestampMicros, latestResult.metadata.publishTimestampMicros, latestResult.metadata.timeSinceLastPong, betterTargets);
+        SmartDashboard.putBoolean(getName() + "test cond", betterResult.getMultiTagResult().isEmpty()); 
+        // SmartDashboard.putNumber(getName() + " timestamp (microsec)", latestResult.metadata.captureTimestampMicros);
+        // SmartDashboard.putNumber(getName() + " timestamp (sec)", betterResult.getTimestampSeconds());
 
         var estimated = poseEstimator.update(betterResult);
-        SmartDashboard.putNumber(camera.getName() + " target count", betterResult.targets.size());
-
 
         if (estimated.isEmpty()) return Optional.empty();
 

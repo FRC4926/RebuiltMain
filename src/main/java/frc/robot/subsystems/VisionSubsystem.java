@@ -102,10 +102,10 @@ public class VisionSubsystem extends SubsystemBase {
     }
     
     public Command addVisionMeasurementsOnceCommand(CommandSwerveDrivetrain drivetrain) {
-        return runOnce(() -> addVisionMeasurements(drivetrain));
+        return runOnce(() -> addVisionMeasurements(drivetrain)).ignoringDisable(true);
     }
     public Command addVisionMeasurementsCommand(CommandSwerveDrivetrain drivetrain) {
-        return run(() -> addVisionMeasurements(drivetrain));
+        return run(() -> addVisionMeasurements(drivetrain)).ignoringDisable(true);
     }
 
     @Override
