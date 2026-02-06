@@ -70,7 +70,7 @@ public class CameraWrapper {
 
     public void addToSimulator(VisionSystemSim sim) {
         if (Robot.isSimulation()) {
-            sim.addCamera(cameraSim, robotToCam);
+            sim.addCamera(cameraSim, robotToCam.inverse());
         }
     }
 
@@ -115,6 +115,7 @@ public class CameraWrapper {
     public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
         if (!camera.isConnected() || latestResult == null || !latestResult.hasTargets())
         {
+            SmartDashboard.putBoolean(getName() + ": ", true);
             if (publishPose) {
                 posePublisher.set(new Pose2d());
             }
@@ -129,7 +130,7 @@ public class CameraWrapper {
             }
         }
         PhotonPipelineResult betterResult = new PhotonPipelineResult(latestResult.metadata.sequenceID, latestResult.metadata.captureTimestampMicros, latestResult.metadata.publishTimestampMicros, latestResult.metadata.timeSinceLastPong, betterTargets);
-        SmartDashboard.putBoolean(getName() + "test cond", betterResult.getMultiTagResult().isEmpty()); 
+        // SmartDashboard.putBoolean(getName() + "test cond", betterResult.getMultiTagResult().isEmpty()); 
         // SmartDashboard.putNumber(getName() + " timestamp (microsec)", latestResult.metadata.captureTimestampMicros);
         // SmartDashboard.putNumber(getName() + " timestamp (sec)", betterResult.getTimestampSeconds());
 
@@ -175,6 +176,7 @@ public class CameraWrapper {
 
     public double getStandardDeviation()
     {
+        SmartDashboard.putBoolean("Here", true);
         double totalDistance = 0;
         double totalTags = 0;
         for (var tag : latestResult.getTargets()) {

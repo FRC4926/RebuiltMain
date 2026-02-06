@@ -43,7 +43,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void updateOrigin() {
         // Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Red);
-        FieldConstants.tagLayout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
+        FieldConstants.tagLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
     }
 
     public void addCamera(String camName, Transform3d robotToCam, double trustFactor) {
@@ -67,6 +67,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     public double[] getStandardDeviations()
     {
+        SmartDashboard.putNumber("Here1", camWrappers.size());
         double[] ret = new double[camWrappers.size()];
         for (int i = 0; i < camWrappers.size(); i++) {
             if (camWrappers.get(i).isConnected())
@@ -111,6 +112,7 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() 
     {
+        
         for (CameraWrapper cam : camWrappers) {
             cam.checkForResult();
         }
