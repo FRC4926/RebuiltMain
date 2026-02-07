@@ -122,26 +122,31 @@ public class CameraWrapper {
                 posePublisher.set(new Pose2d());
             }
             return Optional.empty();
-        } 
-        List<PhotonTrackedTarget> betterTargets = new ArrayList<>();
-        for (PhotonTrackedTarget target : latestResult.targets)
-        {
-            if (targetIsValid(target))
-            {
-                betterTargets.add(target);
-            }
         }
-        PhotonPipelineResult betterResult = new PhotonPipelineResult(latestResult.metadata.sequenceID, latestResult.metadata.captureTimestampMicros, latestResult.metadata.publishTimestampMicros, latestResult.metadata.timeSinceLastPong, betterTargets);
-        // SmartDashboard.putBoolean(getName() + "test cond", betterResult.getMultiTagResult().isEmpty()); 
-        // SmartDashboard.putNumber(getName() + " timestamp (microsec)", latestResult.metadata.captureTimestampMicros);
-        // SmartDashboard.putNumber(getName() + " timestamp (sec)", betterResult.getTimestampSeconds());
+        Optional<EstimatedRobotPose> estimated;
+        if (latestResult.getMultiTagResult().isPresent()) {
+            estimated = poseEstimator.update(latestResult);
+        } else {
+            List<PhotonTrackedTarget> betterTargets = new ArrayList<>();
+            for (PhotonTrackedTarget target : latestResult.targets)
+            {
+                if (targetIsValid(target))
+                {
+                    betterTargets.add(target);
+                }
+            }
+            SmartDashboard.putNumber(getName() + " good targets", betterTargets.size());
+            PhotonPipelineResult betterResult = new PhotonPipelineResult(latestResult.metadata.sequenceID, latestResult.metadata.captureTimestampMicros, latestResult.metadata.publishTimestampMicros, latestResult.metadata.timeSinceLastPong, betterTargets);
+            // SmartDashboard.putBoolean(getName() + "test cond", betterResult.getMultiTagResult().isEmpty()); 
+            // SmartDashboard.putNumber(getName() + " timestamp (microsec)", latestResult.metadata.captureTimestampMicros);
+            // SmartDashboard.putNumber(getName() + " timestamp (sec)", betterResult.getTimestampSeconds());
 
-        var estimated = poseEstimator.update(betterResult);
-
+            estimated = poseEstimator.update(betterResult);
+        }
         if (estimated.isEmpty()) return Optional.empty();
 
         if (publishPose) {
-            if (estimated.isPresent()) {
+            if (estimated.isPresent()){
                 posePublisher.set(estimated.get().estimatedPose.toPose2d());
             } else {
                 posePublisher.set(new Pose2d());
