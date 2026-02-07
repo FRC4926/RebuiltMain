@@ -4,6 +4,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -19,6 +20,8 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.robot.constants.VisionConstants;
+import frc.robot.constants.VisionConstants.CameraWrapperConstants;
 
 public class Telemetry {
     private final double MaxSpeed;
@@ -43,6 +46,8 @@ public class Telemetry {
 
     /* Robot swerve drive state */
     private final NetworkTable driveStateTable = inst.getTable("DriveState");
+    private final NetworkTable translatedPoseTable = inst.getTable("Translated Poses");
+    private final NetworkTable invertedTranslatedPoseTable = inst.getTable("Inverted Translated Poses");    
     private final StructPublisher<Pose2d> drivePose = driveStateTable.getStructTopic("Pose", Pose2d.struct).publish();
     private final StructPublisher<ChassisSpeeds> driveSpeeds = driveStateTable.getStructTopic("Speeds", ChassisSpeeds.struct).publish();
     private final StructArrayPublisher<SwerveModuleState> driveModuleStates = driveStateTable.getStructArrayTopic("ModuleStates", SwerveModuleState.struct).publish();
@@ -94,6 +99,16 @@ public class Telemetry {
         driveModulePositions.set(state.ModulePositions);
         driveTimestamp.set(state.Timestamp);
         driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
+        var robotPose3D = new Pose3d(state.Pose);
+        for (CameraWrapperConstants constant : VisionConstants.camConstants) {
+            var translatedPosePublisher = translatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
+            var invertedTranslatedPosePublisher = invertedTranslatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
+            translatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera()));
+            invertedTranslatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera().inverse()));
+            translatedPosePublisher.close();
+            invertedTranslatedPosePublisher.close();
+        }
+        
 
         /* Also write to log file */
         SignalLogger.writeStruct("DriveState/Pose", Pose2d.struct, state.Pose);

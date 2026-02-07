@@ -92,7 +92,7 @@ public class VisionSubsystem extends SubsystemBase {
             if (poses[i] != null && poseIsValid(poses[i]))
                 drivetrain.addVisionMeasurement(
                     poses[i].estimatedPose.toPose2d(),
-                    Utils.fpgaToCurrentTime(poses[i].timestampSeconds),
+                    poses[i].timestampSeconds,
                     new Matrix<N3, N1>(Nat.N3(), Nat.N1(), new double[] {
                         standardDeviations[i], // x
                         standardDeviations[i], // y

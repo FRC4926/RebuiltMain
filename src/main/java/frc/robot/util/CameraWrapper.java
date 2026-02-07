@@ -40,7 +40,7 @@ public class CameraWrapper {
         trustFactor = _trustFactor;
 
         robotToCam = _robotToCam;
-        poseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam.inverse());
+        poseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam);
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         publishPose = _publishPose;
@@ -106,6 +106,8 @@ public class CameraWrapper {
     }
 
     public boolean targetIsValid(PhotonTrackedTarget target) {
+        SmartDashboard.putNumber(getName() +" Pose Ambiguity", target.getPoseAmbiguity());
+        if (target.getPoseAmbiguity() < 0) return true;
         if (target.getPoseAmbiguity() > VisionConstants.maximumAmbiguity)
             return false;
 
@@ -180,7 +182,7 @@ public class CameraWrapper {
         double totalDistance = 0;
         double totalTags = 0;
         for (var tag : latestResult.getTargets()) {
-            if (tag.getPoseAmbiguity() > VisionConstants.maximumAmbiguity)
+            if (!targetIsValid(tag))
                 continue;
             totalDistance += tag.getBestCameraToTarget().getTranslation().getDistance(new Translation3d());
             totalTags++;
