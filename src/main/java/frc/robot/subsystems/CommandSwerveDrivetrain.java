@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.AutonConstants;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.FieldConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -300,44 +301,39 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
     }
-    public FieldCentric snapToHubStatic(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
-        double desiredX = FieldConstants.hubCenter.getX();
-        double desiredY = FieldConstants.hubCenter.getY();
+
+    public double getEffectiveHubX() {
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+            return FieldConstants.hubCenterRed.getX();
+        }
+        return FieldConstants.hubCenterBlue.getX();
+    }
+    public double getEffectiveHubY() {
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+            return FieldConstants.hubCenterRed.getY();
+        }
+        return FieldConstants.hubCenterBlue.getY();
+    }
+    public double getRotRate() {
+        double desiredX = getEffectiveHubX();
+        double desiredY = getEffectiveHubY();
         double currentX = getState().Pose.getX();
         double currentY = getState().Pose.getY();
 
         double currentAngle = getState().Pose.getRotation().getRadians();
         double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
         double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
-        
+        return rotRate;
+    }
+
+    public FieldCentric snapToHubStatic(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
         return drive.withVelocityX(-y.get() * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-x.get() * DriveConstants.MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(rotRate); // Drive counterclockwise with negative X (left)
+                    .withRotationalRate(getRotRate()); // Drive counterclockwise with negative X (left)
     }
 
     public FieldCentric snapToHubStatic(FieldCentric drive) {
-        double desiredX = FieldConstants.hubCenter.getX();
-        double desiredY = FieldConstants.hubCenter.getY();
-        double currentX = getState().Pose.getX();
-        double currentY = getState().Pose.getY();
-        
-        double currentAngle = getState().Pose.getRotation().getRadians();
-        double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
-        double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
-        return drive.withRotationalRate(rotRate); // Drive counterclockwise with negative X (left)
-    }
-
-    public double snapToHubStaticPID() {
-        double desiredX = FieldConstants.hubCenter.getX();
-        double desiredY = FieldConstants.hubCenter.getY();
-        double currentX = getState().Pose.getX();
-        double currentY = getState().Pose.getY();
-
-        double currentAngle = getState().Pose.getRotation().getRadians();
-        double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
-        double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
-
-        return rotRate;
+        return drive.withRotationalRate(getRotRate()); // Drive counterclockwise with negative X (left)
     }
 
     public Command snapToHubCommand(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
@@ -353,7 +349,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command overrideRot()
     {
         return new InstantCommand(() -> PPHolonomicDriveController.overrideRotationFeedback(() -> {
-            return snapToHubStaticPID();
+            return getRotRate();
         }));
     }
 

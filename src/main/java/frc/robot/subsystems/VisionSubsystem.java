@@ -67,7 +67,6 @@ public class VisionSubsystem extends SubsystemBase {
 
     public double[] getStandardDeviations()
     {
-        SmartDashboard.putNumber("Here1", camWrappers.size());
         double[] ret = new double[camWrappers.size()];
         for (int i = 0; i < camWrappers.size(); i++) {
             if (camWrappers.get(i).isConnected())

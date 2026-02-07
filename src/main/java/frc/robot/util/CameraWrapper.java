@@ -107,7 +107,6 @@ public class CameraWrapper {
 
     public boolean targetIsValid(PhotonTrackedTarget target) {
         SmartDashboard.putNumber(getName() +" Pose Ambiguity", target.getPoseAmbiguity());
-        if (target.getPoseAmbiguity() < 0) return true;
         if (target.getPoseAmbiguity() > VisionConstants.maximumAmbiguity)
             return false;
 
@@ -135,7 +134,7 @@ public class CameraWrapper {
                     betterTargets.add(target);
                 }
             }
-            SmartDashboard.putNumber(getName() + " good targets", betterTargets.size());
+            // SmartDashboard.putNumber(getName() + " good targets", betterTargets.size());
             PhotonPipelineResult betterResult = new PhotonPipelineResult(latestResult.metadata.sequenceID, latestResult.metadata.captureTimestampMicros, latestResult.metadata.publishTimestampMicros, latestResult.metadata.timeSinceLastPong, betterTargets);
             // SmartDashboard.putBoolean(getName() + "test cond", betterResult.getMultiTagResult().isEmpty()); 
             // SmartDashboard.putNumber(getName() + " timestamp (microsec)", latestResult.metadata.captureTimestampMicros);
@@ -183,7 +182,6 @@ public class CameraWrapper {
 
     public double getStandardDeviation()
     {
-        SmartDashboard.putBoolean("Here", true);
         double totalDistance = 0;
         double totalTags = 0;
         for (var tag : latestResult.getTargets()) {
