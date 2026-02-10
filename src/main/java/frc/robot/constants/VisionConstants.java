@@ -20,7 +20,7 @@ public class VisionConstants {
                  new Transform3d(new Translation3d(7*0.0254,0 , 10.5*0.0254), new Rotation3d(0,-15*Math.PI/18,Math.PI)), 1) //1.25
     };
 
-    public static final double kalmanPositionStdDevCoeefficient = 0.6; //0.15
+    public static final double kalmanPositionStdDevCoeefficient = 0.6; //0.6
     public static final double kalmanRotationStdDev = 0.99;
 
     public static final double maximumAmbiguity = 0.25; //0.25

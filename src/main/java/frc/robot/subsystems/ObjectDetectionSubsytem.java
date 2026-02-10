@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.util.CameraWrapper;
@@ -30,7 +31,8 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     private boolean state = false;
     private double avgArea = 0;
     public ObjectDetectionSubsytem() {
-        camera = new CameraWrapper("ArducamColor", new Transform3d(new Translation3d(11.804*0.0254, 0, 20*0.0254), new Rotation3d(0,-15*Math.PI/180,Math.PI/3)), FieldConstants.tagLayout, false, 0);
+        //I know its weird but surely its fine
+        camera = new CameraWrapper("ArducamColor", new Transform3d(new Translation3d(11.804*0.0254, 0, 20*0.0254), new Rotation3d(0,-15*Math.PI/180,Math.PI/3)), FieldConstants.tagLayout, false, 0, RobotContainer.drivetrain::addVisionMeasurement);
         driveController.setTolerance(0);
         rotationController.setTolerance(VisionConstants.objectDetectionRotationTolerance);
         rotationController.enableContinuousInput(-180, 180);
@@ -116,13 +118,15 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        camera.checkForResult();
+
         if (camera == null || !camera.isConnected()) {
             SmartDashboard.putBoolean("Color Camera Connected", false);
             bias = 0;
             // softBias = 0;
             return;
         }
+        
+        camera.checkForResult();
 
         if (!canDetect())
             return;

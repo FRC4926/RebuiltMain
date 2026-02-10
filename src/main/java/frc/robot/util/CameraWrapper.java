@@ -3,6 +3,7 @@ package frc.robot.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -15,14 +16,19 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.constants.VisionConstants;
 
 public class CameraWrapper {
@@ -32,16 +38,20 @@ public class CameraWrapper {
     private final StructPublisher<Pose2d> posePublisher;
     private Transform3d robotToCam;
     private PhotonPipelineResult latestResult;
+    private List<PhotonPipelineResult> unreadResults;
     private boolean publishPose;
     private double trustFactor;
+    private final EstimateConsumer estConsumer;
+    private Pose2d currentPose = new Pose2d();
 
-    public CameraWrapper(String camName, Transform3d _robotToCam, AprilTagFieldLayout fieldLayout, boolean _publishPose, double _trustFactor) {
+    public CameraWrapper(String camName, Transform3d _robotToCam, AprilTagFieldLayout fieldLayout, boolean _publishPose, double _trustFactor, EstimateConsumer addVisionConsumer) {
         camera = new PhotonCamera(camName);
         trustFactor = _trustFactor;
 
         robotToCam = _robotToCam;
-        poseEstimator = new PhotonPoseEstimator(fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam);
-        poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        poseEstimator = new PhotonPoseEstimator(fieldLayout, robotToCam);
+        
+        estConsumer = addVisionConsumer;
 
         publishPose = _publishPose;
         if (publishPose) {
@@ -94,11 +104,19 @@ public class CameraWrapper {
 
     public void checkForResult() {
         if (!camera.isConnected())
+        {
+            unreadResults = new ArrayList<>();
             return;
+        }
 
-        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-        if (!results.isEmpty())
-            latestResult = results.get(results.size() - 1);
+        unreadResults = camera.getAllUnreadResults();
+        if (!unreadResults.isEmpty())
+            latestResult = unreadResults.get(unreadResults.size() - 1);
+    }
+
+    public void updateResults() {
+        checkForResult();
+        addEstimatedGlobalPose();
     }
 
     public PhotonPipelineResult getLatestResult() {
@@ -106,55 +124,56 @@ public class CameraWrapper {
     }
 
     public boolean targetIsValid(PhotonTrackedTarget target) {
-        SmartDashboard.putNumber(getName() +" Pose Ambiguity", target.getPoseAmbiguity());
+        // SmartDashboard.putNumber(getName() +" Pose Ambiguity", target.getPoseAmbiguity());
         if (target.getPoseAmbiguity() > VisionConstants.maximumAmbiguity)
             return false;
 
         return true;
     }
 
-    public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
-        if (!camera.isConnected() || latestResult == null || !latestResult.hasTargets())
+    public void addEstimatedGlobalPose() { 
+        currentPose = new Pose2d();
+        if (!camera.isConnected() || unreadResults.size() <= 0)
         {
-            SmartDashboard.putBoolean(getName() + ": ", true);
-            if (publishPose) {
-                posePublisher.set(new Pose2d());
-            }
-            return Optional.empty();
+            SmartDashboard.putBoolean(getName(), false);
+        } else
+        {
+            SmartDashboard.putBoolean(getName(), true);
         }
-        Optional<EstimatedRobotPose> estimated;
-        if (latestResult.getMultiTagResult().isPresent()) {
-            estimated = poseEstimator.update(latestResult);
-        } else {
-            List<PhotonTrackedTarget> betterTargets = new ArrayList<>();
-            for (PhotonTrackedTarget target : latestResult.targets)
-            {
-                if (targetIsValid(target))
-                {
-                    betterTargets.add(target);
-                }
-            }
-            // SmartDashboard.putNumber(getName() + " good targets", betterTargets.size());
-            PhotonPipelineResult betterResult = new PhotonPipelineResult(latestResult.metadata.sequenceID, latestResult.metadata.captureTimestampMicros, latestResult.metadata.publishTimestampMicros, latestResult.metadata.timeSinceLastPong, betterTargets);
-            // SmartDashboard.putBoolean(getName() + "test cond", betterResult.getMultiTagResult().isEmpty()); 
-            // SmartDashboard.putNumber(getName() + " timestamp (microsec)", latestResult.metadata.captureTimestampMicros);
-            // SmartDashboard.putNumber(getName() + " timestamp (sec)", betterResult.getTimestampSeconds());
 
-            estimated = poseEstimator.update(betterResult);
+    
+        for (var result : unreadResults) {
+            Optional<EstimatedRobotPose> currentEst = poseEstimator.estimateCoprocMultiTagPose(result);
+            if (currentEst.isEmpty()) {
+                currentEst = poseEstimator.estimateLowestAmbiguityPose(result);
+            }
+
+            currentEst.ifPresent(
+                est -> {
+                    // Change our trust in the measurement based on the tags we can see
+                    var translationDeviation = getEstimatedStandardDeviation(result.getTargets());
+
+                    Matrix<N3, N1> estStdDevs = new Matrix<N3, N1>(Nat.N3(), Nat.N1(), new double[] {
+                        translationDeviation, // x
+                        translationDeviation, // y
+                        VisionConstants.kalmanRotationStdDev  // rotation
+                    });
+
+                    currentPose = est.estimatedPose.toPose2d();
+
+                    if (RobotContainer.visionSubsystem.poseIsValid(currentPose))
+                    {
+                        estConsumer.accept(currentPose, est.timestampSeconds, estStdDevs);
+                    }
+                });
         }
-        if (estimated.isEmpty()) return Optional.empty();
 
         if (publishPose) {
-            if (estimated.isPresent()){
-                posePublisher.set(estimated.get().estimatedPose.toPose2d());
-            } else {
-                posePublisher.set(new Pose2d());
-            }
+            posePublisher.set(currentPose);
+
         }
 
         //SmartDashboard.putBoolean("Pose estimator is present for" + camera.getName(), estimated.isPresent());
-
-        return estimated;
 
     }
 
@@ -180,24 +199,34 @@ public class CameraWrapper {
         return camera;
     }
 
-    public double getStandardDeviation()
+    public double getEstimatedStandardDeviation(List<PhotonTrackedTarget> targets)
     {
         double totalDistance = 0;
         double totalTags = 0;
-        for (var tag : latestResult.getTargets()) {
+        for (var tag : targets) {
             if (!targetIsValid(tag))
                 continue;
             totalDistance += tag.getBestCameraToTarget().getTranslation().getDistance(new Translation3d());
             totalTags++;
         }
 
+
         double avgDistance = totalDistance/totalTags;
         double stdDev = VisionConstants.kalmanPositionStdDevCoeefficient
-            * Math.pow(avgDistance, 2.0)
+            * Math.pow(avgDistance, 2)
             / totalTags
             * trustFactor;
         SmartDashboard.putNumber(camera.getName() + " stddev", stdDev);
 
+        if (totalTags <= 0)
+        {
+            return Double.POSITIVE_INFINITY;
+        }
         return stdDev;
+    }
+
+    @FunctionalInterface
+    public static interface EstimateConsumer {
+        public void accept(Pose2d pose, double timestamp, Matrix<N3, N1> estimationStdDevs);
     }
 }

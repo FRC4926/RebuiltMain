@@ -11,6 +11,7 @@ import com.ctre.phoenix6.Utils;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -47,7 +48,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public void addCamera(String camName, Transform3d robotToCam, double trustFactor) {
-        camWrappers.add(new CameraWrapper(camName, robotToCam, FieldConstants.tagLayout, true, trustFactor));
+        camWrappers.add(new CameraWrapper(camName, robotToCam, FieldConstants.tagLayout, true, trustFactor, RobotContainer.drivetrain::addVisionMeasurement));
     }
 
     public List<CameraWrapper> getCameras()
@@ -55,49 +56,36 @@ public class VisionSubsystem extends SubsystemBase {
         return camWrappers;
     }
 
-    public EstimatedRobotPose[] getEstimatedGlobalPoses() {
-        EstimatedRobotPose[] ret = new EstimatedRobotPose[camWrappers.size()];
-        for (int i = 0; i < camWrappers.size(); i++) {
-            Optional<EstimatedRobotPose> estimated = camWrappers.get(i).getEstimatedGlobalPose();
-            ret[i] = estimated.isPresent() ? estimated.get() : null;
-        }
+    // public EstimatedRobotPose[] getEstimatedGlobalPoses() {
+    //     EstimatedRobotPose[] ret = new EstimatedRobotPose[camWrappers.size()];
+    //     for (int i = 0; i < camWrappers.size(); i++) {
+    //         Optional<EstimatedRobotPose> estimated = camWrappers.get(i).getEstimatedGlobalPose();
+    //         ret[i] = estimated.isPresent() ? estimated.get() : null;
+    //     }
 
-        return ret;
+    //     return ret;
+    // }
+
+    // public double[] getStandardDeviations()
+    // {
+    //     double[] ret = new double[camWrappers.size()];
+    //     for (int i = 0; i < camWrappers.size(); i++) {
+    //         if (camWrappers.get(i).isConnected())
+    //             ret[i] = camWrappers.get(i).getStandardDeviation();
+    //         else
+    //             ret[i] = Double.POSITIVE_INFINITY;
+    //     }
+
+    //     return ret;
+    // }
+
+    public boolean poseIsValid(Pose2d pose) {
+        return FieldConstants.fieldRect.contains(pose.getTranslation());
     }
 
-    public double[] getStandardDeviations()
-    {
-        double[] ret = new double[camWrappers.size()];
-        for (int i = 0; i < camWrappers.size(); i++) {
-            if (camWrappers.get(i).isConnected())
-                ret[i] = camWrappers.get(i).getStandardDeviation();
-            else
-                ret[i] = 9999999.0;
-        }
-
-        return ret;
-    }
-
-    public boolean poseIsValid(EstimatedRobotPose pose) {
-        return FieldConstants.fieldRect.contains(pose.estimatedPose.getTranslation().toTranslation2d());
-    }
-
-    public void addVisionMeasurements(CommandSwerveDrivetrain drivetrain) {
-        SmartDashboard.putNumber("Added vision measurement", SmartDashboard.getNumber("Added vision measurement", 0) + 1);
-        EstimatedRobotPose[] poses = getEstimatedGlobalPoses();
-        double[] standardDeviations = getStandardDeviations();
-
-        for (int i = 0; i < poses.length; i++) {
-            if (poses[i] != null && poseIsValid(poses[i]))
-                drivetrain.addVisionMeasurement(
-                    poses[i].estimatedPose.toPose2d(),
-                    poses[i].timestampSeconds,
-                    new Matrix<N3, N1>(Nat.N3(), Nat.N1(), new double[] {
-                        standardDeviations[i], // x
-                        standardDeviations[i], // y
-                        VisionConstants.kalmanRotationStdDev  // rotation
-                    })
-                );
+    public void addVisionMeasurements(CommandSwerveDrivetrain drivetrain) {      
+        for (CameraWrapper cam : camWrappers) {
+            cam.updateResults();
         }
     }
     
@@ -111,10 +99,7 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() 
     {
-        
-        for (CameraWrapper cam : camWrappers) {
-            cam.checkForResult();
-        }
+
         SmartDashboard.putString("Alliance", DriverStation.getAlliance().get().toString());
 
         // if (Robot.isSimulation()) {
