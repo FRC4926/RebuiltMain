@@ -33,6 +33,7 @@ public class VisionSubsystem extends SubsystemBase {
    private List<CameraWrapper> camWrappers = new ArrayList<>();
  
     Optional<EstimatedRobotPose> estimatedPose;
+    boolean toggle = true;
 
     public VisionSubsystem() {
         updateOrigin();
@@ -85,7 +86,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void addVisionMeasurements(CommandSwerveDrivetrain drivetrain) {      
         for (CameraWrapper cam : camWrappers) {
-            cam.updateResults();
+            // cam.addEstimatedGlobalPose();
         }
     }
     
@@ -99,6 +100,10 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() 
     {
+
+        for (CameraWrapper cam : camWrappers) {
+            cam.updateResults();
+        }
 
         SmartDashboard.putString("Alliance", DriverStation.getAlliance().get().toString());
 

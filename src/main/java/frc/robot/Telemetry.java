@@ -33,7 +33,7 @@ public class Telemetry {
      */
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
-        SignalLogger.start();
+        // SignalLogger.start();
 
         /* Set up the module state Mechanism2d telemetry */
         for (int i = 0; i < 4; ++i) {
@@ -100,14 +100,14 @@ public class Telemetry {
         driveTimestamp.set(state.Timestamp);
         driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
         var robotPose3D = new Pose3d(state.Pose);
-        for (CameraWrapperConstants constant : VisionConstants.camConstants) {
-            var translatedPosePublisher = translatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
-            var invertedTranslatedPosePublisher = invertedTranslatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
-            translatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera()));
-            invertedTranslatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera().inverse()));
-            translatedPosePublisher.close();
-            invertedTranslatedPosePublisher.close();
-        }
+        // for (CameraWrapperConstants constant : VisionConstants.camConstants) {
+        //     var translatedPosePublisher = translatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
+        //     var invertedTranslatedPosePublisher = invertedTranslatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
+        //     translatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera()));
+        //     invertedTranslatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera().inverse()));
+        //     translatedPosePublisher.close();
+        //     invertedTranslatedPosePublisher.close();
+        // }
         
 
         /* Also write to log file */

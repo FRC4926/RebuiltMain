@@ -131,14 +131,22 @@ public class CameraWrapper {
         return true;
     }
 
-    public void addEstimatedGlobalPose() { 
+    public void addEstimatedGlobalPose() {
+        SmartDashboard.putNumber(getName() + " results", unreadResults.size());
         currentPose = new Pose2d();
-        if (!camera.isConnected() || unreadResults.size() <= 0)
+        if (!camera.isConnected())
         {
             SmartDashboard.putBoolean(getName(), false);
+            if (publishPose) {
+                posePublisher.set(currentPose);
+            }
+            return;
         } else
         {
             SmartDashboard.putBoolean(getName(), true);
+        }
+        if (unreadResults.size() <= 0){
+            unreadResults.add(latestResult);
         }
 
     
@@ -170,7 +178,6 @@ public class CameraWrapper {
 
         if (publishPose) {
             posePublisher.set(currentPose);
-
         }
 
         //SmartDashboard.putBoolean("Pose estimator is present for" + camera.getName(), estimated.isPresent());
@@ -222,6 +229,7 @@ public class CameraWrapper {
         {
             return Double.POSITIVE_INFINITY;
         }
+
         return stdDev;
     }
 
