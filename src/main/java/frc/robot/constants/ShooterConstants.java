@@ -1,24 +1,37 @@
 package frc.robot.constants;
 
-import com.pathplanner.lib.config.PIDConstants;
+import com.ctre.phoenix6.configs.Slot0Configs;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class ShooterConstants {
-    public static final int shooterCanId = 1;
+    public static final int shooter1CanId = 9;
+    public static final int shooter2CanId = 10;
+    public static final int feederCanID = 11;
+    public static final int hoodCanID = 12;
     
-    public static final double kP = 0.0;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-    public static final double kS = 0.0;
-    public static final double kV = 0.0;
+    public static Slot0Configs shooterPIDConfig = new Slot0Configs()
+            .withKP(0)
+            .withKI(0)
+            .withKD(0)
+            .withKS(0)
+            .withKV(0);
+            
+    public static Slot0Configs hoodPIDConfig = new Slot0Configs()
+            .withKP(0)
+            .withKI(0)
+            .withKD(0)
+            .withKS(0)
+            .withKV(0);
 
-    public static final double targetRPS = 3000.0/60.0;
+    public static final double shooterCurrentLimit = 60;
+    public static final double feederCurrentLimit = 30;
+    public static final double hoodCurrentLimit = 20;
 
+    public static final double hoodGearRatio = 1;
+
+    public static final double idleSpeedRPM = 1000.0;
+    public static final double feederEffort = 0.75;
     public static InterpolatingDoubleTreeMap distanceToAngleTable = new InterpolatingDoubleTreeMap();
 
 }
