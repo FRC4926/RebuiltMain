@@ -31,7 +31,6 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
-        SmartDashboard.putNumber("Controller rot rate", -new CommandXboxController(0).getRightX() * DriveConstants.MaxAngularRate);
     }
 
     @Override

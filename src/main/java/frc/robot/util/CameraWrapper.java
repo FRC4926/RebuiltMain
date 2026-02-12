@@ -55,7 +55,7 @@ public class CameraWrapper {
 
         publishPose = _publishPose;
         if (publishPose) {
-            posePublisher = NetworkTableInstance.getDefault().getStructTopic(camName + " pose", Pose2d.struct).publish();
+            posePublisher = NetworkTableInstance.getDefault().getStructTopic("CAMERA POSES: " + camName + " pose", Pose2d.struct).publish();
         } else {
             posePublisher = null;
         }
@@ -132,25 +132,26 @@ public class CameraWrapper {
     }
 
     public void addEstimatedGlobalPose() {
-        SmartDashboard.putNumber(getName() + " results", unreadResults.size());
+        SmartDashboard.putNumber("CAMERAS: " + getName() + ": Number of results", unreadResults.size());
         currentPose = new Pose2d();
         if (!camera.isConnected())
         {
-            SmartDashboard.putBoolean(getName(), false);
+            SmartDashboard.putBoolean("CAMERAS: " + getName() + ": Connected", false);
             if (publishPose) {
                 posePublisher.set(currentPose);
             }
             return;
         } else
         {
-            SmartDashboard.putBoolean(getName(), true);
+            SmartDashboard.putBoolean("CAMERAS: " + getName() + ": Connected", true);
         }
-        if (unreadResults.size() <= 0){
-            unreadResults.add(latestResult);
-        }
+        // if (unreadResults.size() <= 0){
+        //     unreadResults.add(latestResult);
+        // }
 
     
         for (var result : unreadResults) {
+        // var result = latestResult;
             Optional<EstimatedRobotPose> currentEst = poseEstimator.estimateCoprocMultiTagPose(result);
             if (currentEst.isEmpty()) {
                 currentEst = poseEstimator.estimateLowestAmbiguityPose(result);
@@ -223,7 +224,8 @@ public class CameraWrapper {
             * Math.pow(avgDistance, 2)
             / totalTags
             * trustFactor;
-        SmartDashboard.putNumber(camera.getName() + " stddev", stdDev);
+        SmartDashboard.putNumber("CAMERAS: " + getName() + ": STD DEV", stdDev);
+        SmartDashboard.putNumber("CAMERAS: " + getName() + ": Total tags", totalTags);
 
         if (totalTags <= 0)
         {

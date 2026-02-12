@@ -120,7 +120,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     public void periodic() {
 
         if (camera == null || !camera.isConnected()) {
-            SmartDashboard.putBoolean("Color Camera Connected", false);
+            SmartDashboard.putBoolean("CAMERAS: ArducamColor: Connected", false);
             bias = 0;
             // softBias = 0;
             return;
@@ -131,7 +131,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         if (!canDetect())
             return;
 
-        SmartDashboard.putBoolean("Color Camera Connected", true);
+        SmartDashboard.putBoolean("CAMERAS: ArducamColor: Connected", true);
         List<PhotonTrackedTarget> targets = camera.getLatestResult().getTargets();
 
         bias = 0.0;
@@ -169,9 +169,9 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         //     softBias = 0.0;
         // }
 
-        SmartDashboard.putNumber("Object Bias", bias);
-        SmartDashboard.putNumber("Soft Bias", softBias);
-        SmartDashboard.putBoolean("Object Tracking Active", state);
-        SmartDashboard.putNumber("Objects Detected", targets.size());
+        SmartDashboard.putNumber("CAMERAS: ArducamColor: Object Bias", bias);
+        SmartDashboard.putNumber("CAMERAS: ArducamColor: Soft Bias", softBias);
+        SmartDashboard.putBoolean("CAMERAS: ArducamColor: Object Tracking Active", state);
+        SmartDashboard.putNumber("CAMERAS: ArducamColor: Objects Detected", targets.size());
     }
 }
