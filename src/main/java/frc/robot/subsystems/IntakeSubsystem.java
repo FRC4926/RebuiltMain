@@ -70,6 +70,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command pivotStaticUpCommand(){
         return runOnce(this::setPivotUpPosition);
     }
+    public Command pivotZeroCommand(){
+        return runOnce(this::setPivotZero);
+    }
     public Command intakeRunCommand(){
         return runOnce(this::setReferenceVelocity);
     }
@@ -84,6 +87,9 @@ public class IntakeSubsystem extends SubsystemBase {
     }
     public void setPivotUpPosition() {
         pivotMotor.setControl(new PositionVoltage(rotationsFromDegrees(IntakeConstants.pivotUpPosition)).withSlot(0));
+    }
+    public void setPivotZero(){
+        pivotMotor.setControl(new DutyCycleOut(0));
     }
 
     private double rotationsFromDegrees(double degrees)
