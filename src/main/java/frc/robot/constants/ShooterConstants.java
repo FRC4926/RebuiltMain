@@ -32,6 +32,11 @@ public class ShooterConstants {
 
     public static final double idleSpeedRPM = 1000.0;
     public static final double feederEffort = 0.75;
+    public static InterpolatingDoubleTreeMap distanceToTOF = new InterpolatingDoubleTreeMap();
     public static InterpolatingDoubleTreeMap distanceToAngleTable = new InterpolatingDoubleTreeMap();
+
+    public static final double rpmLow = 0;
+    public static final double rpmHigh = 0;
+    public static final double thresholdDistance = 0;
 
 }

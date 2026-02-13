@@ -12,10 +12,23 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+import frc.robot.RobotContainer;
+import frc.robot.constants.DriveConstants;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -23,6 +36,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public final TalonFX shooterMotor2  = new TalonFX(ShooterConstants.shooter2CanId);
     public final TalonFX feederMotor  = new TalonFX(ShooterConstants.feederCanID);
     public final TalonFX hoodMotor  = new TalonFX(ShooterConstants.hoodCanID);
+    private Translation2d hubShifts = new Translation2d();
     final VelocityVoltage idleSpeed = new VelocityVoltage(ShooterConstants.idleSpeedRPM/60.0).withSlot(0);
 
     public ShooterSubsystem() {
@@ -69,10 +83,62 @@ public class ShooterSubsystem extends SubsystemBase {
     public void setShooterRPMManual(double RPM){
         shooterMotor1.setControl(new VelocityVoltage(RPM/60.0).withSlot(0));
     }
+    public Pose2d getUnmodifiedHubPose() {
+        Pose2d unmodifiedHub = FieldConstants.hubCenterBlue;
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+            unmodifiedHub = FieldConstants.hubCenterRed;
+        }
+        return unmodifiedHub;
+    }
+    public Pose2d getEffectiveHubPose() {
+        return getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
+    }
+
+    public void updateHubShifts() {
+        Pose2d robotPose2d = RobotContainer.drivetrain.getState().Pose;
+        hubShifts = new Translation2d();
+        Pose2d hubPose = getUnmodifiedHubPose();
+        double vx = RobotContainer.drivetrain.getState().Speeds.vxMetersPerSecond;
+        double vy = RobotContainer.drivetrain.getState().Speeds.vyMetersPerSecond;
+        for (int i=0; i<3; i++){
+            double distance = getDistance(robotPose2d, hubPose);
+            double time = ShooterConstants.distanceToTOF.get(distance);
+            hubShifts = new Translation2d(getUnmodifiedHubPose().getX()+vx*time, getUnmodifiedHubPose().getY()+vy*time);
+            hubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
+        }
+    }
+    public double getDistance(Pose2d a, Pose2d b){
+        return Math.sqrt(Math.pow(a.getX()-b.getX(), 2)+Math.pow(a.getY()-b.getY(), 2));
+    }
+    public double getTargetRPM(){
+        double distance = getDistance(RobotContainer.drivetrain.getState().Pose, getEffectiveHubPose());
+        if(distance>=ShooterConstants.thresholdDistance){
+            return ShooterConstants.rpmHigh;
+        }
+        return ShooterConstants.rpmLow;
+    }
+    public double getAngle(){
+        double distance = getDistance(RobotContainer.drivetrain.getState().Pose, getEffectiveHubPose());
+        return ShooterConstants.distanceToAngleTable.get(distance);
+    }
+    
+    public double getRotRate() {
+        SwerveDriveState state = RobotContainer.drivetrain.getState();
+        Pose2d effectiveHubPose = getEffectiveHubPose();
+        double desiredX = effectiveHubPose.getX();
+        double desiredY = effectiveHubPose.getY();
+        double currentX = state.Pose.getX();
+        double currentY = state.Pose.getY();
+
+        double currentAngle = state.Pose.getRotation().getRadians();
+        double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
+        double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
+        return rotRate;
+    }
 
     public void updateShooter() {
-        // TODO: Make the shooter & hood actually work
-
+        shooterMotor1.setControl(new VelocityVoltage(getTargetRPM()));
+        setHoodAngleDegrees(getAngle());
         feederMotor.setControl(new DutyCycleOut(ShooterConstants.feederEffort));
     }
 
@@ -136,6 +202,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        updateHubShifts();
         SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter Avg RPM", getShooterAverageRPM());
         SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 RPM", getShooter1RPM());
         SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 RPM", getShooter2RPM());
