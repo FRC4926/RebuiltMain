@@ -58,21 +58,29 @@ public class HopperSubsystem extends SubsystemBase {
         return hopperMotorRight.getVelocity().getValueAsDouble()*60.0;
     }
 
-    public void setReferenceVelocity() {
-        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.effort));
-        hopperMotorCenter.setControl(new DutyCycleOut(HopperConstants.effort));
-        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.effort));
+    public void highEffort() {
+        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.highEffort));
+        hopperMotorCenter.setControl(new DutyCycleOut(HopperConstants.highEffort));
+        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.highEffort));
+    }
+    public void lowEffort() {
+        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.lowEffort));
+        hopperMotorCenter.setControl(new DutyCycleOut(HopperConstants.lowEffort));
+        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.lowEffort));
     }
     public void setVelocityZero(){
         hopperMotorLeft.setControl(new DutyCycleOut(0));
         hopperMotorCenter.setControl(new DutyCycleOut(0));
         hopperMotorRight.setControl(new DutyCycleOut(0));
     }
-    public Command setVelocity(){
-        return runOnce(() -> setReferenceVelocity());
+    public Command highEffortCommand(){
+        return runOnce(this::highEffort);
+    }
+    public Command lowEffortCommand() {
+        return runOnce(this::lowEffort);
     }
     public Command zeroVelocity(){
-        return runOnce(() -> setVelocityZero());
+        return runOnce(this::setVelocityZero);
     }
     public double getStatorCurrentMotorLeft() {
         return hopperMotorLeft.getStatorCurrent().getValueAsDouble();

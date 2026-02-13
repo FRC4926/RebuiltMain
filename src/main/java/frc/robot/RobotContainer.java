@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.HopperSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ObjectDetectionSubsytem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -38,7 +40,7 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    private final Telemetry logger = new Telemetry(DriveConstants.MaxSpeed);
+    private final Telemetry logger = new Telemetry(DriveConstants.MaxSpeed); 
 
     private final CommandXboxController driverController = new CommandXboxController(0);
 
@@ -55,12 +57,9 @@ public class RobotContainer {
     public final static VisionSubsystem visionSubsystem = new VisionSubsystem();
     public final static ObjectDetectionSubsytem detectionSubsystem = new ObjectDetectionSubsytem();
     
-    public final static ShooterSubsystem shooterSubsytem = new ShooterSubsystem();
-
-    private int aFlag = 0;
-
-
-    
+    public final static ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+    public final static HopperSubsystem hopperSubsystem = new HopperSubsystem();
+    public final static IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 
     public RobotContainer() 
     {
@@ -89,6 +88,10 @@ public class RobotContainer {
                     .withRotationalRate(-rot.calculate(driverController.getRightX()) * DriveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
+
+        shooterSubsystem.setDefaultCommand(shooterSubsystem.idle());
+        hopperSubsystem.setDefaultCommand(hopperSubsystem.lowEffortCommand());
+        intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
 
         visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
