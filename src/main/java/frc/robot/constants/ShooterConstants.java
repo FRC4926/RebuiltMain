@@ -1,8 +1,5 @@
 package frc.robot.constants;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.ctre.phoenix6.configs.Slot0Configs;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;

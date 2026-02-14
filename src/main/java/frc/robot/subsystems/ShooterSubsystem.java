@@ -165,6 +165,17 @@ public class ShooterSubsystem extends SubsystemBase {
         return hoodMotor.getStatorCurrent().getValueAsDouble();
     }
 
+    public boolean shouldUpdateShooter()
+    {
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+            return RobotContainer.drivetrain.getState().Pose.getX() > (FieldConstants.fieldLength - FieldConstants.allianceZoneLine);
+        } else
+        {
+            return RobotContainer.drivetrain.getState().Pose.getX() < FieldConstants.allianceZoneLine;
+        }
+    
+    }
+
     @Override
     public void periodic() {
         lookupTableUtil.updateEffectiveHub();

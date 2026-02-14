@@ -57,8 +57,8 @@ public class LookupTableUtil {
         double distance = distanceBetween(robotPose2d, currentHubPose);
         double time = ShooterConstants.distanceToTOF.get(distance);
 
-        //TODO manually end this if it never converges
-        while (true)
+        //10 loops before manual break
+        for(int i = 0; i < 10; i++)
         {
             hubShifts = new Translation2d(getUnmodifiedHubPose().getX()-vx*time, getUnmodifiedHubPose().getY()-vy*time);
             currentHubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
