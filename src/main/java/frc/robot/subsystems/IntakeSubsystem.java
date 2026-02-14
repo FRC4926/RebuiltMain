@@ -37,18 +37,21 @@ public class IntakeSubsystem extends SubsystemBase {
         Slot0Configs slot0Conf = IntakeConstants.pivotPIDSlot0Configs;
 
 
-        CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(30);
-        intakeMotor1.getConfigurator().apply(currentLimitsConfigs);
-        intakeMotor2.getConfigurator().apply(currentLimitsConfigs);
-        pivotMotor.getConfigurator().apply(currentLimitsConfigs);
+        CurrentLimitsConfigs intakeCurrentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(IntakeConstants.intakeCurrentLimit);
+        intakeMotor1.getConfigurator().apply(intakeCurrentLimitsConfigs);
+        intakeMotor2.getConfigurator().apply(intakeCurrentLimitsConfigs);
+
+        CurrentLimitsConfigs pivotCurrentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(IntakeConstants.pivotCurrentLimit);
+        pivotMotor.getConfigurator().apply(pivotCurrentLimitsConfigs);
 
         intakeMotor1.setNeutralMode(NeutralModeValue.Coast);
         intakeMotor2.setNeutralMode(NeutralModeValue.Coast);
-        pivotMotor.setNeutralMode(NeutralModeValue.Coast);
+        pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
         intakeMotor2.setControl(new Follower(IntakeConstants.intake2CanId, MotorAlignmentValue.Opposed));
 
         pivotMotor.getConfigurator().apply(slot0Conf);
+        pivotMotor.setPosition(0);
     }
 
     public double getIntake1RPM()
@@ -96,12 +99,16 @@ public class IntakeSubsystem extends SubsystemBase {
     {
         return degrees*IntakeConstants.gearRatio/360.0;
     }
-    
+
+    private double degreesFromRotations(double motorRot)
+    {
+        return motorRot/IntakeConstants.gearRatio*360.0;
+    }
+
 
     public void setPivotVelocity(double velocity) {
         pivotMotor.setControl(new VelocityVoltage(velocity));
     }
-    
 
     public double getIntake1Velocity() {
         return intakeMotor1.getVelocity().getValueAsDouble();
@@ -134,7 +141,7 @@ public class IntakeSubsystem extends SubsystemBase {
         return IntakeConstants.pivotDownPosition;
     }
     public double getPivotAngle(){
-        return pivotMotor.getPosition().getValueAsDouble()*360*IntakeConstants.gearRatio;
+        return degreesFromRotations(pivotMotor.getPosition().getValueAsDouble());
     }
     @Override
     public void periodic() {

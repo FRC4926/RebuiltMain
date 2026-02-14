@@ -6,6 +6,9 @@ public class IntakeConstants {
     public static final int intake1CanId = 14;
     public static final int intake2CanId = 15;
     public static final int pivotCanId = 13;
+
+    public static final double intakeCurrentLimit = 30;
+    public static final double pivotCurrentLimit = 30;
     
     public static final Slot0Configs pivotPIDSlot0Configs = new Slot0Configs()
             .withKP(0)
