@@ -69,7 +69,7 @@ public class ShooterConstants {
     public static final InterpolatingDoubleTreeMap[] angleLookupTables = {distanceToAngle1, distanceToAngle2, distanceToAngle3};
     public static final double[] RPMRanges = {2000, 3000, 4500};
     public static final double[] rangeDistanceThresholds = {0.75, 1.5, 2.25};
-    public static final double distanceThres = 0.2;
+    public static final double distanceThres = 0.08;
 
     public static final double idleSpeedRPM = 1000.0;
 }

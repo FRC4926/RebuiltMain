@@ -86,7 +86,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void addVisionMeasurements(CommandSwerveDrivetrain drivetrain) {      
         for (CameraWrapper cam : camWrappers) {
-            // cam.addEstimatedGlobalPose();
+            cam.updateResults();
         }
     }
     
@@ -100,16 +100,10 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() 
     {
-
-        for (CameraWrapper cam : camWrappers) {
-            cam.updateResults();
-        }
-
         SmartDashboard.putString("Alliance", DriverStation.getAlliance().get().toString());
 
         // if (Robot.isSimulation()) {
         //     visionSim.update(RobotContainer.drivetrain.getState().Pose);
         // }
-        
     } 
 }

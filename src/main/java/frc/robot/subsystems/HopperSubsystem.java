@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.constants.HopperConstants;
 
 public class HopperSubsystem extends SubsystemBase {
@@ -94,13 +95,17 @@ public class HopperSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("HOPPER SUBSYSTEM: Left RPM", getHopperLeftRPM());
-        SmartDashboard.putNumber("HOPPER SUBSYSTEM: Center RPM", getHopperCenterRPM());
-        SmartDashboard.putNumber("HOPPER SUBSYSTEM: Right RPM", getHopperRightRPM());
 
-        SmartDashboard.putNumber("HOPPER SUBSYSTEM: Left Current",getStatorCurrentMotorLeft());
-        SmartDashboard.putNumber("HOPPER SUBSYSTEM: Center Current",getStatorCurrentMotorCenter());
-        SmartDashboard.putNumber("HOPPER SUBSYSTEM: Right Current",getStatorCurrentMotorRight());
+        if (RobotContainer.debugMode)
+        {
+            SmartDashboard.putNumber("HOPPER SUBSYSTEM: Left RPM", getHopperLeftRPM());
+            SmartDashboard.putNumber("HOPPER SUBSYSTEM: Center RPM", getHopperCenterRPM());
+            SmartDashboard.putNumber("HOPPER SUBSYSTEM: Right RPM", getHopperRightRPM());
+
+            SmartDashboard.putNumber("HOPPER SUBSYSTEM: Left Current",getStatorCurrentMotorLeft());
+            SmartDashboard.putNumber("HOPPER SUBSYSTEM: Center Current",getStatorCurrentMotorCenter());
+            SmartDashboard.putNumber("HOPPER SUBSYSTEM: Right Current",getStatorCurrentMotorRight());
+        }
     }
 
 }

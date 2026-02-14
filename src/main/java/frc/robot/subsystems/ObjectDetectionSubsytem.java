@@ -169,9 +169,12 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         //     softBias = 0.0;
         // }
 
-        SmartDashboard.putNumber("CAMERAS: ArducamColor: Object Bias", bias);
-        SmartDashboard.putNumber("CAMERAS: ArducamColor: Soft Bias", softBias);
-        SmartDashboard.putBoolean("CAMERAS: ArducamColor: Object Tracking Active", state);
-        SmartDashboard.putNumber("CAMERAS: ArducamColor: Objects Detected", targets.size());
+        if (RobotContainer.debugMode)
+        {
+            SmartDashboard.putNumber("CAMERAS: ArducamColor: Object Bias", bias);
+            SmartDashboard.putNumber("CAMERAS: ArducamColor: Soft Bias", softBias);
+            SmartDashboard.putBoolean("CAMERAS: ArducamColor: Object Tracking Active", state);
+            SmartDashboard.putNumber("CAMERAS: ArducamColor: Objects Detected", targets.size());
+        }
     }
 }

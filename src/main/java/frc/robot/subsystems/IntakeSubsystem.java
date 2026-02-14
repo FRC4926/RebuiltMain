@@ -15,6 +15,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -145,16 +146,17 @@ public class IntakeSubsystem extends SubsystemBase {
     }
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 RPM", getIntake1RPM());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 RPM", getIntake2RPM());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake Average RPM", getIntakeAverageRPM());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Angle", getPivotAngle());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Up Angle", getPivotUpAngle());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Down Angle", getPivotDownAngle());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 Stator Current", getStatorIntake1Current());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 Stator Current", getStatorIntake2Current());
-        SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Stator Current", getPivotCurrent());
-        
+        if (RobotContainer.debugMode)
+        {
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 RPM", getIntake1RPM());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 RPM", getIntake2RPM());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake Average RPM", getIntakeAverageRPM());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Angle", getPivotAngle());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Up Angle", getPivotUpAngle());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Down Angle", getPivotDownAngle());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 Stator Current", getStatorIntake1Current());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 Stator Current", getStatorIntake2Current());
+            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Stator Current", getPivotCurrent());
+        }
     }
-
 }

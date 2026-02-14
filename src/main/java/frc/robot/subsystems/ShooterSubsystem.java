@@ -181,20 +181,23 @@ public class ShooterSubsystem extends SubsystemBase {
         lookupTableUtil.updateEffectiveHub();
         lookupTableUtil.updateCurrentRange();
 
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter Avg RPM", getShooterAverageRPM());
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 RPM", getShooter1RPM());
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 RPM", getShooter2RPM());
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
+        if (RobotContainer.debugMode)
+        {
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter Avg RPM", getShooterAverageRPM());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 RPM", getShooter1RPM());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 RPM", getShooter2RPM());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
 
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Feed Stator Current", getFeedMotorStatorCurrent());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Feed Stator Current", getFeedMotorStatorCurrent());
 
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Angle (deg)", getHoodAngleDegrees());
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Stator Current", getHoodMotorStatorCurrent());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Angle (deg)", getHoodAngleDegrees());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Stator Current", getHoodMotorStatorCurrent());
 
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded Hood Angle", lookupTableUtil.getHoodAngle());
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded RPM", lookupTableUtil.getTargetRPM());
-        SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Current Range", lookupTableUtil.getCurrentRange());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded Hood Angle", lookupTableUtil.getHoodAngle());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded RPM", lookupTableUtil.getTargetRPM());
+            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Current Range", lookupTableUtil.getCurrentRange());
+        }
     }
 
 }
