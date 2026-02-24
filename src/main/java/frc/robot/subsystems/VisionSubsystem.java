@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.simulation.VisionSystemSim;
 
 import com.ctre.phoenix6.Utils;
 
@@ -30,16 +31,30 @@ import frc.robot.constants.VisionConstants;
 import frc.robot.util.CameraWrapper;
 
 public class VisionSubsystem extends SubsystemBase {
-   private List<CameraWrapper> camWrappers = new ArrayList<>();
+    private List<CameraWrapper> camWrappers = new ArrayList<>();
  
     Optional<EstimatedRobotPose> estimatedPose;
     boolean toggle = true;
+
+    private final VisionSystemSim visionSim;
+
 
     public VisionSubsystem() {
         updateOrigin();
 
         for (VisionConstants.CameraWrapperConstants camConstant : VisionConstants.camConstants) {
             addCamera(camConstant.name(), camConstant.robotToCamera(), camConstant.trustFactor());
+        }
+
+        if (Robot.isSimulation()) {
+            // visionSim = null;
+            visionSim = new VisionSystemSim("main");
+            visionSim.addAprilTags(FieldConstants.tagLayout);
+            for (CameraWrapper cam : camWrappers) {
+                cam.addToSimulator(visionSim);
+            }
+        } else {
+            visionSim = null;
         }
     }
 
@@ -100,10 +115,10 @@ public class VisionSubsystem extends SubsystemBase {
     @Override
     public void periodic() 
     {
-        SmartDashboard.putString("Alliance", DriverStation.getAlliance().get().toString());
-
-        // if (Robot.isSimulation()) {
-        //     visionSim.update(RobotContainer.drivetrain.getState().Pose);
-        // }
+        if (Robot.isSimulation()) {
+            visionSim.update(RobotContainer.drivetrain.getState().Pose);
+        } else {
+            SmartDashboard.putString("Alliance", DriverStation.getAlliance().get().toString());
+        }
     } 
 }

@@ -63,16 +63,20 @@ public class CameraWrapper {
         if (Robot.isSimulation()) {
             SimCameraProperties camProps = new SimCameraProperties();
             // A 640 x 480 camera with a 100 degree diagonal FOV.
-            camProps.setCalibration(640, 480, Rotation2d.fromDegrees(100));
+            camProps.setCalibration(640, 480, Rotation2d.fromDegrees(70));
             // Approximate detection noise with average and standard deviation error in pixels.
             camProps.setCalibError(0.25, 0.08);
+            // camProps.setCalibError(0, 0);
             // Set the camera image capture framerate (Note: this is limited by robot loop rate).
             camProps.setFPS(45);
             // The average and standard deviation in milliseconds of image data latency.
             camProps.setAvgLatencyMs(25);
             camProps.setLatencyStdDevMs(5);
-
+                
             cameraSim = new PhotonCameraSim(camera, camProps);
+
+            cameraSim.enableDrawWireframe(true);
+
         } else {
             cameraSim = null;
         }
@@ -80,7 +84,7 @@ public class CameraWrapper {
 
     public void addToSimulator(VisionSystemSim sim) {
         if (Robot.isSimulation()) {
-            sim.addCamera(cameraSim, robotToCam.inverse());
+            sim.addCamera(cameraSim, robotToCam);
         }
     }
 
