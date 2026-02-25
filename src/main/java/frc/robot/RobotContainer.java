@@ -52,8 +52,6 @@ public class RobotContainer {
     public SlewRateLimiter driveY = new SlewRateLimiter(translationRateLimit);
     public SlewRateLimiter rot = new SlewRateLimiter(2);
 
-    public static final boolean debugMode = true;
-
     //subsystems
     public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 

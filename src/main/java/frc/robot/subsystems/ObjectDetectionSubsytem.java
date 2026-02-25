@@ -6,6 +6,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.RobotCentric;
 
+import edu.wpi.first.epilogue.logging.errors.LoggerDisabler;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -17,6 +18,7 @@ import frc.robot.RobotContainer;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.util.CameraWrapper;
+import frc.robot.util.LoggerUtil;
 
 public class ObjectDetectionSubsytem extends SubsystemBase {
 
@@ -30,6 +32,9 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     private double softBias = 0.0;
     private boolean state = false;
     private double avgArea = 0;
+
+    private LoggerUtil logger = new LoggerUtil("Object Detection");
+
     public ObjectDetectionSubsytem() {
         //I know its weird but surely its fine
         camera = new CameraWrapper("ArducamColor", new Transform3d(new Translation3d(11.804*0.0254, 0, 20*0.0254), new Rotation3d(0,-15*Math.PI/180,Math.PI/3)), FieldConstants.tagLayout, false, 0, RobotContainer.drivetrain::addVisionMeasurement);
@@ -120,7 +125,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     public void periodic() {
 
         if (camera == null || !camera.isConnected()) {
-            SmartDashboard.putBoolean("CAMERAS: ArducamColor: Connected", false);
+            logger.put("Connected", false);
             bias = 0;
             // softBias = 0;
             return;
@@ -131,7 +136,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         if (!canDetect())
             return;
 
-        SmartDashboard.putBoolean("CAMERAS: ArducamColor: Connected", true);
+        logger.put("Connected", true);
         List<PhotonTrackedTarget> targets = camera.getLatestResult().getTargets();
 
         bias = 0.0;
@@ -169,12 +174,16 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         //     softBias = 0.0;
         // }
 
-        if (RobotContainer.debugMode)
-        {
-            SmartDashboard.putNumber("CAMERAS: ArducamColor: Object Bias", bias);
-            SmartDashboard.putNumber("CAMERAS: ArducamColor: Soft Bias", softBias);
-            SmartDashboard.putBoolean("CAMERAS: ArducamColor: Object Tracking Active", state);
-            SmartDashboard.putNumber("CAMERAS: ArducamColor: Objects Detected", targets.size());
-        }
+        // if (RobotContainer.debugMode)
+        // {
+        //     SmartDashboard.putNumber("CAMERAS: ArducamColor: Object Bias", bias);
+        //     SmartDashboard.putNumber("CAMERAS: ArducamColor: Soft Bias", softBias);
+        //     SmartDashboard.putBoolean("CAMERAS: ArducamColor: Object Tracking Active", state);
+        //     SmartDashboard.putNumber("CAMERAS: ArducamColor: Objects Detected", targets.size());
+        // }
+        logger.put("Object Bias", bias);
+        logger.put("Soft Bias", softBias);
+        logger.put("Object Tracking Active", state);
+        logger.put("Objects Detected", targets.size(), true);
     }
 }

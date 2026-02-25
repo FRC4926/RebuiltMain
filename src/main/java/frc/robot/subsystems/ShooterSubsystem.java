@@ -30,6 +30,7 @@ import frc.robot.RobotContainer;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.ShooterConstants;
+import frc.robot.util.LoggerUtil;
 import frc.robot.util.LookupTableUtil;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -41,6 +42,8 @@ public class ShooterSubsystem extends SubsystemBase {
     final VelocityVoltage idleSpeed = new VelocityVoltage(ShooterConstants.idleSpeedRPM/60.0).withSlot(0);
 
     LookupTableUtil lookupTableUtil = new LookupTableUtil();
+
+    private LoggerUtil logger = new LoggerUtil("Shooter Subsystem");
 
     public ShooterSubsystem() {
 
@@ -181,23 +184,37 @@ public class ShooterSubsystem extends SubsystemBase {
         lookupTableUtil.updateEffectiveHub();
         lookupTableUtil.updateCurrentRange();
 
-        if (RobotContainer.debugMode)
-        {
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter Avg RPM", getShooterAverageRPM());
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 RPM", getShooter1RPM());
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 RPM", getShooter2RPM());
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
+        // if (RobotContainer.debugMode)
+        // {
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter Avg RPM", getShooterAverageRPM());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 RPM", getShooter1RPM());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 RPM", getShooter2RPM());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
 
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Feed Stator Current", getFeedMotorStatorCurrent());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Feed Stator Current", getFeedMotorStatorCurrent());
 
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Angle (deg)", getHoodAngleDegrees());
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Stator Current", getHoodMotorStatorCurrent());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Angle (deg)", getHoodAngleDegrees());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Stator Current", getHoodMotorStatorCurrent());
 
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded Hood Angle", lookupTableUtil.getHoodAngle());
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded RPM", lookupTableUtil.getTargetRPM());
-            SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Current Range", lookupTableUtil.getCurrentRange());
-        }
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded Hood Angle", lookupTableUtil.getHoodAngle());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded RPM", lookupTableUtil.getTargetRPM());
+        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Current Range", lookupTableUtil.getCurrentRange());
+        // }
+        logger.put("Shooter Avg RPM", getShooterAverageRPM());
+        logger.put("Shooter 1 RPM", getShooter1RPM());
+        logger.put("Shooter 2 RPM", getShooter2RPM());
+        logger.put("Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
+        logger.put("Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
+
+        logger.put("Feed Stator Current", getFeedMotorStatorCurrent());
+
+        logger.put("Hood Angle (deg)", getHoodAngleDegrees());
+        logger.put("Hood Stator Current", getHoodMotorStatorCurrent());
+
+        logger.put("Commanded Hood Angle", lookupTableUtil.getHoodAngle());
+        logger.put("Commanded RPM", lookupTableUtil.getTargetRPM());
+        logger.put("Current Range", lookupTableUtil.getCurrentRange());
     }
 
 }

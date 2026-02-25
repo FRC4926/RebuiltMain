@@ -17,11 +17,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.constants.IntakeConstants;
+import frc.robot.util.LoggerUtil;
 
 public class IntakeSubsystem extends SubsystemBase {
     public final TalonFX intakeMotor1  = new TalonFX(IntakeConstants.intake1CanId);
     public final TalonFX intakeMotor2  = new TalonFX(IntakeConstants.intake2CanId);
     public final TalonFX pivotMotor  = new TalonFX(IntakeConstants.pivotCanId);
+    
+    private LoggerUtil logger = new LoggerUtil("Intake Subsystem");
 
     public IntakeSubsystem() {
 
@@ -146,17 +149,26 @@ public class IntakeSubsystem extends SubsystemBase {
     }
     @Override
     public void periodic() {
-        if (RobotContainer.debugMode)
-        {
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 RPM", getIntake1RPM());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 RPM", getIntake2RPM());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake Average RPM", getIntakeAverageRPM());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Angle", getPivotAngle());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Up Angle", getPivotUpAngle());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Down Angle", getPivotDownAngle());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 Stator Current", getStatorIntake1Current());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 Stator Current", getStatorIntake2Current());
-            SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Stator Current", getPivotCurrent());
-        }
+        // if (RobotContainer.debugMode)
+        // {
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 RPM", getIntake1RPM());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 RPM", getIntake2RPM());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake Average RPM", getIntakeAverageRPM());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Angle", getPivotAngle());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Up Angle", getPivotUpAngle());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Down Angle", getPivotDownAngle());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 1 Stator Current", getStatorIntake1Current());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Intake 2 Stator Current", getStatorIntake2Current());
+        //     SmartDashboard.putNumber("INTAKE SUBSYSTEM: Pivot Stator Current", getPivotCurrent());
+        // }
+        logger.put("Intake 1 RPM", getIntake1RPM());
+        logger.put("Intake 2 RPM", getIntake2RPM());
+        logger.put("Intake Average RPM", getIntakeAverageRPM());
+        logger.put("Pivot Angle", getPivotAngle());
+        logger.put("Pivot Up Angle", getPivotUpAngle());
+        logger.put("Pivot Down Angle", getPivotDownAngle());
+        logger.put("Intake 1 Stator Current", getStatorIntake1Current());
+        logger.put("Intake 2 Stator Current", getStatorIntake2Current());
+        logger.put("Pivot Stator Current", getPivotCurrent());
     }
 }

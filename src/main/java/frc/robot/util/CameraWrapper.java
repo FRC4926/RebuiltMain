@@ -35,7 +35,7 @@ public class CameraWrapper {
     private final PhotonCamera camera;
     private final PhotonCameraSim cameraSim;
     private final PhotonPoseEstimator poseEstimator;
-    private final StructPublisher<Pose2d> posePublisher;
+    // private final StructPublisher<Pose2d> posePublisher;
     private Transform3d robotToCam;
     private PhotonPipelineResult latestResult;
     private List<PhotonPipelineResult> unreadResults;
@@ -43,6 +43,8 @@ public class CameraWrapper {
     private double trustFactor;
     private final EstimateConsumer estConsumer;
     private Pose2d currentPose = new Pose2d();
+
+    private LoggerUtil logger;
 
     public CameraWrapper(String camName, Transform3d _robotToCam, AprilTagFieldLayout fieldLayout, boolean _publishPose, double _trustFactor, EstimateConsumer addVisionConsumer) {
         camera = new PhotonCamera(camName);
@@ -54,12 +56,12 @@ public class CameraWrapper {
         estConsumer = addVisionConsumer;
 
         publishPose = _publishPose;
-        if (publishPose) {
-            posePublisher = NetworkTableInstance.getDefault().getStructTopic("CAMERA POSES: " + camName + " pose", Pose2d.struct).publish();
-        } else {
-            posePublisher = null;
-        }
-   
+        // if (publishPose) {
+        //     posePublisher = NetworkTableInstance.getDefault().getStructTopic("CAMERA POSES: " + camName + " pose", Pose2d.struct).publish();
+        // } else {
+        //     posePublisher = null;
+        // }
+        logger = new LoggerUtil("Vision/" + camName);
         if (Robot.isSimulation()) {
             SimCameraProperties camProps = new SimCameraProperties();
             // A 640 x 480 camera with a 100 degree diagonal FOV.
@@ -136,18 +138,19 @@ public class CameraWrapper {
     }
 
     public void addEstimatedGlobalPose() {
-        SmartDashboard.putNumber("CAMERAS: " + getName() + ": Number of results", unreadResults.size());
+        logger.put("Number of results", unreadResults.size());
         currentPose = new Pose2d();
         if (!camera.isConnected())
         {
-            SmartDashboard.putBoolean("CAMERAS: " + getName() + ": Connected", false);
-            if (publishPose) {
-                posePublisher.set(currentPose);
-            }
+            logger.put("Connected", false);
+            // if (publishPose) {
+            //     posePublisher.set(currentPose);
+            // }
+            if (publishPose) logger.put("Pose", currentPose);
             return;
         } else
         {
-            SmartDashboard.putBoolean("CAMERAS: " + getName() + ": Connected", true);
+            logger.put("Connected", true);
         }
         // if (unreadResults.size() <= 0){
         //     unreadResults.add(latestResult);
@@ -181,9 +184,10 @@ public class CameraWrapper {
                 });
         }
 
-        if (publishPose) {
-            posePublisher.set(currentPose);
-        }
+        // if (publishPose) {
+        //     posePublisher.set(currentPose);
+        // }
+        if (publishPose) logger.put("Pose", currentPose);
 
         //SmartDashboard.putBoolean("Pose estimator is present for" + camera.getName(), estimated.isPresent());
 
@@ -228,8 +232,8 @@ public class CameraWrapper {
             * Math.pow(avgDistance, 2)
             / totalTags
             * trustFactor;
-        SmartDashboard.putNumber("CAMERAS: " + getName() + ": STD DEV", stdDev);
-        SmartDashboard.putNumber("CAMERAS: " + getName() + ": Total tags", totalTags);
+        logger.put("STD DEV", stdDev);
+        logger.put("Total tags", totalTags);
 
         if (totalTags <= 0)
         {
