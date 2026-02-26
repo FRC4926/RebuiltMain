@@ -1,6 +1,10 @@
 package frc.robot.constants;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -31,6 +35,9 @@ public class VisionConstants {
     public static final PIDController objectDetectionRotationPIDController = new PIDController(0.2067, 0, 0);
     public static final double objectDetectionRotationTolerance = 0.7;
     public static final double objectDetectHorizonPitch = 20;
+
+    public static final double objectDetectMinBias = 0.1;
+    public static final double objectDetectAreaThreshold = 1.2;
 
     public static final double timeThres = 1;
 

@@ -67,8 +67,7 @@ public class RobotContainer {
         new EventTrigger("PointToHub").onTrue(drivetrain.overrideRot());
         new EventTrigger("PointToHub").onFalse(drivetrain.clearOverride());
 
-
-        NamedCommands.registerCommand("AutoTrackCommand", detectionSubsystem.autonObjectDetect(drivetrain, relativeDrive));
+        NamedCommands.registerCommand("AutoTrackCommand", detectionSubsystem.autonIntake(5, drivetrain, relativeDrive, hopperSubsystem, intakeSubsystem));
         NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
         NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
 

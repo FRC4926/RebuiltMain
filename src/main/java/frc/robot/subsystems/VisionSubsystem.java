@@ -14,6 +14,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -31,6 +32,7 @@ import frc.robot.constants.VisionConstants;
 import frc.robot.util.CameraWrapper;
 
 public class VisionSubsystem extends SubsystemBase {
+    
     private List<CameraWrapper> camWrappers = new ArrayList<>();
  
     Optional<EstimatedRobotPose> estimatedPose;

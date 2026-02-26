@@ -1,17 +1,23 @@
 package frc.robot.subsystems;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.RobotCentric;
 
-import edu.wpi.first.epilogue.logging.errors.LoggerDisabler;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -33,6 +39,8 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     private boolean state = false;
     private double avgArea = 0;
 
+    private Timer objectDectectionTime;
+
     private LoggerUtil logger = new LoggerUtil("Object Detection");
 
     public ObjectDetectionSubsytem() {
@@ -43,32 +51,55 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         rotationController.enableContinuousInput(-180, 180);
     }
 
+    boolean isPosePastMidline(Pose2d pose) {
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
+            return pose.getMeasureX().magnitude() > FieldConstants.fieldLength/2;
+        }
+        return pose.getMeasureX().magnitude() < FieldConstants.fieldLength/2;
+    }
 
-    public RobotCentric driveToObject(RobotCentric drive) {
-        if (!canDetect() || Math.abs(bias) < 0.1) {
-            return blindDrive(drive);
-        }
-        if (avgArea > 1.2) {
-            return targetDrive(drive);
-        }
-        double rot = rotationController.calculate(bias, 0);
+    public double getTargetRotRate() {
+        // Check for blind drive
+        if (!canDetect() || Math.abs(bias) < VisionConstants.objectDetectMinBias) return -Math.PI/3;
+        // Check for target drive
+        if (avgArea > VisionConstants.objectDetectAreaThreshold) return 0;
+        return rotationController.calculate(bias, 0);
+    }
+
+    public double getForwardSpeed(double rot) {
+        // Check for blind drive
+        if (!canDetect() || Math.abs(bias) < VisionConstants.objectDetectMinBias) return 1;
+        // Check for target drive
+        if (avgArea > VisionConstants.objectDetectAreaThreshold) return 1;
+        return 2 / (1 + Math.abs(rot / 5));
+    }
+
+    public RobotCentric driveToObjectTeleOp(RobotCentric drive) {
+        double rot = getTargetRotRate();
+        double speed = getForwardSpeed(rot);
         return drive
-            .withVelocityX(2 / (1 + Math.abs(rot / 5)))
+            .withVelocityX(speed)
             .withVelocityY(0)
             .withRotationalRate(rot);
     }
-    public RobotCentric targetDrive(RobotCentric drive) {
+
+    public RobotCentric driveToObjectAuton(RobotCentric drive) {
+        double rot = getTargetRotRate();
+        double speed = getForwardSpeed(rot);
+        Pose2d initialPose = RobotContainer.drivetrain.getState().Pose;
+        double newAngle = initialPose.getRotation().getRadians() + rot;
+        Transform2d transform1s = new Transform2d(new Translation2d(speed * Math.cos(newAngle), speed * Math.sin(newAngle)), new Rotation2d(rot));
+        if (isPosePastMidline(initialPose.plus(transform1s))) {
+            return drive.withVelocityX(0)
+                .withVelocityY(0)
+                .withRotationalRate(-Math.PI/3);
+        }
         return drive
-            .withVelocityX(1)
+            .withVelocityX(speed)
             .withVelocityY(0)
-            .withRotationalRate(0);
+            .withRotationalRate(rot);
     }
-    public RobotCentric blindDrive(RobotCentric drive) {
-        return drive
-            .withVelocityX(1)
-            .withVelocityY(0)
-            .withRotationalRate(-Math.PI/3);
-    }
+
     public RobotCentric zeroDrive(RobotCentric drive) {
         return drive
             .withVelocityX(0)
@@ -77,18 +108,32 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     }
 
     public Command objectTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive) {
-        return drivetrain.applyRequest(() -> driveToObject(drive))
+        return drivetrain.applyRequest(() -> driveToObjectTeleOp(drive))
             .beforeStarting(() -> state = true)
             .finallyDo(interrupted -> state = false);
     }
 
-    public Command autonObjectTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive) {
-        return objectTrackCommand(drivetrain, drive).until(this::objectDone);
-    }
+    // public Command autonObjectTrackCommand(CommandSwerveDrivetrain drivetrain, RobotCentric drive) {
+    //     return objectTrackCommand(drivetrain, drive).until(this::objectDone);
+    // }
 
-    public Command autonObjectDetect(CommandSwerveDrivetrain drivetrain, RobotCentric drive) {
-        return autonObjectTrackCommand(drivetrain, drive)
-            .andThen(drivetrain.applyRequest(() -> zeroDrive(drive)));
+    // public Command autonObjectDetect(CommandSwerveDrivetrain drivetrain, RobotCentric drive) {
+    //     return autonObjectTrackCommand(drivetrain, drive)
+    //         .andThen(drivetrain.applyRequest(() -> zeroDrive(drive)));
+    // }
+
+    public Command autonIntake(double totalTime, CommandSwerveDrivetrain drivetrain, RobotCentric drive, HopperSubsystem hopper, IntakeSubsystem intake) {
+        Command startCmd = runOnce(objectDectectionTime::restart)
+            .andThen(() -> state = true);
+        Command objAndIntake = drivetrain.applyRequest(() -> driveToObjectAuton(drive))
+            .andThen(intake.intakeRunCommand())
+            .andThen(hopper.highEffortCommand());
+        BooleanSupplier isDone = () -> objectDectectionTime.hasElapsed(totalTime);
+        Command endCmd = drivetrain.applyRequest(() -> zeroDrive(drive))
+            .andThen(intake.zeroIntake())
+            .andThen(() -> state = false)
+            .andThen(hopper.lowEffortCommand());
+        return startCmd.andThen(objAndIntake.until(isDone)).andThen(endCmd);
     }
 
     public boolean isTracking() {
