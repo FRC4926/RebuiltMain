@@ -2,12 +2,15 @@ package frc.robot.constants;
 
 import java.util.ArrayList;
 
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
     public record CameraWrapperConstants(String name, Transform3d robotToCamera, double trustFactor) {};
@@ -43,4 +46,8 @@ public class VisionConstants {
 
     public static final double yawWeight = 0.03;
     public static final double areaWeight = 10;
+
+    public static final PathConstraints pathOnTheFlyConstraints = new PathConstraints(
+            4,5,
+            Units.degreesToRadians(540), Units.degreesToRadians(720));
 }

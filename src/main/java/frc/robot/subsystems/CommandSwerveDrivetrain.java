@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -19,7 +20,9 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,6 +30,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -135,6 +139,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         },
         this // Reference to this subsystem to set requirements
         );
+
+        initTrenchFlyPaths();
     }
 
     /*
@@ -257,6 +263,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      */
     public Command applyRequest(Supplier<SwerveRequest> request) {
         return run(() -> this.setControl(request.get()));
+    }
+
+    public Command applyRequestOnce(Supplier<SwerveRequest> request) {
+        return runOnce(() -> this.setControl(request.get()));
     }
 
     /**
@@ -401,5 +411,64 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+    }
+
+
+
+    // Trench Path on the Fly
+
+    public record PathOnTheFlyZone(Pose2d target, Translation2d corner1, Translation2d corner2, Rectangle2d rect) {};
+
+    public static ArrayList<PathOnTheFlyZone> trenchPathFlyZones = new ArrayList<>();
+
+    public static PathOnTheFlyZone flipZoneHorizontal(PathOnTheFlyZone old) {
+        Pose2d target = new Pose2d(old.target().getX(), FieldConstants.fieldWidth-old.target().getY(), old.target().getRotation());
+        Translation2d corner1 = new Translation2d(old.corner1().getX(), FieldConstants.fieldWidth-old.corner1().getY());
+        Translation2d corner2 = new Translation2d(old.corner2().getX(), FieldConstants.fieldWidth-old.corner2().getY());
+        return createPathOnTheFlyZone(target, corner1, corner2);
+    }
+
+    public static PathOnTheFlyZone flipZoneToRedAlliance(PathOnTheFlyZone old) {
+        Pose2d target = new Pose2d(FieldConstants.fieldLength-old.target().getX(), old.target().getY(), old.target().getRotation().plus(Rotation2d.k180deg));
+        Translation2d corner1 = new Translation2d(FieldConstants.fieldLength-old.corner1().getX(), old.corner1().getY());
+        Translation2d corner2 = new Translation2d(FieldConstants.fieldLength-old.corner2().getX(), old.corner2().getY());
+        return createPathOnTheFlyZone(target, corner1, corner2);
+    }
+
+    public static PathOnTheFlyZone createPathOnTheFlyZone(Pose2d target, Translation2d corner1, Translation2d corner2) {
+        Rectangle2d rect = new Rectangle2d(corner1, corner2);
+        return new PathOnTheFlyZone(target, corner1, corner2, rect);
+    }
+
+    public static void initTrenchFlyPaths() {
+        trenchPathFlyZones.add(createPathOnTheFlyZone(
+            new Pose2d(5.735, 0.654, Rotation2d.kZero),
+            new Translation2d(),
+            FieldConstants.hubCenterBlue.getTranslation()));
+        trenchPathFlyZones.add(createPathOnTheFlyZone(
+            new Pose2d(3.694, 0.634, Rotation2d.k180deg),
+            new Translation2d(FieldConstants.fieldLength/2, 0),
+            FieldConstants.hubCenterBlue.getTranslation()));
+
+        int numberOfZones = trenchPathFlyZones.size();
+        for (int i = 0; i < numberOfZones; i++) {
+            trenchPathFlyZones.add(flipZoneHorizontal(trenchPathFlyZones.get(i)));
+        }
+
+        numberOfZones = trenchPathFlyZones.size();
+        for (int i = 0; i < numberOfZones; i++) {
+            trenchPathFlyZones.add(flipZoneToRedAlliance(trenchPathFlyZones.get(i)));
+        }
+    }
+
+    public Command trenchFlyCommand() {
+        return defer(() -> {
+            for (PathOnTheFlyZone zone : trenchPathFlyZones) {
+                if (zone.rect().contains(getState().Pose.getTranslation())) {
+                    return AutoBuilder.pathfindToPose(zone.target(), VisionConstants.pathOnTheFlyConstraints, 0);
+                }
+            }
+            return Commands.none();
+        });
     }
 }
