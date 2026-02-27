@@ -442,11 +442,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public static void initTrenchFlyPaths() {
         trenchPathFlyZones.add(createPathOnTheFlyZone(
-            new Pose2d(5.735, 0.654, Rotation2d.kZero),
+            new Pose2d(5.735, 0.644, Rotation2d.kZero),
             new Translation2d(),
             FieldConstants.hubCenterBlue.getTranslation()));
         trenchPathFlyZones.add(createPathOnTheFlyZone(
-            new Pose2d(3.694, 0.634, Rotation2d.k180deg),
+            new Pose2d(3.694, 0.644, Rotation2d.k180deg),
             new Translation2d(FieldConstants.fieldLength/2, 0),
             FieldConstants.hubCenterBlue.getTranslation()));
 

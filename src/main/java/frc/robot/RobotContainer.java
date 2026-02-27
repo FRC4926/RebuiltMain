@@ -31,6 +31,7 @@ public class RobotContainer {
     public static final boolean shooterEnabled = true;
     public static final boolean intakeEnabled = false;
     public static final boolean hopperEnabled = false;
+    public static final boolean visionEnabled = false;
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -59,12 +60,12 @@ public class RobotContainer {
     //subsystems
     public final static CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public final static VisionSubsystem visionSubsystem = new VisionSubsystem();
-    public final static ObjectDetectionSubsytem detectionSubsystem = new ObjectDetectionSubsytem();
+    public static VisionSubsystem visionSubsystem;
+    public static ObjectDetectionSubsytem detectionSubsystem;
     
-    public final static ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-    public final static HopperSubsystem hopperSubsystem = new HopperSubsystem();
-    public final static IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    public static ShooterSubsystem shooterSubsystem;
+    public static HopperSubsystem hopperSubsystem;
+    public static IntakeSubsystem intakeSubsystem;
 
     public RobotContainer() 
     {
@@ -79,6 +80,11 @@ public class RobotContainer {
         SmartDashboard.putData("Autonomous", autonChooser);
         
         configureBindings();
+        if (shooterEnabled) shooterSubsystem = new ShooterSubsystem();
+        if (hopperEnabled) hopperSubsystem = new HopperSubsystem();
+        if (intakeEnabled) intakeSubsystem = new IntakeSubsystem();
+        if (visionEnabled) visionSubsystem = new VisionSubsystem();
+        if (visionEnabled) detectionSubsystem = new ObjectDetectionSubsytem();
     }
 
     private void configureBindings() {
@@ -96,8 +102,7 @@ public class RobotContainer {
         if (shooterEnabled) shooterSubsystem.setDefaultCommand(shooterSubsystem.idle());
         if (hopperEnabled) hopperSubsystem.setDefaultCommand(hopperSubsystem.lowEffortCommand());
         if (intakeEnabled) intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
-
-        visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
+        if (visionEnabled) visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -107,9 +112,9 @@ public class RobotContainer {
         );
 
         if (shooterEnabled) driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY).alongWith(shooterSubsystem.updateShooterCommand()));
-        driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
-        driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
+        if (visionEnabled) driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
         
+        driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
         driverController.y().whileTrue(drivetrain.trenchFlyCommand());
        
     //    if (shooterEnabled) new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());

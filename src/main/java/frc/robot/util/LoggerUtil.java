@@ -1,7 +1,6 @@
 package frc.robot.util;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 import com.ctre.phoenix6.SignalLogger;
 
@@ -11,6 +10,7 @@ import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 
 public class LoggerUtil {
@@ -22,6 +22,7 @@ public class LoggerUtil {
     HashMap<String, IntegerPublisher> intTopics = new HashMap<>();
     HashMap<String, DoublePublisher> doubleTopics = new HashMap<>();
     HashMap<String, StructPublisher<Pose2d>> pose2dTopics = new HashMap<>();
+    HashMap<String, StringPublisher> stringTopics = new HashMap<>();
 
     public LoggerUtil(String name) {
         this(name, false);
@@ -82,5 +83,18 @@ public class LoggerUtil {
             pose2dTopics.get(topic).set(value);
         }
         SignalLogger.writeStruct(name + "/" + topic, Pose2d.struct, value);
+    }
+
+    public void put(String name, String value) {
+        put(name, value, false);
+    }
+    public void put(String topic, String value, boolean critical) {
+        if (debugMode || critical) {
+            if (!stringTopics.containsKey(topic)) {
+                stringTopics.put(topic, table.getStringTopic(topic).publish());
+            }
+            stringTopics.get(topic).set(value);
+        }
+        SignalLogger.writeString(name + "/" + topic, value);
     }
 }
