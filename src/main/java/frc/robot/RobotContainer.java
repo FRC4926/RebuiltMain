@@ -28,6 +28,10 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
+    public static final boolean shooterEnabled = true;
+    public static final boolean intakeEnabled = false;
+    public static final boolean hopperEnabled = false;
+
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(DriveConstants.MaxSpeed * 0.1).withRotationalDeadband(DriveConstants.MaxAngularRate * 0.1) // Add a 10% deadband
@@ -89,9 +93,9 @@ public class RobotContainer {
             )
         );
 
-        shooterSubsystem.setDefaultCommand(shooterSubsystem.idle());
-        hopperSubsystem.setDefaultCommand(hopperSubsystem.lowEffortCommand());
-        intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
+        if (shooterEnabled) shooterSubsystem.setDefaultCommand(shooterSubsystem.idle());
+        if (hopperEnabled) hopperSubsystem.setDefaultCommand(hopperSubsystem.lowEffortCommand());
+        if (intakeEnabled) intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
 
         visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
@@ -102,13 +106,13 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));
+        if (shooterEnabled) driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY).alongWith(shooterSubsystem.updateShooterCommand()));
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
         driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
         
         driverController.y().whileTrue(drivetrain.trenchFlyCommand());
        
-       new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
+    //    if (shooterEnabled) new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
 
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))

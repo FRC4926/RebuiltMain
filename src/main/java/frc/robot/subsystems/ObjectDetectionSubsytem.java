@@ -39,7 +39,7 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
     private boolean state = false;
     private double avgArea = 0;
 
-    private Timer objectDectectionTime;
+    private Timer objectDectectionTime = new Timer();
 
     private LoggerUtil logger = new LoggerUtil("Object Detection");
 
@@ -124,16 +124,16 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
 
     public Command autonIntake(double totalTime, CommandSwerveDrivetrain drivetrain, RobotCentric drive, HopperSubsystem hopper, IntakeSubsystem intake) {
         Command startCmd = runOnce(objectDectectionTime::restart)
-            .andThen(() -> state = true);
-        Command objAndIntake = drivetrain.applyRequest(() -> driveToObjectAuton(drive))
+            .andThen(() -> state = true)
             .andThen(intake.intakeRunCommand())
             .andThen(hopper.highEffortCommand());
+        Command followCmd = drivetrain.applyRequest(() -> driveToObjectAuton(drive));
         BooleanSupplier isDone = () -> objectDectectionTime.hasElapsed(totalTime);
-        Command endCmd = drivetrain.applyRequest(() -> zeroDrive(drive))
+        Command endCmd = drivetrain.applyRequestOnce(() -> zeroDrive(drive))
             .andThen(intake.zeroIntake())
-            .andThen(() -> state = false)
-            .andThen(hopper.lowEffortCommand());
-        return startCmd.andThen(objAndIntake.until(isDone)).andThen(endCmd);
+            .andThen(hopper.lowEffortCommand())
+            .andThen(() -> state = false);
+        return startCmd.andThen(followCmd.until(isDone)).andThen(endCmd);
     }
 
     public boolean isTracking() {
