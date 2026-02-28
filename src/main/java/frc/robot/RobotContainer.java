@@ -30,7 +30,7 @@ import frc.robot.subsystems.VisionSubsystem;
 public class RobotContainer {
     public static final boolean shooterEnabled = true;
     public static final boolean intakeEnabled = false;
-    public static final boolean hopperEnabled = false;
+    public static final boolean hopperEnabled = true;
     public static final boolean visionEnabled = false;
 
     /* Setting up bindings for necessary control of the swerve drive platform */
