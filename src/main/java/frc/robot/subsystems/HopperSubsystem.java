@@ -27,7 +27,7 @@ public class HopperSubsystem extends SubsystemBase {
     public HopperSubsystem() {
 
         hopperMotorLeft.getConfigurator().apply(
-            new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
+            new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)
         );
         hopperMotorCenter.getConfigurator().apply(
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
@@ -61,42 +61,64 @@ public class HopperSubsystem extends SubsystemBase {
         return hopperMotorRight.getVelocity().getValueAsDouble()*60.0;
     }
 
-    public void highEffort() {
-        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.highEffort));
-        hopperMotorCenter.setControl(new DutyCycleOut(HopperConstants.highEffort));
-        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.highEffort));
+    public void positiveEffort() {
+        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.sideEffort));
+        hopperMotorCenter.setControl(new DutyCycleOut(HopperConstants.centerEffort));
+        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.sideEffort));
     }
-    public void lowEffort() {
-        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.lowEffort));
-        hopperMotorCenter.setControl(new DutyCycleOut(HopperConstants.lowEffort));
-        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.lowEffort));
+
+    public void negativeEffort() {
+        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.sideEffort));
+        hopperMotorCenter.setControl(new DutyCycleOut(-HopperConstants.centerEffort));
+        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.sideEffort));
     }
     public void setVelocityZero(){
         hopperMotorLeft.setControl(new DutyCycleOut(0));
         hopperMotorCenter.setControl(new DutyCycleOut(0));
         hopperMotorRight.setControl(new DutyCycleOut(0));
     }
-    public Command highEffortCommand(){
-        return runOnce(this::highEffort);
+
+    public Command positiveEffortCommand() {
+        return runOnce(this::positiveEffort);
     }
-    public Command lowEffortCommand() {
-        return runOnce(this::lowEffort);
+
+    public Command negativeEffortCommand() {
+        return runOnce(this::negativeEffort);
     }
+
     public Command zeroVelocity(){
         return runOnce(this::setVelocityZero);
     }
+
     public double getStatorCurrentMotorLeft() {
         return hopperMotorLeft.getStatorCurrent().getValueAsDouble();
     }
+
     public double getStatorCurrentMotorCenter() {
         return hopperMotorCenter.getStatorCurrent().getValueAsDouble();
     }
+
     public double getStatorCurrentMotorRight() {
         return hopperMotorRight.getStatorCurrent().getValueAsDouble();
     }
 
     @Override
     public void periodic() {
+        // if (RobotContainer.driverController.a().getAsBoolean()) {
+        //     hopperMotorCenter.set(1);
+        //     hopperMotorLeft.set(-0.3);
+        //     hopperMotorRight.set(0.3);
+        // } else if (RobotContainer.driverController.x().getAsBoolean()) {
+        //     hopperMotorLeft.set(0);
+        //     hopperMotorRight.set(0);
+        //     hopperMotorCenter.set(-1);
+
+        // } else {
+        //     hopperMotorCenter.set(0);
+        //     hopperMotorLeft.set(0);
+        //     hopperMotorRight.set(0);
+        // }
+
 
         // if (RobotContainer.debugMode)
         // {
@@ -108,13 +130,13 @@ public class HopperSubsystem extends SubsystemBase {
         //     SmartDashboard.putNumber("HOPPER SUBSYSTEM: Right Current", getStatorCurrentMotorRight());
         // }
 
-        logger.put("Left RPM", getHopperLeftRPM());
-        logger.put("Center RPM", getHopperCenterRPM());
-        logger.put("Right RPM", getHopperRightRPM());
+        // logger.put("Left RPM", getHopperLeftRPM());
+        // logger.put("Center RPM", getHopperCenterRPM());
+        // logger.put("Right RPM", getHopperRightRPM());
 
-        logger.put("Left Current", getStatorCurrentMotorLeft());
-        logger.put("Center Current", getStatorCurrentMotorCenter());
-        logger.put("Right Current", getStatorCurrentMotorRight());
+        // logger.put("Left Current", getStatorCurrentMotorLeft());
+        // logger.put("Center Current", getStatorCurrentMotorCenter());
+        // logger.put("Right Current", getStatorCurrentMotorRight());
     }
 
 }

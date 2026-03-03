@@ -2,8 +2,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -13,19 +11,13 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.FieldConstants;
@@ -34,8 +26,8 @@ import frc.robot.util.LoggerUtil;
 import frc.robot.util.LookupTableUtil;
 
 public class ShooterSubsystem extends SubsystemBase {
-    public final TalonFX shooterMotor1  = new TalonFX(ShooterConstants.shooter1CanId);
-    public final TalonFX shooterMotor2  = new TalonFX(ShooterConstants.shooter2CanId);
+    public final TalonFX shooterMotor1  = new TalonFX(ShooterConstants.shooterRightCanId);
+    public final TalonFX shooterMotor2  = new TalonFX(ShooterConstants.shooterLeftCanId);
     public final TalonFX feederMotor  = new TalonFX(ShooterConstants.feederCanID);
     public final TalonFX hoodMotor  = new TalonFX(ShooterConstants.hoodCanID);
    
@@ -71,13 +63,13 @@ public class ShooterSubsystem extends SubsystemBase {
 
         shooterMotor1.setNeutralMode(NeutralModeValue.Coast);
         shooterMotor2.setNeutralMode(NeutralModeValue.Coast);
-        feederMotor.setNeutralMode(NeutralModeValue.Coast);
-        hoodMotor.setNeutralMode(NeutralModeValue.Brake);
+        feederMotor.setNeutralMode(NeutralModeValue.Brake);
+        hoodMotor.setNeutralMode(NeutralModeValue.Coast); //TODO: change to brake
 
         shooterMotor1.getConfigurator().apply(ShooterConstants.shooterPIDConfig);
         shooterMotor2.getConfigurator().apply(ShooterConstants.hoodPIDConfig);
 
-        shooterMotor2.setControl(new Follower(ShooterConstants.shooter1CanId, MotorAlignmentValue.Opposed));
+        shooterMotor2.setControl(new Follower(ShooterConstants.shooterRightCanId, MotorAlignmentValue.Opposed));
         hoodMotor.setPosition(0);
     }
     
@@ -148,6 +140,10 @@ public class ShooterSubsystem extends SubsystemBase {
         hoodMotor.setControl(new PositionVoltage(degreesToHoodMotorRotations(deg)).withSlot(0));
     }
 
+    public void setHoodEffort(double effort) {
+        hoodMotor.set(effort);
+    }
+
     public double getShooterAverageRPM()
     {
         return (shooterMotor1.getVelocity().getValueAsDouble()*60.0+shooterMotor2.getVelocity().getValueAsDouble()*60.0)/2;
@@ -184,37 +180,40 @@ public class ShooterSubsystem extends SubsystemBase {
         lookupTableUtil.updateEffectiveHub();
         lookupTableUtil.updateCurrentRange();
 
-        // if (RobotContainer.debugMode)
-        // {
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter Avg RPM", getShooterAverageRPM());
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 RPM", getShooter1RPM());
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 RPM", getShooter2RPM());
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
+        setHoodAngleDegrees(10);
 
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Feed Stator Current", getFeedMotorStatorCurrent());
 
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Angle (deg)", getHoodAngleDegrees());
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Hood Stator Current", getHoodMotorStatorCurrent());
-
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded Hood Angle", lookupTableUtil.getHoodAngle());
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Commanded RPM", lookupTableUtil.getTargetRPM());
-        //     SmartDashboard.putNumber("SHOOTER SUBSYSTEM: Current Range", lookupTableUtil.getCurrentRange());
+        // if (RobotContainer.driverController.b().getAsBoolean() || RobotContainer.driverController.a().getAsBoolean() || RobotContainer.driverController.x().getAsBoolean()) {
+        //     setShooterRPMManual(4000);
+        // } else {
+        //     setShooterRPMManual(0);
         // }
-        logger.put("Shooter Avg RPM", getShooterAverageRPM());
-        logger.put("Shooter 1 RPM", getShooter1RPM());
-        logger.put("Shooter 2 RPM", getShooter2RPM());
-        logger.put("Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
-        logger.put("Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
+        // if (RobotContainer.driverController.a().getAsBoolean()) {
+        //     feederMotor.setControl(new DutyCycleOut(ShooterConstants.feederEffort));
+        // } else if (RobotContainer.driverController.x().getAsBoolean()) {
+        //     feederMotor.setControl(new DutyCycleOut(-0.8));
+        // } else {
+        //     feederMotor.setControl(new DutyCycleOut(0));
+        // }
+        // setHoodAngleDegrees(320.0);
 
-        logger.put("Feed Stator Current", getFeedMotorStatorCurrent());
+        // shooterMotor1.set(0.5);
+        // feederMotor.set(0.5);
 
-        logger.put("Hood Angle (deg)", getHoodAngleDegrees());
-        logger.put("Hood Stator Current", getHoodMotorStatorCurrent());
+        // logger.put("Shooter Avg RPM", getShooterAverageRPM());
+        // logger.put("Shooter 1 RPM", getShooter1RPM());
+        // logger.put("Shooter 2 RPM", getShooter2RPM());
+        // logger.put("Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
+        // logger.put("Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
 
-        logger.put("Commanded Hood Angle", lookupTableUtil.getHoodAngle());
-        logger.put("Commanded RPM", lookupTableUtil.getTargetRPM());
-        logger.put("Current Range", lookupTableUtil.getCurrentRange());
+        // logger.put("Feed Stator Current", getFeedMotorStatorCurrent());
+
+        // logger.put("Hood Angle (deg)", getHoodAngleDegrees());
+        // logger.put("Hood Stator Current", getHoodMotorStatorCurrent());
+
+        // logger.put("Commanded Hood Angle", lookupTableUtil.getHoodAngle());
+        // logger.put("Commanded RPM", lookupTableUtil.getTargetRPM());
+        // logger.put("Current Range", lookupTableUtil.getCurrentRange());
     }
 
 }

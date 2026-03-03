@@ -20,6 +20,6 @@ public class IntakeConstants {
     public static final double targetRPS = 3000.0/60.0;
     public static final double IntakeMotorEffort = 0.75;
     public static final double pivotUpPosition = 0;
-    public static final double gearRatio = 0;
-    public static final double pivotDownPosition = 90;
+    public static final double gearRatio = 48;
+    public static final double pivotDownPosition = -88.9;
 }

@@ -126,12 +126,12 @@ public class ObjectDetectionSubsytem extends SubsystemBase {
         Command startCmd = runOnce(objectDectectionTime::restart)
             .andThen(() -> state = true)
             .andThen(intake.intakeRunCommand())
-            .andThen(hopper.highEffortCommand());
+            .andThen(hopper.positiveEffortCommand());
         Command followCmd = drivetrain.applyRequest(() -> driveToObjectAuton(drive));
         BooleanSupplier isDone = () -> objectDectectionTime.hasElapsed(totalTime);
         Command endCmd = drivetrain.applyRequestOnce(() -> zeroDrive(drive))
             .andThen(intake.zeroIntake())
-            .andThen(hopper.lowEffortCommand())
+            .andThen(hopper.zeroVelocity())
             .andThen(() -> state = false);
         return startCmd.andThen(followCmd.until(isDone)).andThen(endCmd);
     }

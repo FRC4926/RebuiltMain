@@ -5,8 +5,8 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class ShooterConstants {
-    public static final int shooter1CanId = 9;
-    public static final int shooter2CanId = 10;
+    public static final int shooterRightCanId = 9;
+    public static final int shooterLeftCanId = 10;
     public static final int feederCanID = 11;
     public static final int hoodCanID = 12;
     
@@ -15,22 +15,22 @@ public class ShooterConstants {
 	    .withKI(0)
 	    .withKD(0)
 	    .withKS(0)
-	    .withKV(0);
+	    .withKV(.12);
 	    
     public static Slot0Configs hoodPIDConfig = new Slot0Configs()
-	    .withKP(0)
+	    .withKP(0.1)
 	    .withKI(0)
 	    .withKD(0)
-	    .withKS(0)
-	    .withKV(0);
+	    .withKG(0);
 
     public static final double shooterCurrentLimit = 60;
-    public static final double feederCurrentLimit = 30;
-    public static final double hoodCurrentLimit = 20;
+    public static final double feederCurrentLimit = 70;
+    public static final double hoodCurrentLimit = 30;
 
-    public static final double hoodGearRatio = 1;
+    public static final double hoodGearRatio = 185.0/18.0;
 
-    public static final double feederEffort = 0.75;
+    //Hood angle range: 14  to 420
+    public static final double feederEffort = 1;
 
     public static final double TOFConvergingPercent = 0.2;
 
@@ -71,5 +71,5 @@ public class ShooterConstants {
     public static final double[] rangeDistanceThresholds = {0.75, 1.5, 2.25};
     public static final double distanceThres = 0.08;
 
-    public static final double idleSpeedRPM = 1000.0;
+    public static final double idleSpeedRPM = 0.0;
 }

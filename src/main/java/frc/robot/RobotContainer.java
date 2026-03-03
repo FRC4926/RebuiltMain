@@ -7,8 +7,6 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -17,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -30,7 +27,7 @@ import frc.robot.subsystems.VisionSubsystem;
 public class RobotContainer {
     public static final boolean shooterEnabled = true;
     public static final boolean intakeEnabled = false;
-    public static final boolean hopperEnabled = true;
+    public static final boolean hopperEnabled = false;
     public static final boolean visionEnabled = false;
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -48,7 +45,7 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(DriveConstants.MaxSpeed); 
 
-    private final CommandXboxController driverController = new CommandXboxController(0);
+    public static final CommandXboxController driverController = new CommandXboxController(0);
 
     public static SendableChooser<Command> autonChooser;
 
@@ -69,22 +66,23 @@ public class RobotContainer {
 
     public RobotContainer() 
     {
-        new EventTrigger("PointToHub").onTrue(drivetrain.overrideRot());
-        new EventTrigger("PointToHub").onFalse(drivetrain.clearOverride());
+        // new EventTrigger("PointToHub").onTrue(drivetrain.overrideRot());
+        // new EventTrigger("PointToHub").onFalse(drivetrain.clearOverride());
 
-        NamedCommands.registerCommand("AutoTrackCommand", detectionSubsystem.autonIntake(5, drivetrain, relativeDrive, hopperSubsystem, intakeSubsystem));
-        NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
-        NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
+        // NamedCommands.registerCommand("AutoTrackCommand", detectionSubsystem.autonIntake(5, drivetrain, relativeDrive, hopperSubsystem, intakeSubsystem));
+        // NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
+        // NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
 
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Autonomous", autonChooser);
         
-        configureBindings();
         if (shooterEnabled) shooterSubsystem = new ShooterSubsystem();
         if (hopperEnabled) hopperSubsystem = new HopperSubsystem();
-        if (intakeEnabled) intakeSubsystem = new IntakeSubsystem();
-        if (visionEnabled) visionSubsystem = new VisionSubsystem();
-        if (visionEnabled) detectionSubsystem = new ObjectDetectionSubsytem();
+        // if (intakeEnabled) intakeSubsystem = new IntakeSubsystem();
+        // if (visionEnabled) visionSubsystem = new VisionSubsystem();
+        // if (visionEnabled) detectionSubsystem = new ObjectDetectionSubsytem();
+        
+        configureBindings();
     }
 
     private void configureBindings() {
@@ -99,8 +97,8 @@ public class RobotContainer {
             )
         );
 
-        if (shooterEnabled) shooterSubsystem.setDefaultCommand(shooterSubsystem.idle());
-        if (hopperEnabled) hopperSubsystem.setDefaultCommand(hopperSubsystem.lowEffortCommand());
+        if (shooterEnabled) shooterSubsystem.setDefaultCommand(shooterSubsystem.shooterIdleCommand());
+        if (hopperEnabled) hopperSubsystem.setDefaultCommand(hopperSubsystem.positiveEffortCommand());
         if (intakeEnabled) intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
         if (visionEnabled) visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
@@ -111,12 +109,15 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        if (shooterEnabled) driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY).alongWith(shooterSubsystem.updateShooterCommand()));
-        if (visionEnabled) driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
+        // if (shooterEnabled) driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY).alongWith(shooterSubsystem.updateShooterCommand()));
+        // if (visionEnabled) driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
         
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
-        driverController.y().whileTrue(drivetrain.trenchFlyCommand());
-       
+        // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
+
+        if (shooterEnabled) driverController.b().onTrue(new InstantCommand(() -> shooterSubsystem.setHoodEffort(0.5)));
+        if (shooterEnabled) driverController.b().onFalse(new InstantCommand(() -> shooterSubsystem.setHoodEffort(0)));
+
     //    if (shooterEnabled) new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
 
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->

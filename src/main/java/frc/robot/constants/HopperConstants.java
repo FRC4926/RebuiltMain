@@ -6,8 +6,9 @@ public class HopperConstants {
     public static final int hopperMotorCenterID = 18;
     public static final int hopperMotorRightID = 17;
 
-    public static double highEffort = 0.75;
-    public static double lowEffort = 0.25;
-    public static int hopperCurrentLimit = 30;
+    public static double centerEffort = 1;
+    public static double sideEffort = 0.3;
+
+    public static int hopperCurrentLimit = 40;
 
 }
