@@ -15,16 +15,14 @@ import edu.wpi.first.math.util.Units;
 public class VisionConstants {
     public record CameraWrapperConstants(String name, Transform3d robotToCamera, double trustFactor) {};
     public static final CameraWrapperConstants[] camConstants = {
-        new CameraWrapperConstants("ArducamTop",
-            new Transform3d(new Translation3d(4.828*0.0254, -11.804*0.0254, 16*0.0254), new Rotation3d(0,-15*Math.PI/180,Math.PI/3).unaryMinus()), 1),
-        new CameraWrapperConstants("Right",
-            new Transform3d(new Translation3d(2.184*0.0254, -11.804*0.0254, 16*0.0254), new Rotation3d(0,-15*Math.PI/180,2*Math.PI/3).unaryMinus()), 1),
-        new CameraWrapperConstants("ArducamBack",
-            new Transform3d(new Translation3d(2.184*0.0254, 11.804*0.0254, 16*0.0254), new Rotation3d(0,-15*Math.PI/180,-2*Math.PI/3).unaryMinus()), 1),// 1.25
-        // new CameraWrapperConstants("ArducamRight",
-        //     new Transform3d(new Translation3d(-11.804*0.0254, -4.828*0.0254, 16*0.0254), new Rotation3d(0,-15*Math.PI/180,-Math.PI/3)), 1),
-         new CameraWrapperConstants("Limelight",
-                 new Transform3d(new Translation3d(7*0.0254,0 , 10.5*0.0254), new Rotation3d(0,-15*Math.PI/18,Math.PI)), 2) //1.25
+        new CameraWrapperConstants("BackLeft",
+            new Transform3d(new Translation3d(-0.32964297, 0.280335875, 0.532235), new Rotation3d(0,0.0, 165*Math.PI/180)), 1),
+        new CameraWrapperConstants("BackRight",
+            new Transform3d(new Translation3d(-0.32964297, -0.280335875, 0.532235), new Rotation3d(0,0.0, 195*Math.PI/180)), 1),
+        new CameraWrapperConstants("Limelight",
+             new Transform3d(new Translation3d(-0.07804633, 0.22102592, 0.483858645), new Rotation3d(0, 25*Math.PI/180, 15*Math.PI/180)), 1),
+        new CameraWrapperConstants("FrontRight",
+            new Transform3d(new Translation3d(-0.05190144, -0.17368266, 0.494284), new Rotation3d(0, 35*Math.PI/180, -15*Math.PI/180)), 1)
     };
 
     public static final double kalmanPositionStdDevCoeefficient = 0.3; //0.6

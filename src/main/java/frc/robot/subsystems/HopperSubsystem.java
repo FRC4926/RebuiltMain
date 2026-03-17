@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -46,6 +47,9 @@ public class HopperSubsystem extends SubsystemBase {
 
         hopperMotorRight.getConfigurator().apply(currentLimitsConfigs);
         hopperMotorRight.setNeutralMode(NeutralModeValue.Coast);
+
+        ParentDevice.optimizeBusUtilizationForAll(hopperMotorLeft, hopperMotorCenter, hopperMotorRight);
+
     }
 
     public double getHopperLeftRPM()
@@ -119,24 +123,13 @@ public class HopperSubsystem extends SubsystemBase {
         //     hopperMotorRight.set(0);
         // }
 
+        logger.put("Left RPM", getHopperLeftRPM());
+        logger.put("Center RPM", getHopperCenterRPM());
+        logger.put("Right RPM", getHopperRightRPM());
 
-        // if (RobotContainer.debugMode)
-        // {
-        //     SmartDashboard.putNumber("HOPPER SUBSYSTEM: Left RPM", getHopperLeftRPM());
-        //     SmartDashboard.putNumber("HOPPER SUBSYSTEM: Center RPM", getHopperCenterRPM());
-        //     SmartDashboard.putNumber("HOPPER SUBSYSTEM: Right RPM", getHopperRightRPM());
-        //     SmartDashboard.putNumber("HOPPER SUBSYSTEM: Left Current", getStatorCurrentMotorLeft());
-        //     SmartDashboard.putNumber("HOPPER SUBSYSTEM: Center Current", getStatorCurrentMotorCenter());
-        //     SmartDashboard.putNumber("HOPPER SUBSYSTEM: Right Current", getStatorCurrentMotorRight());
-        // }
-
-        // logger.put("Left RPM", getHopperLeftRPM());
-        // logger.put("Center RPM", getHopperCenterRPM());
-        // logger.put("Right RPM", getHopperRightRPM());
-
-        // logger.put("Left Current", getStatorCurrentMotorLeft());
-        // logger.put("Center Current", getStatorCurrentMotorCenter());
-        // logger.put("Right Current", getStatorCurrentMotorRight());
+        logger.put("Left Current", getStatorCurrentMotorLeft());
+        logger.put("Center Current", getStatorCurrentMotorCenter());
+        logger.put("Right Current", getStatorCurrentMotorRight());
     }
 
 }

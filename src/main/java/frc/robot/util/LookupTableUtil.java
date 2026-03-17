@@ -24,8 +24,14 @@ public class LookupTableUtil {
 
     public double getHoodAngle()
     {
-
-        return ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
+        var val = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
+        if (val == null)
+        {
+            return 0.0;
+        } else
+        {
+            return val;
+        }
     }
 
     public double getTargetRPM()
@@ -47,36 +53,38 @@ public class LookupTableUtil {
     }
 
     public void updateEffectiveHub() {
-        Translation2d hubShifts = new Translation2d();
-        Pose2d currentHubPose = getUnmodifiedHubPose();
+        // Translation2d hubShifts = new Translation2d();
+        // Pose2d currentHubPose = getUnmodifiedHubPose();
 
-        Pose2d robotPose2d = RobotContainer.drivetrain.getState().Pose;
-        double vx = RobotContainer.drivetrain.getState().Speeds.vxMetersPerSecond;
-        double vy = RobotContainer.drivetrain.getState().Speeds.vyMetersPerSecond;
+        // Pose2d robotPose2d = RobotContainer.drivetrain.getState().Pose;
+        // double vx = RobotContainer.drivetrain.getState().Speeds.vxMetersPerSecond;
+        // double vy = RobotContainer.drivetrain.getState().Speeds.vyMetersPerSecond;
 
-        double distance = distanceBetween(robotPose2d, currentHubPose);
-        double time = ShooterConstants.distanceToTOF.get(distance);
+        // double distance = distanceBetween(robotPose2d, currentHubPose);
+        // double time = ShooterConstants.distanceToTOF.get(distance);
 
-        //10 loops before manual break
-        for(int i = 0; i < 10; i++)
-        {
-            hubShifts = new Translation2d(getUnmodifiedHubPose().getX()-vx*time, getUnmodifiedHubPose().getY()-vy*time);
-            currentHubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
-            distance = distanceBetween(currentHubPose, robotPose2d);
-            double newTime = ShooterConstants.distanceToTOF.get(distance);
+        // //10 loops before manual break
+        // for(int i = 0; i < 10; i++)
+        // {
+        //     hubShifts = new Translation2d(getUnmodifiedHubPose().getX()-vx*time, getUnmodifiedHubPose().getY()-vy*time);
+        //     currentHubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
+        //     distance = distanceBetween(currentHubPose, robotPose2d);
+        //     double newTime = ShooterConstants.distanceToTOF.get(distance);
 
-            if (withinConvergingTolerance(newTime, time))
-            {
-                time = newTime;
-                break;
-            } else
-            {
-                time = newTime;
-            }
-        }
+        //     if (withinConvergingTolerance(newTime, time))
+        //     {
+        //         time = newTime;
+        //         break;
+        //     } else
+        //     {
+        //         time = newTime;
+        //     }
+        // }
 
-        hubShifts = new Translation2d(getUnmodifiedHubPose().getX()-vx*time, getUnmodifiedHubPose().getY()-vy*time);
-        effectiveHubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
+        // hubShifts = new Translation2d(getUnmodifiedHubPose().getX()-vx*time, getUnmodifiedHubPose().getY()-vy*time);
+        // effectiveHubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
+
+        effectiveHubPose = getUnmodifiedHubPose();
         // distanceToHub = SmartDashboard.getNumber("Sim distance", 0.0);
         distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose);
     }

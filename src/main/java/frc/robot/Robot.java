@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.ParentDevice;
 
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -68,6 +69,11 @@ public class Robot extends TimedRobot {
     public void teleopInit() {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
+        }
+
+        for (int i = 0 ; i < RobotContainer.drivetrain.getModules().length; i++)
+        {
+            ParentDevice.optimizeBusUtilizationForAll(RobotContainer.drivetrain.getModule(i).getDriveMotor(), RobotContainer.drivetrain.getModule(i).getSteerMotor());
         }
     }
 

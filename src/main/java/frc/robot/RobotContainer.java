@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -13,6 +14,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.constants.DriveConstants;
@@ -25,10 +30,6 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
-    public static final boolean shooterEnabled = true;
-    public static final boolean intakeEnabled = false;
-    public static final boolean hopperEnabled = false;
-    public static final boolean visionEnabled = false;
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -76,11 +77,11 @@ public class RobotContainer {
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Autonomous", autonChooser);
         
-        if (shooterEnabled) shooterSubsystem = new ShooterSubsystem();
-        if (hopperEnabled) hopperSubsystem = new HopperSubsystem();
-        // if (intakeEnabled) intakeSubsystem = new IntakeSubsystem();
-        // if (visionEnabled) visionSubsystem = new VisionSubsystem();
-        // if (visionEnabled) detectionSubsystem = new ObjectDetectionSubsytem();
+        shooterSubsystem = new ShooterSubsystem();
+        hopperSubsystem = new HopperSubsystem();
+        intakeSubsystem = new IntakeSubsystem();
+        visionSubsystem = new VisionSubsystem();
+        // detectionSubsystem = new ObjectDetectionSubsytem();
         
         configureBindings();
     }
@@ -97,10 +98,10 @@ public class RobotContainer {
             )
         );
 
-        if (shooterEnabled) shooterSubsystem.setDefaultCommand(shooterSubsystem.shooterIdleCommand());
-        if (hopperEnabled) hopperSubsystem.setDefaultCommand(hopperSubsystem.positiveEffortCommand());
-        if (intakeEnabled) intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
-        if (visionEnabled) visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
+        // shooterSubsystem.setDefaultCommand(shooterSubsystem.shooterIdleCommand());
+        // hopperSubsystem.setDefaultCommand(hopperSubsystem.positiveEffortCommand());
+        // intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
+        visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -109,16 +110,34 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        // if (shooterEnabled) driverController.b().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY).alongWith(shooterSubsystem.updateShooterCommand()));
-        // if (visionEnabled) driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
+        driverController.leftBumper().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));//.alongWith(shooterSubsystem.updateShooterCommand()));
+        // driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
         
-        driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
+        // driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
+
+        driverController.leftTrigger().whileTrue(
+            hopperSubsystem.positiveEffortCommand()
+            .andThen(new InstantCommand(() -> shooterSubsystem.setFeedEffort(-0.2)))
+
+            .andThen(new WaitUntilCommand(() -> shooterSubsystem.RPMWithinTolerance()))
+            .andThen(new InstantCommand(() -> shooterSubsystem.updateFeeder()))
+        );    
+        
+
+        driverController.leftTrigger().onFalse(new InstantCommand(() -> shooterSubsystem.setFeedEffort(0.0)).alongWith(hopperSubsystem.zeroVelocity()));
+
+        driverController.rightTrigger().onTrue(intakeSubsystem.intakeRunCommand());
+        driverController.rightTrigger().onFalse(intakeSubsystem.zeroIntake());
+
+        // driverController.x().whileTrue(new RepeatCommand(intakeSubsystem.oscillatePivotCommand()));
+        
+        driverController.y().onTrue(intakeSubsystem.pivotUpCommand());
+        driverController.x().onTrue(intakeSubsystem.pivotDownCommand());
+
+
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
-        if (shooterEnabled) driverController.b().onTrue(new InstantCommand(() -> shooterSubsystem.setHoodEffort(0.5)));
-        if (shooterEnabled) driverController.b().onFalse(new InstantCommand(() -> shooterSubsystem.setHoodEffort(0)));
-
-    //    if (shooterEnabled) new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
+        // new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
 
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
@@ -134,7 +153,7 @@ public class RobotContainer {
         // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // Reset the field-centric heading on left bumper press.
-        driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        // driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

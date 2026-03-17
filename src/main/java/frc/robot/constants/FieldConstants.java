@@ -23,7 +23,7 @@ public class FieldConstants {
 
         public static final Rectangle2d fieldRect = new Rectangle2d(new Translation2d(), new Translation2d(fieldLength, fieldWidth));
 
-        public static final Pose2d hubCenterBlue = new Pose2d(4.6256194, 4.0346376, new Rotation2d(0));
+        public static final Pose2d hubCenterBlue = new Pose2d(4.6256194, 4.0346376, new Rotation2d(0)); //4.0346376
 
         public static final Pose2d hubCenterRed = new Pose2d(16.5354-4.6256194, 4.0346376, new Rotation2d(0));
 

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -54,6 +55,9 @@ public class ClimberSubsystem extends SubsystemBase {
         );
 
         climberMotorLeft.setPosition(0);
+
+        ParentDevice.optimizeBusUtilizationForAll(climberMotorLeft, climberMotorRight);
+
     }
 
     public void setPercentOutput(double percent) {
