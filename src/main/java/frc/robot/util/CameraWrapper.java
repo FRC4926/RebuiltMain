@@ -240,6 +240,11 @@ public class CameraWrapper {
             return Double.POSITIVE_INFINITY;
         }
 
+        // if (Math.abs(RobotContainer.drivetrain.getPigeon2().getYaw().getValueAsDouble() - 0.0) > (3*(Math.PI/180.0)))
+        // {
+        //     stdDev = stdDev/2.0;
+        // }
+
         return stdDev;
     }
 

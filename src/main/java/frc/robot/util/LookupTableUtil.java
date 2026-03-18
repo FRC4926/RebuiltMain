@@ -10,11 +10,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.ShooterConstants;
+import frc.robot.subsystems.ShooterSubsystem;
 
 public class LookupTableUtil {
 
     private Pose2d effectiveHubPose = new Pose2d();
     private double distanceToHub = 0.0;
+    private double distanceToFeed = 0.0;
     private int currentRange = 0;
 
     public LookupTableUtil()
@@ -24,24 +26,42 @@ public class LookupTableUtil {
 
     public double getHoodAngle()
     {
-        var val = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
-        if (val == null)
-        {
-            return 0.0;
-        } else
-        {
-            return val;
-        }
+        double angle = 0.0;
+        if (inAllianceZone())
+            angle = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
+        else
+            angle = ShooterConstants.distanceToAngleFeed.get(distanceToFeed);
+        
+        return angle;
     }
 
     public double getTargetRPM()
     {
-        return ShooterConstants.RPMRanges[currentRange];
+        if (inAllianceZone())
+            return ShooterConstants.RPMRanges[currentRange];
+        else
+            return ShooterConstants.feedRPM;
     }
 
     public double distanceToHub(Pose2d robotPose)
     {
         return distanceBetween(effectiveHubPose, robotPose);
+    }
+
+    public double distanceToFeed(Pose2d robotPose)
+    {
+        return Math.abs(getFeedLine() - robotPose.getX());
+    }
+
+    public boolean inAllianceZone()
+    {
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+            return RobotContainer.drivetrain.getState().Pose.getX() > (FieldConstants.fieldLength - FieldConstants.allianceZoneLineBlue);
+        } else
+        {
+            return RobotContainer.drivetrain.getState().Pose.getX() < FieldConstants.allianceZoneLineBlue;
+        }
+    
     }
 
     public Pose2d getUnmodifiedHubPose() {
@@ -52,7 +72,16 @@ public class LookupTableUtil {
         return unmodifiedHub;
     }
 
-    public void updateEffectiveHub() {
+    public double getFeedLine() {
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+            return FieldConstants.fieldLength - FieldConstants.allianceZoneLineBlue;
+        } else
+        {
+            return FieldConstants.feedLineBlue;
+        }
+    }
+
+    public void updateEffectiveDistance() {
         // Translation2d hubShifts = new Translation2d();
         // Pose2d currentHubPose = getUnmodifiedHubPose();
 
@@ -87,7 +116,9 @@ public class LookupTableUtil {
         effectiveHubPose = getUnmodifiedHubPose();
         // distanceToHub = SmartDashboard.getNumber("Sim distance", 0.0);
         distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose);
+        distanceToFeed = distanceToFeed(RobotContainer.drivetrain.getState().Pose);
     }
+
 
     public void updateCurrentRange()
     {

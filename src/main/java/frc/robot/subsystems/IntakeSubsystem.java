@@ -16,13 +16,17 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.RobotContainer;
 import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.ShooterConstants;
 import frc.robot.util.LoggerUtil;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 
 public class IntakeSubsystem extends SubsystemBase {
     public final TalonFX intakeMotor1  = new TalonFX(IntakeConstants.intake1CanId); //intakeRight
@@ -98,8 +102,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public Command oscillatePivotCommand()
     {
-        return pivotOscillateCommand(IntakeConstants.pivotOscillateUpPosition)
-            .andThen(pivotOscillateCommand(IntakeConstants.pivotOscillateDownPosition));
+        return Commands.sequence(pivotOscillateCommand(IntakeConstants.pivotOscillateUpPosition), 
+            new WaitCommand(IntakeConstants.pivotOscillateBetween), 
+            pivotOscillateCommand(IntakeConstants.pivotOscillateDownPosition), 
+            new WaitCommand(IntakeConstants.pivotOscillateBetween)).repeatedly();
     }
 
     public Command pivotDownCommand(){
@@ -204,6 +210,15 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotMotor.setControl(new PositionVoltage(rotationsFromDegrees(angle)).withSlot(2));
     }
 
+    public Command autonIntakeCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive){
+        return intakeRunCommand();
+    }
+    public Command autonPivotUpCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive){
+        return pivotUpCommand();
+    }
+    public Command autonPivotDownCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive){
+        return pivotDownCommand();
+    }
     @Override
     public void periodic() {
         // setPivotPosition(SmartDashboard.getNumber("Target Pivot Angle", 0.0));

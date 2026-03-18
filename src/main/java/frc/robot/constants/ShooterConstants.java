@@ -50,39 +50,51 @@ public class ShooterConstants {
         distanceToAngle1.put(0.0, 0.0);
 	    distanceToAngle1.put(0.9144, 4.67);
         distanceToAngle1.put(1.38, 8.5);
-        distanceToAngle1.put(1.73, 10.0);
-        distanceToAngle1.put(2.05, 12.11);
-        distanceToAngle1.put(2.44, 13.56);
-        distanceToAngle1.put(2.83, 16.16);
+        distanceToAngle1.put(1.61, 10.0);
+        distanceToAngle1.put(1.91, 12.11);
+        distanceToAngle1.put(2.22, 13.56);
+        distanceToAngle1.put(2.53, 16.16);
+        distanceToAngle1.put(6.0, 16.16);
     }
 
     public static final InterpolatingDoubleTreeMap distanceToAngle2 = new InterpolatingDoubleTreeMap();
     static 
     {
-	    distanceToAngle2.put(2.83, 13.56);
-        distanceToAngle2.put(3.31, 14.85);
-        distanceToAngle2.put(3.6, 16.31);
-        distanceToAngle2.put(3.87, 16.96);
-        distanceToAngle2.put(4.18, 16.96);
+	    distanceToAngle2.put(2.53, 13.56);
+        distanceToAngle2.put(2.84, 14.85);
+        distanceToAngle2.put(3.14, 16.31);
+        distanceToAngle2.put(3.49, 16.96);
+        distanceToAngle2.put(3.77, 16.96);
+        distanceToAngle2.put(6.0, 16.96);
     }
 
     public static final InterpolatingDoubleTreeMap distanceToAngle3 = new InterpolatingDoubleTreeMap();
     static 
     {
-		distanceToAngle2.put(4.18, 18.0);
-        distanceToAngle2.put(4.49, 19.5);
-        distanceToAngle2.put(4.83, 19.5);
-        distanceToAngle2.put(5.05, 21.0);
+		distanceToAngle3.put(3.77, 18.0);
+        distanceToAngle3.put(4.08, 19.5);
+        distanceToAngle3.put(4.41, 19.5);
+        distanceToAngle3.put(6.0, 21.0);
+    }
+
+    public static final InterpolatingDoubleTreeMap distanceToAngleFeed = new InterpolatingDoubleTreeMap();
+    static 
+    {
+		distanceToAngleFeed.put(0.0, 0.0);
+        distanceToAngleFeed.put(20.0, 28.0);
     }
 
 
     //RPM ranges each with their own angle LUT
     public static final InterpolatingDoubleTreeMap[] angleLookupTables = {distanceToAngle1, distanceToAngle2, distanceToAngle3};
-    public static final double[] RPMRanges = {3800, 4200, 4500};
-    public static final double[] rangeDistanceThresholds = {2.83, 4.18, 5.5};
+    public static final double[] RPMRanges = {3900, 4300, 4500};
+    public static final double feedRPM = 4200;
+    public static final double[] rangeDistanceThresholds = {2.53, 3.77, 6.0};
     public static final double distanceThres = 0.1;
 
-    public static final double idleSpeedRPM = 0.0;
+    public static final double idleSpeedSpeed = 0.1;
+    public static final double idleFeedSpeed = -0.05;
 
     public static final double RPMTolerance = 75;
+    public static final double angleTolerance = 0.5;
 }

@@ -31,7 +31,7 @@ public class IntakeConstants {
 
     public static final Slot2Configs pivotOscillateConfigs= new Slot2Configs()
         .withGravityType(GravityTypeValue.Arm_Cosine)
-        .withKP(1)
+        .withKP(0.7)
         .withKI(0)
         .withKD(0)
         .withKG(0.0035);
@@ -49,8 +49,10 @@ public class IntakeConstants {
     public static final double gearRatio = 62.1176470588; //(22/17)*48
     public static final double pivotUpPosition = 98;
     public static final double pivotDownPosition = -13.5;
-    public static final double pivotOscillateUpPosition = 65;
+    public static final double pivotOscillateUpPosition = 83;
     public static final double pivotOscillateDownPosition = 10;
+
+    public static final double pivotOscillateBetween = 0.5;
 
     public static final ControlRequest intakeRunControl = new VelocityVoltage(targetRPS).withSlot(0);
 }

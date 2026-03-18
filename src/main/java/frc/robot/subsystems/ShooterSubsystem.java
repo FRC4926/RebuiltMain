@@ -13,12 +13,14 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.constants.DriveConstants;
@@ -90,9 +92,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     
     public void shooterIdle(){
-        setShooterRPMManual(ShooterConstants.idleSpeedRPM);
-        feederMotor.setControl(new DutyCycleOut(0));
-        hoodMotor.setControl(new DutyCycleOut(0));
+        shooterMotor1.set(ShooterConstants.idleSpeedSpeed);
+        feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedSpeed));
     }
 
     public void setShooterRPMManual(double RPM){
@@ -103,6 +104,7 @@ public class ShooterSubsystem extends SubsystemBase {
         }
         shooterMotor1.setControl(new VelocityVoltage(RPM/60.0).withSlot(0));
     }    
+    
     public double getRotRate() {
         SwerveDriveState state = RobotContainer.drivetrain.getState();
         Pose2d effectiveHubPose = lookupTableUtil.getEffectiveHubPose();
@@ -202,25 +204,21 @@ public class ShooterSubsystem extends SubsystemBase {
         return hoodMotor.getClosedLoopOutput().getValueAsDouble();
     }
 
-    public boolean shouldUpdateShooter()
-    {
-        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
-            return RobotContainer.drivetrain.getState().Pose.getX() > (FieldConstants.fieldLength - FieldConstants.allianceZoneLine);
-        } else
-        {
-            return RobotContainer.drivetrain.getState().Pose.getX() < FieldConstants.allianceZoneLine;
-        }
-    
-    }
+
 
     public double getRPMError()
     {
         return Math.abs(lookupTableUtil.getTargetRPM() - getShooterAverageRPM());
     }
 
-    public boolean RPMWithinTolerance()
+    public double getAngleError()
     {
-        return getRPMError() < ShooterConstants.RPMTolerance;
+        return Math.abs(lookupTableUtil.getHoodAngle() - getHoodAngleDegrees());
+    }
+
+    public boolean canShoot()
+    {
+        return getRPMError() < ShooterConstants.RPMTolerance & getAngleError() < ShooterConstants.angleTolerance;
     }
 
     public void setFeedEffort(double effort)
@@ -228,9 +226,33 @@ public class ShooterSubsystem extends SubsystemBase {
         feederMotor.set(effort);
     }
 
+    public void shoot()
+    {  
+        updateRPM();
+        if (canShoot())
+        {
+            setFeedEffort(ShooterConstants.feederEffort);
+        } else
+        {
+            setFeedEffort(-0.2);
+        }
+    }
+
+    public Command shootCommand()
+    {
+        return run(this::shoot);
+    }
+
+            
+    public Command autonShootCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive, HopperSubsystem hopper) {
+         return drivetrain.snapToHubAutonCommand(drive).until(() -> drivetrain.atSnapTarget())
+        .andThen(Commands.parallel(shootCommand(), hopper.hopperAutonCommand()).withTimeout(3))
+        .andThen(shooterIdleCommand()).andThen(hopper.zeroEffortCommand());
+    }
+
     @Override
     public void periodic() {
-        lookupTableUtil.updateEffectiveHub();
+        lookupTableUtil.updateEffectiveDistance();
         lookupTableUtil.updateCurrentRange();
 
         // double targetRPM = SmartDashboard.getNumber("Target RPM", 0); //40000.0
@@ -239,7 +261,6 @@ public class ShooterSubsystem extends SubsystemBase {
         // setHoodAngleDegrees(SmartDashboard.getNumber("Target Angle", 0)); //17.2
 
         updateAngle();
-        updateRPM();
 
         // if (RobotContainer.driverController.b().getAsBoolean() || RobotContainer.driverController.a().getAsBoolean() || RobotContainer.driverController.x().getAsBoolean()) {
         //     setShooterRPMManual(4000);

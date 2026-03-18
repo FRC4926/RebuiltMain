@@ -46,7 +46,7 @@ public class Telemetry {
 
     /* Robot swerve drive state */
     private final NetworkTable driveStateTable = inst.getTable("DriveState");
-    private final NetworkTable translatedPoseTable = inst.getTable("Translated Poses");
+    // private final NetworkTable translatedPoseTable = inst.getTable("Translated Poses");
     private final StructPublisher<Pose2d> drivePose = driveStateTable.getStructTopic("Pose", Pose2d.struct).publish();
     private final StructPublisher<ChassisSpeeds> driveSpeeds = driveStateTable.getStructTopic("Speeds", ChassisSpeeds.struct).publish();
     private final StructArrayPublisher<SwerveModuleState> driveModuleStates = driveStateTable.getStructArrayTopic("ModuleStates", SwerveModuleState.struct).publish();
@@ -98,12 +98,12 @@ public class Telemetry {
         driveModulePositions.set(state.ModulePositions);
         driveTimestamp.set(state.Timestamp);
         driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
-        var robotPose3D = new Pose3d(state.Pose);
-        for (CameraWrapperConstants constant : VisionConstants.camConstants) {
-            var translatedPosePublisher = translatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
-            translatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera()));
-            translatedPosePublisher.close();
-        }
+        // var robotPose3D = new Pose3d(state.Pose);
+        // for (CameraWrapperConstants constant : VisionConstants.camConstants) {
+        //     var translatedPosePublisher = translatedPoseTable.getStructTopic(constant.name(), Pose3d.struct).publish();
+        //     translatedPosePublisher.accept(robotPose3D.transformBy(constant.robotToCamera()));
+        //     translatedPosePublisher.close();
+        // }
         
 
         /* Also write to log file */

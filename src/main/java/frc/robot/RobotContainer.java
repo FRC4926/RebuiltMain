@@ -8,11 +8,13 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -21,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.constants.DriveConstants;
+import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.HopperSubsystem;
@@ -98,8 +101,8 @@ public class RobotContainer {
             )
         );
 
-        // shooterSubsystem.setDefaultCommand(shooterSubsystem.shooterIdleCommand());
-        // hopperSubsystem.setDefaultCommand(hopperSubsystem.positiveEffortCommand());
+        // shooterSubsystem.setDefaultCommand(Commands.run(shooterSubsystem::shooterIdleCommand, shooterSubsystem));
+        hopperSubsystem.setDefaultCommand(Commands.run(hopperSubsystem::zeroEffortCommand, hopperSubsystem));
         // intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
         visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
@@ -110,29 +113,22 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        driverController.leftBumper().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));//.alongWith(shooterSubsystem.updateShooterCommand()));
-        // driverController.a().whileTrue(detectionSubsystem.objectTrackCommand(drivetrain, relativeDrive));
         
-        // driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
-
-        driverController.leftTrigger().whileTrue(
-            hopperSubsystem.positiveEffortCommand()
-            .andThen(new InstantCommand(() -> shooterSubsystem.setFeedEffort(-0.2)))
-
-            .andThen(new WaitUntilCommand(() -> shooterSubsystem.RPMWithinTolerance()))
-            .andThen(new InstantCommand(() -> shooterSubsystem.updateFeeder()))
-        );    
+        driverController.leftTrigger().whileTrue(shoot());
+        driverController.leftTrigger().onFalse(
+            hopperSubsystem.zeroEffortCommand()
+            .andThen(intakeSubsystem.pivotUpCommand())
+            .andThen(intakeSubsystem.zeroIntake())
+            .alongWith(shooterSubsystem.shooterIdleCommand()));
         
 
-        driverController.leftTrigger().onFalse(new InstantCommand(() -> shooterSubsystem.setFeedEffort(0.0)).alongWith(hopperSubsystem.zeroVelocity()));
-
-        driverController.rightTrigger().onTrue(intakeSubsystem.intakeRunCommand());
+        
+        driverController.rightTrigger().onTrue(intakeSubsystem.intakeRunCommand().andThen(intakeSubsystem.pivotDownCommand()));
         driverController.rightTrigger().onFalse(intakeSubsystem.zeroIntake());
 
-        // driverController.x().whileTrue(new RepeatCommand(intakeSubsystem.oscillatePivotCommand()));
-        
-        driverController.y().onTrue(intakeSubsystem.pivotUpCommand());
-        driverController.x().onTrue(intakeSubsystem.pivotDownCommand());
+        driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
+
+        driverController.a().onTrue(new InstantCommand(() -> intakeSubsystem.pivotMotor.setPosition(0)));
 
 
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
@@ -156,6 +152,20 @@ public class RobotContainer {
         // driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        // NamedCommands.registerCommand("Shooting", shooterSubsystem.autonShootCommand(drivetrain, drive, hopperSubsystem));
+        // NamedCommands.registerCommand("IntakeRun", intakeSubsystem.autonIntakeCommand(drivetrain, drive));
+        // NamedCommands.registerCommand("IntakePivotUp", intakeSubsystem.autonPivotUpCommand(drivetrain, drive));
+        // NamedCommands.registerCommand("IntakePivotDown", intakeSubsystem.autonPivotDownCommand(drivetrain, drive));
+    }
+
+    private Command shoot()
+    {
+        return hopperSubsystem.positiveEffortCommand()
+            .andThen(drivetrain.snapToHubCommandEnd(drive))
+            .andThen(Commands.parallel(
+                shooterSubsystem.shootCommand(), 
+                Commands.sequence(new WaitCommand(1.0), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
     }
 
     public Command getAutonomousCommand() {

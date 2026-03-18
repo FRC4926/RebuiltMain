@@ -42,6 +42,7 @@ import frc.robot.constants.AutonConstants;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.VisionConstants;
+import frc.robot.util.LoggerUtil;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -69,6 +70,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
     private static RobotConfig config;
+
+    private LoggerUtil logger = new LoggerUtil("Drive Subsystem");
+
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -271,6 +275,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command applyRequestOnce(Supplier<SwerveRequest> request) {
         return runOnce(() -> this.setControl(request.get()));
     }
+    public boolean atSnapTarget() {
+        return Math.abs(DriveConstants.snapToHubPID.getError())<DriveConstants.snapToHubRotationTolerance;
+    }
 
     /**
      * Runs the SysId Quasistatic test in the given direction for the routine
@@ -301,7 +308,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("DISTANCE", distanceBetween(getState().Pose, RobotContainer.shooterSubsystem.lookupTableUtil.getUnmodifiedHubPose()));
+        logger.put("DISTANCE", distanceBetween(getState().Pose, RobotContainer.shooterSubsystem.lookupTableUtil.getUnmodifiedHubPose()));
+        logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble()*Math.PI/180.0);
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -336,7 +344,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.applyRequest(() -> snapToHubStatic(drive, x, y));
     }
 
-    public Command snapToHuAutonCommand(FieldCentric drive) {
+    public Command snapToHubCommandEnd(FieldCentric drive) {
+        
+        return this.applyRequest(() -> snapToHubStatic(drive)).until(() -> atSnapTarget());
+    }
+
+
+    public Command snapToHubAutonCommand(FieldCentric drive) {
         
         return this.applyRequest(() -> snapToHubStatic(drive));
     }

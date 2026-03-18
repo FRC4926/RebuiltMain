@@ -90,7 +90,7 @@ public class HopperSubsystem extends SubsystemBase {
         return runOnce(this::negativeEffort);
     }
 
-    public Command zeroVelocity(){
+    public Command zeroEffortCommand(){
         return runOnce(this::setVelocityZero);
     }
 
@@ -105,7 +105,9 @@ public class HopperSubsystem extends SubsystemBase {
     public double getStatorCurrentMotorRight() {
         return hopperMotorRight.getStatorCurrent().getValueAsDouble();
     }
-
+    public Command hopperAutonCommand(){
+        return positiveEffortCommand();
+    }
     @Override
     public void periodic() {
         // if (RobotContainer.driverController.a().getAsBoolean()) {
