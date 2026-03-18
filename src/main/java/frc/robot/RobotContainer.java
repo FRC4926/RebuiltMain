@@ -106,7 +106,7 @@ public class RobotContainer {
         // intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
         visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
-        // Idle while the robot is disabled. This ensures the configured
+        // Idle while the robot is disabled. This ensures the configured 6-7
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
         RobotModeTriggers.disabled().whileTrue(
@@ -154,9 +154,10 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
 
         // NamedCommands.registerCommand("Shooting", shooterSubsystem.autonShootCommand(drivetrain, drive, hopperSubsystem));
-        // NamedCommands.registerCommand("IntakeRun", intakeSubsystem.autonIntakeCommand(drivetrain, drive));
-        // NamedCommands.registerCommand("IntakePivotUp", intakeSubsystem.autonPivotUpCommand(drivetrain, drive));
-        // NamedCommands.registerCommand("IntakePivotDown", intakeSubsystem.autonPivotDownCommand(drivetrain, drive));
+        NamedCommands.registerCommand("RunIntake", intakeSubsystem.intakeRunCommand());
+        NamedCommands.registerCommand("StopIntake", intakeSubsystem.zeroIntake());
+        NamedCommands.registerCommand("IntakeUp", intakeSubsystem.pivotUpCommand());
+        NamedCommands.registerCommand("IntakeDown", intakeSubsystem.pivotDownCommand());
     }
 
     private Command shoot()
@@ -172,3 +173,4 @@ public class RobotContainer {
         return autonChooser.getSelected();
     }
 }
+

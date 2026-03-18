@@ -210,15 +210,6 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotMotor.setControl(new PositionVoltage(rotationsFromDegrees(angle)).withSlot(2));
     }
 
-    public Command autonIntakeCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive){
-        return intakeRunCommand();
-    }
-    public Command autonPivotUpCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive){
-        return pivotUpCommand();
-    }
-    public Command autonPivotDownCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive){
-        return pivotDownCommand();
-    }
     @Override
     public void periodic() {
         // setPivotPosition(SmartDashboard.getNumber("Target Pivot Angle", 0.0));
