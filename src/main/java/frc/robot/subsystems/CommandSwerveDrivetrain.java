@@ -358,15 +358,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public Command snapToHubCommandEnd(FieldCentric drive, BooleanSupplier override) 
-    {
-        if (override.getAsBoolean())
-        {
-            return Commands.none();
-        }
-        else
-        {   
-            return this.applyRequest(() -> snapToHubStatic(drive)).until(() -> atSnapTarget());
-        }
+    {   
+        return defer(() -> {
+            if (override.getAsBoolean())
+            {
+                return Commands.none();
+            }
+            else
+            {   
+                return this.applyRequest(() -> snapToHubStatic(drive)).until(() -> atSnapTarget());
+            }
+        });
     }
 
 
