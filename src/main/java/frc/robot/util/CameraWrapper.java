@@ -142,7 +142,7 @@ public class CameraWrapper {
         currentPose = new Pose2d();
         if (!camera.isConnected())
         {
-            logger.put("Connected", false);
+            SmartDashboard.putBoolean(getName() + " Connected", false);
             // if (publishPose) {
             //     posePublisher.set(currentPose);
             // }
@@ -150,7 +150,7 @@ public class CameraWrapper {
             return;
         } else
         {
-            logger.put("Connected", true);
+            SmartDashboard.putBoolean(getName() + " Connected", true);
         }
         // if (unreadResults.size() <= 0){
         //     unreadResults.add(latestResult);
@@ -167,12 +167,18 @@ public class CameraWrapper {
             currentEst.ifPresent(
                 est -> {
                     // Change our trust in the measurement based on the tags we can see
-                    var translationDeviation = getEstimatedStandardDeviation(result.getTargets());
+                    double baseDeviation = getEstimatedStandardDeviationBase(result.getTargets());
+                    double translationDeviation = baseDeviation*VisionConstants.kalmanPositionStdDevCoeefficient;
+                    double rotDeviation = baseDeviation*VisionConstants.kalmanRotStdDevCoeefficient;
+
+                    logger.put("Translation STD DEV", translationDeviation);
+                    logger.put("Rot STD DEV", rotDeviation);
+
 
                     Matrix<N3, N1> estStdDevs = new Matrix<N3, N1>(Nat.N3(), Nat.N1(), new double[] {
                         translationDeviation, // x
                         translationDeviation, // y
-                        VisionConstants.kalmanRotationStdDev  // rotation
+                        rotDeviation  // rotation
                     });
 
                     currentPose = est.estimatedPose.toPose2d();
@@ -215,7 +221,7 @@ public class CameraWrapper {
         return camera;
     }
 
-    public double getEstimatedStandardDeviation(List<PhotonTrackedTarget> targets)
+    public double getEstimatedStandardDeviationBase(List<PhotonTrackedTarget> targets)
     {
         double totalDistance = 0;
         double totalTags = 0;
@@ -228,11 +234,11 @@ public class CameraWrapper {
 
 
         double avgDistance = totalDistance/totalTags;
-        double stdDev = VisionConstants.kalmanPositionStdDevCoeefficient
-            * Math.pow(avgDistance, 2)
+        double stdDevBase = 
+            Math.pow(avgDistance, 2)
             / totalTags
             * trustFactor;
-        logger.put("STD DEV", stdDev);
+
         logger.put("Total tags", totalTags);
 
         if (totalTags <= 0)
@@ -245,7 +251,7 @@ public class CameraWrapper {
         //     stdDev = stdDev/2.0;
         // }
 
-        return stdDev;
+        return stdDevBase;
     }
 
     @FunctionalInterface

@@ -30,7 +30,7 @@ public class LookupTableUtil {
         if (inAllianceZone())
             angle = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
         else
-            angle = ShooterConstants.distanceToAngleFeed.get(distanceToFeed);
+            angle = ShooterConstants.feedAngle;
         
         return angle;
     }

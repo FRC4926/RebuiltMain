@@ -133,11 +133,20 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command zeroIntake() {
         return runOnce(this::zeroVelocity);
     }
+
+    public Command clearIntake() {
+        return runOnce(this::zeroPivot);
+    }
+
     public void zeroVelocity(){
         intakeMotor1.setControl(new DutyCycleOut(0));
         // intakeMotor2.setControl(new DutyCycleOut(0));
-
     }
+
+    public void zeroPivot(){
+        pivotMotor.setControl(new DutyCycleOut(0));
+    }
+
     public void setPivotDownPosition() {
         pivotMotor.setControl(new PositionVoltage(rotationsFromDegrees(IntakeConstants.pivotDownPosition)).withSlot(0));
     }
@@ -208,6 +217,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void setOscillatePosition(double angle) {
         pivotMotor.setControl(new PositionVoltage(rotationsFromDegrees(angle)).withSlot(2));
+    }
+
+    public Command unJamIntakeCommand() {
+        return runOnce(() -> intakeMotor1.setControl(new DutyCycleOut(-IntakeConstants.intakeMotorEffort)));
     }
 
     @Override

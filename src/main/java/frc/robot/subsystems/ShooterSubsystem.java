@@ -108,7 +108,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public double getRotRate() {
         SwerveDriveState state = RobotContainer.drivetrain.getState();
         Pose2d effectiveHubPose = lookupTableUtil.getEffectiveHubPose();
-        double desiredX = effectiveHubPose.getX();
+        double desiredX = effectiveHubPose.getX() + getOffset();
         double desiredY = effectiveHubPose.getY();
         double currentX = state.Pose.getX();
         double currentY = state.Pose.getY();
@@ -117,6 +117,14 @@ public class ShooterSubsystem extends SubsystemBase {
         double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
         double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
         return rotRate;
+    }
+
+    public double getOffset() {
+        double offset = -0.0;
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+            offset = 0.0;
+        }
+        return offset;
     }
 
     public void updateShooter() {
@@ -250,6 +258,13 @@ public class ShooterSubsystem extends SubsystemBase {
         .andThen(shooterIdleCommand()).andThen(hopper.zeroEffortCommand());
     }
 
+    public Command unJamShooterCommand() {
+        return Commands.sequence(
+            runOnce(() -> shooterMotor1.setControl(new DutyCycleOut(-0.2))),
+            runOnce(() -> feederMotor.setControl(new DutyCycleOut(-0.6)))
+        );
+    }
+
     @Override
     public void periodic() {
         lookupTableUtil.updateEffectiveDistance();
@@ -298,6 +313,8 @@ public class ShooterSubsystem extends SubsystemBase {
         logger.put("Commanded Hood Angle", lookupTableUtil.getHoodAngle());
         logger.put("Commanded RPM", lookupTableUtil.getTargetRPM());
         logger.put("Current Range", lookupTableUtil.getCurrentRange());
+
+        logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
     }
 
 }

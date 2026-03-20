@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -36,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
 import frc.robot.constants.AutonConstants;
@@ -72,6 +74,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static RobotConfig config;
 
     private LoggerUtil logger = new LoggerUtil("Drive Subsystem");
+
+    public boolean overrideSnapToHub = false;
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -309,7 +313,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public void periodic() {
         logger.put("DISTANCE", distanceBetween(getState().Pose, RobotContainer.shooterSubsystem.lookupTableUtil.getUnmodifiedHubPose()));
-        logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble()*Math.PI/180.0);
+
+        logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
+        logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());
+
+        logger.put("Hub PID Error", DriveConstants.snapToHubPID.getError());
+
+        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone());
+
+        SmartDashboard.putBoolean("Manual Alignment", overrideSnapToHub);
+        
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -344,9 +357,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.applyRequest(() -> snapToHubStatic(drive, x, y));
     }
 
-    public Command snapToHubCommandEnd(FieldCentric drive) {
-        
-        return this.applyRequest(() -> snapToHubStatic(drive)).until(() -> atSnapTarget());
+    public Command snapToHubCommandEnd(FieldCentric drive, BooleanSupplier override) 
+    {
+        if (override.getAsBoolean())
+        {
+            return Commands.none();
+        }
+        else
+        {   
+            return this.applyRequest(() -> snapToHubStatic(drive)).until(() -> atSnapTarget());
+        }
     }
 
 
@@ -365,6 +385,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command clearOverride()
     {
         return new InstantCommand(() -> PPHolonomicDriveController.clearRotationFeedbackOverride());
+    }
+
+    public boolean getOverride()
+    {
+        return overrideSnapToHub;
+    }
+
+    public void toggleOverride()
+    {
+        overrideSnapToHub = !overrideSnapToHub;
+    }
+
+    public Command toggleOverrideCommand()
+    {
+        return new InstantCommand(() -> toggleOverride());
     }
 
     public RobotCentric zeroDrive(RobotCentric drive) {

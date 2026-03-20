@@ -19,14 +19,16 @@ public class VisionConstants {
             new Transform3d(new Translation3d(-0.32964297, 0.280335875, 0.532235), new Rotation3d(0,0.0, 165*Math.PI/180)), 1),
         new CameraWrapperConstants("BackRight",
             new Transform3d(new Translation3d(-0.32964297, -0.280335875, 0.532235), new Rotation3d(0,0.0, 195*Math.PI/180)), 1),
-        new CameraWrapperConstants("FrontRight",
-            new Transform3d(new Translation3d(-0.05190144, -0.17368266, 0.494284), new Rotation3d(0, 35*Math.PI/180, -15*Math.PI/180)), 1),
+        new CameraWrapperConstants("Arducam_OV9281_USB_Camera",
+            new Transform3d(new Translation3d(-0.05190144, -0.17368266, 0.494284), new Rotation3d(0, 30*Math.PI/180, -15*Math.PI/180)), 1),
          new CameraWrapperConstants("FrontLeft",
-            new Transform3d(new Translation3d(-0.05190144, 0.17368266, 0.494284), new Rotation3d(0, 35*Math.PI/180, 15*Math.PI/180)), 1)
+            new Transform3d(new Translation3d(-0.05190144, 0.17368266, 0.494284), new Rotation3d(0, 30*Math.PI/180, 15*Math.PI/180)), 1)
     };
 
     public static final double kalmanPositionStdDevCoeefficient = 0.3; //0.6
-    public static final double kalmanRotationStdDev = 0.99;
+    public static final double kalmanRotStdDevCoeefficient = 0.6; //0.6
+
+    // public static final double kalmanRotationStdDev = 0.99;
 
     public static final double maximumAmbiguity = 0.25; //0.25
 

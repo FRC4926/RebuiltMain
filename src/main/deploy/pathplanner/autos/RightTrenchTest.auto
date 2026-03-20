@@ -7,12 +7,6 @@
         {
           "type": "named",
           "data": {
-            "name": "PivotUp"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "StopIntake"
           }
         },
@@ -61,7 +55,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Right3"
+                  "pathName": "RightTrench3"
                 }
               },
               {
@@ -76,13 +70,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Right5"
+            "pathName": "RightTrench4"
           }
         },
         {

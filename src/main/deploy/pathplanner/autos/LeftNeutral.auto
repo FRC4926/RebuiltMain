@@ -5,9 +5,47 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Left1"
+            "name": "PivotUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopIntake"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Left1"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "RunIntake"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -29,7 +67,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "StopIntake"
                 }
               }
             ]

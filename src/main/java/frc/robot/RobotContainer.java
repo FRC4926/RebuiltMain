@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.constants.DriveConstants;
@@ -50,6 +51,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(DriveConstants.MaxSpeed); 
 
     public static final CommandXboxController driverController = new CommandXboxController(0);
+    public static final CommandJoystick operatorController = new CommandJoystick(1);
 
     public static SendableChooser<Command> autonChooser;
 
@@ -70,6 +72,12 @@ public class RobotContainer {
 
     public RobotContainer() 
     {
+        shooterSubsystem = new ShooterSubsystem();
+        hopperSubsystem = new HopperSubsystem();
+        intakeSubsystem = new IntakeSubsystem();
+        visionSubsystem = new VisionSubsystem();
+        // detectionSubsystem = new ObjectDetectionSubsytem();
+
         // new EventTrigger("PointToHub").onTrue(drivetrain.overrideRot());
         // new EventTrigger("PointToHub").onFalse(drivetrain.clearOverride());
 
@@ -77,15 +85,14 @@ public class RobotContainer {
         // NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
         // NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
 
+        NamedCommands.registerCommand("Shoot", autonShoot());
+        NamedCommands.registerCommand("ClearIntake", intakeSubsystem.clearIntake());
+        NamedCommands.registerCommand("RunIntake", intakeSubsystem.pivotDownCommand().andThen(intakeSubsystem.intakeRunCommand()));
+        NamedCommands.registerCommand("StopIntake", intakeSubsystem.zeroIntake());
+        NamedCommands.registerCommand("PivotUp", intakeSubsystem.pivotUpCommand());
+
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Autonomous", autonChooser);
-        
-        shooterSubsystem = new ShooterSubsystem();
-        hopperSubsystem = new HopperSubsystem();
-        intakeSubsystem = new IntakeSubsystem();
-        visionSubsystem = new VisionSubsystem();
-        // detectionSubsystem = new ObjectDetectionSubsytem();
-        
         configureBindings();
     }
 
@@ -115,11 +122,7 @@ public class RobotContainer {
 
         
         driverController.leftTrigger().whileTrue(shoot());
-        driverController.leftTrigger().onFalse(
-            hopperSubsystem.zeroEffortCommand()
-            .andThen(intakeSubsystem.pivotUpCommand())
-            .andThen(intakeSubsystem.zeroIntake())
-            .alongWith(shooterSubsystem.shooterIdleCommand()));
+        driverController.leftTrigger().onFalse(shooterDefault());
         
 
         
@@ -128,8 +131,17 @@ public class RobotContainer {
 
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
 
-        driverController.a().onTrue(new InstantCommand(() -> intakeSubsystem.pivotMotor.setPosition(0)));
 
+        operatorController.button(1).onTrue(shooterSubsystem.unJamShooterCommand());
+        operatorController.button(1).onFalse(shooterDefault());
+        
+        operatorController.button(2).onTrue(intakeSubsystem.unJamIntakeCommand());
+        operatorController.button(2).onFalse(intakeSubsystem.zeroIntake());
+
+        operatorController.button(3).onTrue(new InstantCommand(() -> intakeSubsystem.pivotMotor.setPosition(0)));
+        operatorController.button(4).onTrue(intakeSubsystem.pivotUpCommand());
+
+        operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
 
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
@@ -152,21 +164,31 @@ public class RobotContainer {
         // driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
-
-        // NamedCommands.registerCommand("Shooting", shooterSubsystem.autonShootCommand(drivetrain, drive, hopperSubsystem));
-        NamedCommands.registerCommand("RunIntake", intakeSubsystem.intakeRunCommand());
-        NamedCommands.registerCommand("StopIntake", intakeSubsystem.zeroIntake());
-        NamedCommands.registerCommand("IntakeUp", intakeSubsystem.pivotUpCommand());
-        NamedCommands.registerCommand("IntakeDown", intakeSubsystem.pivotDownCommand());
     }
 
     private Command shoot()
     {
         return hopperSubsystem.positiveEffortCommand()
-            .andThen(drivetrain.snapToHubCommandEnd(drive))
+            .andThen(drivetrain.snapToHubCommandEnd(drive, () -> drivetrain.getOverride()))
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
                 Commands.sequence(new WaitCommand(1.0), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
+    }
+
+    private Command autonShoot()
+    {
+        return hopperSubsystem.positiveEffortCommand()
+            .andThen(Commands.parallel(
+                shooterSubsystem.shootCommand(), 
+                Commands.sequence(new WaitCommand(1.0), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
+    }
+
+    public Command shooterDefault()
+    {
+        return hopperSubsystem.zeroEffortCommand()
+            .andThen(intakeSubsystem.pivotUpCommand())
+            .andThen(intakeSubsystem.zeroIntake())
+            .alongWith(shooterSubsystem.shooterIdleCommand());
     }
 
     public Command getAutonomousCommand() {
