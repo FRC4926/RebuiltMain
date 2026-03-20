@@ -12,7 +12,7 @@ public class IntakeConstants {
     public static final int intake2CanId = 15; //intakeLeft
     public static final int pivotCanId = 13;
 
-    public static final double intakeCurrentLimit = 40;
+    public static final double intakeCurrentLimit = 30;
     public static final double pivotCurrentLimit = 40;
     
     public static final Slot0Configs pivotDownPIDSlot0Configs = new Slot0Configs()
