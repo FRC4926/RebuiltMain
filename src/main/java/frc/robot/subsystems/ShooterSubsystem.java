@@ -48,6 +48,10 @@ public class ShooterSubsystem extends SubsystemBase {
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
         );
 
+        shooterMotor2.getConfigurator().apply(
+            new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)
+        );
+
         feederMotor.getConfigurator().apply(
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
         );
@@ -81,9 +85,11 @@ public class ShooterSubsystem extends SubsystemBase {
         hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
         shooterMotor1.getConfigurator().apply(ShooterConstants.shooterPIDConfig);
+        shooterMotor2.getConfigurator().apply(ShooterConstants.shooterPIDConfig);
+
         hoodMotor.getConfigurator().apply(ShooterConstants.hoodPIDConfig);
 
-        shooterMotor2.setControl(new Follower(ShooterConstants.shooterRightCanId, MotorAlignmentValue.Opposed));
+        // shooterMotor2.setControl(new Follower(ShooterConstants.shooterRightCanId, MotorAlignmentValue.Opposed));
         hoodMotor.setPosition(0);
 
         ParentDevice.resetSignalFrequenciesForAll(shooterMotor1, shooterMotor2);
@@ -93,6 +99,8 @@ public class ShooterSubsystem extends SubsystemBase {
     
     public void shooterIdle(){
         shooterMotor1.set(ShooterConstants.idleSpeedSpeed);
+        shooterMotor2.set(ShooterConstants.idleSpeedSpeed);
+
         feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedSpeed));
     }
 
@@ -100,9 +108,12 @@ public class ShooterSubsystem extends SubsystemBase {
         if (RPM < 150)
         {
             shooterMotor1.set(0.0);
+            shooterMotor2.set(0.0);
             return;
         }
         shooterMotor1.setControl(new VelocityVoltage(RPM/60.0).withSlot(0));
+        shooterMotor2.setControl(new VelocityVoltage(RPM/60.0).withSlot(0));
+
     }    
     
     public double getRotRate() {
@@ -251,6 +262,13 @@ public class ShooterSubsystem extends SubsystemBase {
         return run(this::shoot);
     }
 
+    public void unJamShooter()
+    {
+        shooterMotor1.setControl(new DutyCycleOut(-0.2));
+        shooterMotor2.setControl(new DutyCycleOut(-0.2));
+        feederMotor.setControl(new DutyCycleOut(-0.6));
+    }
+
             
     public Command autonShootCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive, HopperSubsystem hopper) {
          return drivetrain.snapToHubAutonCommand(drive).until(() -> drivetrain.atSnapTarget())
@@ -260,8 +278,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public Command unJamShooterCommand() {
         return Commands.sequence(
-            runOnce(() -> shooterMotor1.setControl(new DutyCycleOut(-0.2))),
-            runOnce(() -> feederMotor.setControl(new DutyCycleOut(-0.6)))
+            runOnce(() -> unJamShooter())
         );
     }
 
