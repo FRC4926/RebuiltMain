@@ -18,7 +18,7 @@ public class ShooterConstants {
 	    .withKV(0.1225);
 	    
     public static Slot0Configs hoodPIDConfig = new Slot0Configs()
-	    .withKP(60)
+	    .withKP(80)
 	    .withKI(1.5)
 	    .withKD(0)
 	    .withKG(0.4);
@@ -97,7 +97,7 @@ public class ShooterConstants {
     public static final double idleSpeedSpeed = 0.1;
     public static final double idleFeedSpeed = -0.05;
 
-    public static final double RPMTolerance = 75;
+    public static final double RPMTolerance = 80;
     public static final double angleTolerance = 0.5;
 
     public static final double timeTillOscillation = 2.0;
