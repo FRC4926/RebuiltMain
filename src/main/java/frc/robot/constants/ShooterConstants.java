@@ -87,7 +87,7 @@ public class ShooterConstants {
 
     //RPM ranges each with their own angle LUT
     public static final InterpolatingDoubleTreeMap[] angleLookupTables = {distanceToAngle1, distanceToAngle2, distanceToAngle3};
-    public static final double[] RPMRanges = {3850, 4350, 4500};
+    public static final double[] RPMRanges = {3750, 4250, 4500}; //3850, 4350
     public static final double feedRPM = 4200;
     public static final double[] rangeDistanceThresholds = {2.53, 3.77, 6.0};
     public static final double distanceThres = 0.1;

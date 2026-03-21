@@ -237,6 +237,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public boolean canShoot()
     {
+        updateRPM();
+        setFeedEffort(-0.2);
         return getRPMError() < ShooterConstants.RPMTolerance && getAngleError() < ShooterConstants.angleTolerance;
     }
 
@@ -248,18 +250,12 @@ public class ShooterSubsystem extends SubsystemBase {
     public void shoot()
     {  
         updateRPM();
-        if (canShoot())
-        {
-            setFeedEffort(ShooterConstants.feederEffort);
-        } else
-        {
-            setFeedEffort(-0.2);
-        }
+        setFeedEffort(ShooterConstants.feederEffort);
     }
 
     public Command shootCommand()
     {
-        return run(this::shoot);
+        return (Commands.idle().until(() -> canShoot())).andThen(run(this::shoot));
     }
 
     public void unJamShooter()
@@ -277,9 +273,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public Command unJamShooterCommand() {
-        return Commands.sequence(
-            runOnce(() -> unJamShooter())
-        );
+        return runOnce(this:: unJamShooter);
     }
 
     @Override
