@@ -145,6 +145,10 @@ public class RobotContainer {
 
         operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
 
+        operatorController.button(11).onTrue(shooterSubsystem.incrementMultiplier());
+        operatorController.button(12).onTrue(shooterSubsystem.decrementMultiplier());
+
+
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
         // new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());

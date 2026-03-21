@@ -313,7 +313,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        logger.put("DISTANCE", distanceBetween(getState().Pose, RobotContainer.shooterSubsystem.lookupTableUtil.getUnmodifiedHubPose()), true);
 
         logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
         logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());

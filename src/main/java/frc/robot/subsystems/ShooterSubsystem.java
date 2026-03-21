@@ -37,6 +37,8 @@ public class ShooterSubsystem extends SubsystemBase {
    
     LookupTableUtil lookupTableUtil = new LookupTableUtil();
 
+    public double multiplier = 1.0;
+
     private LoggerUtil logger = new LoggerUtil("Shooter Subsystem");
 
     public ShooterSubsystem() {
@@ -97,6 +99,14 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }
     
+    public Command incrementMultiplier() {
+        return runOnce(()->multiplier+=.1);
+    }
+
+    public Command decrementMultiplier() {
+        return runOnce(()->multiplier-=.1);
+    }
+
     public void shooterIdle(){
         shooterMotor1.set(ShooterConstants.idleSpeedSpeed);
         shooterMotor2.set(ShooterConstants.idleSpeedSpeed);
@@ -278,7 +288,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        lookupTableUtil.updateEffectiveDistance();
+        lookupTableUtil.updateEffectiveDistance(multiplier);
         lookupTableUtil.updateCurrentRange();
 
         // double targetRPM = SmartDashboard.getNumber("Target RPM", 0); //40000.0
@@ -326,6 +336,9 @@ public class ShooterSubsystem extends SubsystemBase {
         logger.put("Current Range", lookupTableUtil.getCurrentRange(), true);
 
         logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
+        logger.put("Multiplier", multiplier, true);
+        logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
+
     }
 
 }
