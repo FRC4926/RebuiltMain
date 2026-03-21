@@ -305,14 +305,14 @@ public class ShooterSubsystem extends SubsystemBase {
 
         logger.put("Feed Stator Current", getFeedMotorStatorCurrent());
 
-        logger.put("Hood Angle (deg)", getHoodAngleDegrees());
+        logger.put("Hood Angle (deg)", getHoodAngleDegrees(), true);
         logger.put("Hood Stator Current", getHoodMotorStatorCurrent());
         logger.put("Hood Voltage", getHoodMotorVoltage());
 
 
         logger.put("Commanded Hood Angle", lookupTableUtil.getHoodAngle());
         logger.put("Commanded RPM", lookupTableUtil.getTargetRPM());
-        logger.put("Current Range", lookupTableUtil.getCurrentRange());
+        logger.put("Current Range", lookupTableUtil.getCurrentRange(), true);
 
         logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
     }

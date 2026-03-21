@@ -312,14 +312,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        logger.put("DISTANCE", distanceBetween(getState().Pose, RobotContainer.shooterSubsystem.lookupTableUtil.getUnmodifiedHubPose()));
+        logger.put("DISTANCE", distanceBetween(getState().Pose, RobotContainer.shooterSubsystem.lookupTableUtil.getUnmodifiedHubPose()), true);
 
         logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
         logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());
 
         logger.put("Hub PID Error", DriveConstants.snapToHubPID.getError());
 
-        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone());
+        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone(), true);
 
         SmartDashboard.putBoolean("Manual Alignment", overrideSnapToHub);
         
@@ -360,7 +360,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command snapToHubCommandEnd(FieldCentric drive, BooleanSupplier override) 
     {   
         return defer(() -> {
-            if (override.getAsBoolean())
+            if (override.getAsBoolean() || !RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone())
             {
                 return Commands.none();
             }
