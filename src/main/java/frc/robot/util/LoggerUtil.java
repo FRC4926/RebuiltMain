@@ -14,7 +14,7 @@ import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 
 public class LoggerUtil {
-    public static final boolean globalDebugMode = false;
+    public static final boolean globalDebugMode = true;
     boolean debugMode;
     String name;
     NetworkTable table;

@@ -21,7 +21,7 @@ public class LookupTableUtil {
 
     public LookupTableUtil()
     {
-        SmartDashboard.putNumber("Sim distance", 0.0);
+        // SmartDashboard.putNumber("Sim distance", 0.0);
     }
 
     public double getHoodAngle()

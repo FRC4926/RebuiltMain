@@ -321,7 +321,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone(), true);
 
-        SmartDashboard.putBoolean("Manual Alignment", overrideSnapToHub);
+        logger.put("Manual Alignment", overrideSnapToHub, true);
         
         /*
          * Periodically try to apply the operator perspective.

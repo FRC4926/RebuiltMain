@@ -142,7 +142,7 @@ public class CameraWrapper {
         currentPose = new Pose2d();
         if (!camera.isConnected())
         {
-            SmartDashboard.putBoolean(getName() + " Connected", false);
+            logger.put(getName() + " Connected", false, true);
             // if (publishPose) {
             //     posePublisher.set(currentPose);
             // }
@@ -150,7 +150,7 @@ public class CameraWrapper {
             return;
         } else
         {
-            SmartDashboard.putBoolean(getName() + " Connected", true);
+            logger.put(getName() + " Connected", true, true);
         }
         // if (unreadResults.size() <= 0){
         //     unreadResults.add(latestResult);

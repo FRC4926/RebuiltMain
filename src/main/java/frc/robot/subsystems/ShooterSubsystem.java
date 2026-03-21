@@ -41,8 +41,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public ShooterSubsystem() {
 
-        SmartDashboard.putNumber("Target RPM", 0); //4000
-        SmartDashboard.putNumber("Target Angle", 0);
+        // SmartDashboard.putNumber("Target RPM", 0); //4000
+        // SmartDashboard.putNumber("Target Angle", 0);
 
         shooterMotor1.getConfigurator().apply(
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
