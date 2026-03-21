@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.ShooterConstants;
@@ -147,6 +148,8 @@ public class RobotContainer {
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
         // new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
+
+        new Trigger(drivetrain::getTeleop).onTrue(shooterDefault());
 
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))

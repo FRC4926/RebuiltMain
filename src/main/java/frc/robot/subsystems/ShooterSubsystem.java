@@ -237,7 +237,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public boolean canShoot()
     {
-        return getRPMError() < ShooterConstants.RPMTolerance & getAngleError() < ShooterConstants.angleTolerance;
+        return getRPMError() < ShooterConstants.RPMTolerance && getAngleError() < ShooterConstants.angleTolerance;
     }
 
     public void setFeedEffort(double effort)
