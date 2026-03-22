@@ -110,7 +110,7 @@ public class RobotContainer {
             )
         );
 
-        shooterSubsystem.setDefaultCommand(Commands.run(shooterSubsystem::shooterIdleCommand, shooterSubsystem));
+        // shooterSubsystem.setDefaultCommand(Commands.run(shooterSubsystem::shooterIdleCommand, shooterSubsystem));
         hopperSubsystem.setDefaultCommand(Commands.run(hopperSubsystem::zeroEffortCommand, hopperSubsystem));
         // intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
         visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
@@ -148,6 +148,9 @@ public class RobotContainer {
         operatorController.button(11).onTrue(shooterSubsystem.incrementMultiplier());
         operatorController.button(12).onTrue(shooterSubsystem.decrementMultiplier());
 
+        driverController.leftBumper().onTrue(manualShoot());
+        driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)).andThen(shooterDefault()));
+
 
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
@@ -180,6 +183,13 @@ public class RobotContainer {
             .andThen(drivetrain.snapToHubCommandEnd(drive, () -> drivetrain.getOverride()))
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
+    }
+    private Command manualShoot(){
+        return hopperSubsystem.positiveEffortCommand()
+            .andThen(drivetrain.snapToHubCommandEnd(drive, () -> true))
+            .andThen(Commands.parallel(
+                shooterSubsystem.manualShotCommand(), 
                 Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
     }
 

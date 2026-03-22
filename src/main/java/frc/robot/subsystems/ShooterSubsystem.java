@@ -41,6 +41,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     private LoggerUtil logger = new LoggerUtil("Shooter Subsystem");
 
+    private boolean manualShot = false;
+
     public ShooterSubsystem() {
 
         // SmartDashboard.putNumber("Target RPM", 0); //4000
@@ -160,6 +162,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void updateAngle() {
+        if (manualShot)
+            return;
         setHoodAngleDegrees(lookupTableUtil.getHoodAngle());
     }
 
@@ -234,7 +238,6 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
 
-
     public double getRPMError()
     {
         return Math.abs(lookupTableUtil.getTargetRPM() - getShooterAverageRPM());
@@ -284,6 +287,29 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public Command unJamShooterCommand() {
         return runOnce(this:: unJamShooter);
+    }
+
+    public void manualShot()
+    {
+        manualShot = true;
+        setHoodAngleDegrees(ShooterConstants.manualAngle);
+        setShooterRPMManual(ShooterConstants.manualRPM);
+        setFeedEffort(-0.2);
+    }
+
+    public boolean canShootManual()
+    {
+        return Math.abs(ShooterConstants.manualRPM - getShooterAverageRPM()) < ShooterConstants.RPMTolerance && Math.abs(ShooterConstants.manualAngle - getHoodAngleDegrees()) < ShooterConstants.angleTolerance;
+    }
+
+    public Command manualShotCommand()
+    {
+        return runOnce(this::manualShot).andThen(Commands.idle().until(() -> canShootManual())).andThen(run(() -> setFeedEffort(ShooterConstants.feederEffort)));
+    }
+
+    public void setManual(boolean val)
+    {
+        manualShot = val;
     }
 
     @Override
@@ -339,6 +365,11 @@ public class ShooterSubsystem extends SubsystemBase {
         logger.put("Multiplier", multiplier, true);
         logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
 
+    }
+
+    public Command removeMultiplier() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'removeMultiplier'");
     }
 
 }
