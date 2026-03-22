@@ -61,9 +61,9 @@ public class TunerConstants {
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(Amps.of(100))
+                .withStatorCurrentLimit(Amps.of(90))
                 .withStatorCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(Amps.of(50))
+                .withSupplyCurrentLimit(Amps.of(40))
                 .withSupplyCurrentLimitEnable(true)
         );
 
