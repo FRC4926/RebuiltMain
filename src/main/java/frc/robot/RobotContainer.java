@@ -23,8 +23,10 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.IntakeConstants;
+import frc.robot.constants.ShooterConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.HopperSubsystem;
@@ -143,9 +145,18 @@ public class RobotContainer {
 
         operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
 
+        operatorController.button(11).onTrue(shooterSubsystem.incrementMultiplier());
+        operatorController.button(12).onTrue(shooterSubsystem.decrementMultiplier());
+
+        driverController.leftBumper().onTrue(manualShoot());
+        driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)).andThen(shooterDefault()));
+
+
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
         // new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
+
+        new Trigger(drivetrain::getTeleop).onTrue(shooterDefault());
 
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
@@ -172,7 +183,14 @@ public class RobotContainer {
             .andThen(drivetrain.snapToHubCommandEnd(drive, () -> drivetrain.getOverride()))
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
-                Commands.sequence(new WaitCommand(1.0), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
+    }
+    private Command manualShoot(){
+        return hopperSubsystem.positiveEffortCommand()
+            .andThen(drivetrain.snapToHubCommandEnd(drive, () -> true))
+            .andThen(Commands.parallel(
+                shooterSubsystem.manualShotCommand(), 
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
     }
 
     private Command autonShoot()
@@ -180,13 +198,12 @@ public class RobotContainer {
         return hopperSubsystem.positiveEffortCommand()
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
-                Commands.sequence(new WaitCommand(1.0), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
     }
 
-    public Command shooterDefault()
+    public static Command shooterDefault()
     {
         return hopperSubsystem.zeroEffortCommand()
-            .andThen(intakeSubsystem.pivotUpCommand())
             .andThen(intakeSubsystem.zeroIntake())
             .alongWith(shooterSubsystem.shooterIdleCommand());
     }

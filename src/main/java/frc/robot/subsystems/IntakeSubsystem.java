@@ -230,10 +230,10 @@ public class IntakeSubsystem extends SubsystemBase {
         logger.put("Intake 1 RPM", getIntake1RPM());
         logger.put("Intake 2 RPM", getIntake2RPM());
         logger.put("Intake Average RPM", getIntakeAverageRPM());
-        logger.put("Pivot Angle", getPivotAngle());
+        logger.put("Pivot Angle", getPivotAngle(), true);
         logger.put("Pivot Angle Actual", pivotMotor.getPosition().getValueAsDouble());
-        logger.put("Intake 1 Stator Current", getStatorIntake1Current());
-        logger.put("Intake 2 Stator Current", getStatorIntake2Current());
+        logger.put("Intake 1 Stator Current", getStatorIntake1Current(), true);
+        logger.put("Intake 2 Stator Current", getStatorIntake2Current(), true);
         // logger.put("Intake 1 Supply Current", getStatorIntake1Current());
         // logger.put("Intake 2 Supply Current", getStatorIntake2Current());
         logger.put("Pivot Stator Current", getPivotCurrent());

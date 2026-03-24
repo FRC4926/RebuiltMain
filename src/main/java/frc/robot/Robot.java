@@ -38,7 +38,10 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit()
     {
-        
+        for (int i = 0 ; i < RobotContainer.drivetrain.getModules().length; i++)
+        {
+            ParentDevice.optimizeBusUtilizationForAll(RobotContainer.drivetrain.getModule(i).getDriveMotor(), RobotContainer.drivetrain.getModule(i).getSteerMotor());
+        }
     }
 
     @Override
@@ -73,14 +76,14 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        RobotContainer.drivetrain.setTeleop(true);
+
+
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
 
-        for (int i = 0 ; i < RobotContainer.drivetrain.getModules().length; i++)
-        {
-            ParentDevice.optimizeBusUtilizationForAll(RobotContainer.drivetrain.getModule(i).getDriveMotor(), RobotContainer.drivetrain.getModule(i).getSteerMotor());
-        }
+
     }
 
     @Override

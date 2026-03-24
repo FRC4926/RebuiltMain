@@ -12,7 +12,7 @@ public class IntakeConstants {
     public static final int intake2CanId = 15; //intakeLeft
     public static final int pivotCanId = 13;
 
-    public static final double intakeCurrentLimit = 30;
+    public static final double intakeCurrentLimit = 50;
     public static final double pivotCurrentLimit = 40;
     
     public static final Slot0Configs pivotDownPIDSlot0Configs = new Slot0Configs()
@@ -44,7 +44,7 @@ public class IntakeConstants {
         .withKS(0)
         .withKV(0.108);
 
-    public static final double targetRPS = 2800.0/60.0;
+    public static final double targetRPS = 3200.0/60.0;
     public static final double intakeMotorEffort = 1;
     public static final double gearRatio = 62.1176470588; //(22/17)*48
     public static final double pivotUpPosition = 98;

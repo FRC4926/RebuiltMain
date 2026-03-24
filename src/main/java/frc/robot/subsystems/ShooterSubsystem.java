@@ -37,15 +37,23 @@ public class ShooterSubsystem extends SubsystemBase {
    
     LookupTableUtil lookupTableUtil = new LookupTableUtil();
 
+    public double multiplier = 1.0;
+
     private LoggerUtil logger = new LoggerUtil("Shooter Subsystem");
+
+    private boolean manualShot = false;
 
     public ShooterSubsystem() {
 
-        SmartDashboard.putNumber("Target RPM", 0); //4000
-        SmartDashboard.putNumber("Target Angle", 0);
+        // SmartDashboard.putNumber("Target RPM", 0); //4000
+        // SmartDashboard.putNumber("Target Angle", 0);
 
         shooterMotor1.getConfigurator().apply(
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
+        );
+
+        shooterMotor2.getConfigurator().apply(
+            new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)
         );
 
         feederMotor.getConfigurator().apply(
@@ -81,9 +89,11 @@ public class ShooterSubsystem extends SubsystemBase {
         hoodMotor.setNeutralMode(NeutralModeValue.Brake);
 
         shooterMotor1.getConfigurator().apply(ShooterConstants.shooterPIDConfig);
+        shooterMotor2.getConfigurator().apply(ShooterConstants.shooterPIDConfig);
+
         hoodMotor.getConfigurator().apply(ShooterConstants.hoodPIDConfig);
 
-        shooterMotor2.setControl(new Follower(ShooterConstants.shooterRightCanId, MotorAlignmentValue.Opposed));
+        // shooterMotor2.setControl(new Follower(ShooterConstants.shooterRightCanId, MotorAlignmentValue.Opposed));
         hoodMotor.setPosition(0);
 
         ParentDevice.resetSignalFrequenciesForAll(shooterMotor1, shooterMotor2);
@@ -91,8 +101,18 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }
     
+    public Command incrementMultiplier() {
+        return runOnce(()->multiplier+=.1);
+    }
+
+    public Command decrementMultiplier() {
+        return runOnce(()->multiplier-=.1);
+    }
+
     public void shooterIdle(){
         shooterMotor1.set(ShooterConstants.idleSpeedSpeed);
+        shooterMotor2.set(ShooterConstants.idleSpeedSpeed);
+
         feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedSpeed));
     }
 
@@ -100,9 +120,12 @@ public class ShooterSubsystem extends SubsystemBase {
         if (RPM < 150)
         {
             shooterMotor1.set(0.0);
+            shooterMotor2.set(0.0);
             return;
         }
         shooterMotor1.setControl(new VelocityVoltage(RPM/60.0).withSlot(0));
+        shooterMotor2.setControl(new VelocityVoltage(RPM/60.0).withSlot(0));
+
     }    
     
     public double getRotRate() {
@@ -139,6 +162,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void updateAngle() {
+        if (manualShot)
+            return;
         setHoodAngleDegrees(lookupTableUtil.getHoodAngle());
     }
 
@@ -213,7 +238,6 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
 
-
     public double getRPMError()
     {
         return Math.abs(lookupTableUtil.getTargetRPM() - getShooterAverageRPM());
@@ -226,7 +250,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public boolean canShoot()
     {
-        return getRPMError() < ShooterConstants.RPMTolerance & getAngleError() < ShooterConstants.angleTolerance;
+        updateRPM();
+        setFeedEffort(-0.2);
+        return getRPMError() < ShooterConstants.RPMTolerance && getAngleError() < ShooterConstants.angleTolerance;
     }
 
     public void setFeedEffort(double effort)
@@ -237,18 +263,19 @@ public class ShooterSubsystem extends SubsystemBase {
     public void shoot()
     {  
         updateRPM();
-        if (canShoot())
-        {
-            setFeedEffort(ShooterConstants.feederEffort);
-        } else
-        {
-            setFeedEffort(-0.2);
-        }
+        setFeedEffort(ShooterConstants.feederEffort);
     }
 
     public Command shootCommand()
     {
-        return run(this::shoot);
+        return (Commands.idle().until(() -> canShoot())).andThen(run(this::shoot));
+    }
+
+    public void unJamShooter()
+    {
+        shooterMotor1.setControl(new DutyCycleOut(-0.2));
+        shooterMotor2.setControl(new DutyCycleOut(-0.2));
+        feederMotor.setControl(new DutyCycleOut(-0.6));
     }
 
             
@@ -259,15 +286,35 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public Command unJamShooterCommand() {
-        return Commands.sequence(
-            runOnce(() -> shooterMotor1.setControl(new DutyCycleOut(-0.2))),
-            runOnce(() -> feederMotor.setControl(new DutyCycleOut(-0.6)))
-        );
+        return runOnce(this:: unJamShooter);
+    }
+
+    public void manualShot()
+    {
+        manualShot = true;
+        setHoodAngleDegrees(ShooterConstants.manualAngle);
+        setShooterRPMManual(ShooterConstants.manualRPM);
+        setFeedEffort(-0.2);
+    }
+
+    public boolean canShootManual()
+    {
+        return Math.abs(ShooterConstants.manualRPM - getShooterAverageRPM()) < ShooterConstants.RPMTolerance && Math.abs(ShooterConstants.manualAngle - getHoodAngleDegrees()) < ShooterConstants.angleTolerance;
+    }
+
+    public Command manualShotCommand()
+    {
+        return runOnce(this::manualShot).andThen(Commands.idle().until(() -> canShootManual())).andThen(run(() -> setFeedEffort(ShooterConstants.feederEffort)));
+    }
+
+    public void setManual(boolean val)
+    {
+        manualShot = val;
     }
 
     @Override
     public void periodic() {
-        lookupTableUtil.updateEffectiveDistance();
+        lookupTableUtil.updateEffectiveDistance(multiplier);
         lookupTableUtil.updateCurrentRange();
 
         // double targetRPM = SmartDashboard.getNumber("Target RPM", 0); //40000.0
@@ -305,16 +352,24 @@ public class ShooterSubsystem extends SubsystemBase {
 
         logger.put("Feed Stator Current", getFeedMotorStatorCurrent());
 
-        logger.put("Hood Angle (deg)", getHoodAngleDegrees());
+        logger.put("Hood Angle (deg)", getHoodAngleDegrees(), true);
         logger.put("Hood Stator Current", getHoodMotorStatorCurrent());
         logger.put("Hood Voltage", getHoodMotorVoltage());
 
 
         logger.put("Commanded Hood Angle", lookupTableUtil.getHoodAngle());
         logger.put("Commanded RPM", lookupTableUtil.getTargetRPM());
-        logger.put("Current Range", lookupTableUtil.getCurrentRange());
+        logger.put("Current Range", lookupTableUtil.getCurrentRange(), true);
 
         logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
+        logger.put("Multiplier", multiplier, true);
+        logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
+
+    }
+
+    public Command removeMultiplier() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'removeMultiplier'");
     }
 
 }

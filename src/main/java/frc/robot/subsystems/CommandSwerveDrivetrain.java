@@ -75,8 +75,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private LoggerUtil logger = new LoggerUtil("Drive Subsystem");
 
-    public boolean overrideSnapToHub = false;
+    public boolean overrideSnapToHub = true;
 
+    public static boolean teleop = false;
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -312,16 +313,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        logger.put("DISTANCE", distanceBetween(getState().Pose, RobotContainer.shooterSubsystem.lookupTableUtil.getUnmodifiedHubPose()));
 
         logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
         logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());
 
         logger.put("Hub PID Error", DriveConstants.snapToHubPID.getError());
 
-        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone());
+        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone(), true);
 
-        SmartDashboard.putBoolean("Manual Alignment", overrideSnapToHub);
+        logger.put("Manual Alignment", overrideSnapToHub, true);
         
         /*
          * Periodically try to apply the operator perspective.
@@ -360,7 +360,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command snapToHubCommandEnd(FieldCentric drive, BooleanSupplier override) 
     {   
         return defer(() -> {
-            if (override.getAsBoolean())
+            if (override.getAsBoolean() || !RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone())
             {
                 return Commands.none();
             }
@@ -375,6 +375,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command snapToHubAutonCommand(FieldCentric drive) {
         
         return this.applyRequest(() -> snapToHubStatic(drive));
+    }
+
+    public boolean getTeleop()
+    {
+        return teleop;
+    }
+
+    public void setTeleop(boolean set)
+    {
+        teleop = set;
     }
 
     public Command overrideRot()
