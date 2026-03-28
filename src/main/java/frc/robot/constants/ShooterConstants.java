@@ -30,9 +30,15 @@ public class ShooterConstants {
 	    .withKD(0)
 	    .withKG(0.4);
 
-    public static final double shooterCurrentLimit = 60;
-    public static final double feederCurrentLimit = 70;
-    public static final double hoodCurrentLimit = 40;
+    public static final double shooterStatorCurrentLimit = 60;
+    public static final double shooterSupplyCurrentLimit = 60;
+
+    public static final double feederStatorCurrentLimit = 60;
+    public static final double feederSupplyCurrentLimit = 60;
+
+    public static final double hoodStatorCurrentLimit = 30;
+    public static final double hoodSupplyCurrentLimit = 30;
+
 
     public static final double hoodGearRatio = 185.0/18.0;
 

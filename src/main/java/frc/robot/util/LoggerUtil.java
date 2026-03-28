@@ -88,6 +88,7 @@ public class LoggerUtil {
     public void put(String name, String value) {
         put(name, value, false);
     }
+    
     public void put(String topic, String value, boolean critical) {
         if (debugMode || critical) {
             if (!stringTopics.containsKey(topic)) {

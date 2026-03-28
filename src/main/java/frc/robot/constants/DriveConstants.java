@@ -10,6 +10,4 @@ public class DriveConstants {
 
     public static final PIDController snapToHubPID = new PIDController(8, 0, 0); //5
     public static final double snapToHubRotationTolerance = 1*Math.PI/180.0; //1
-
-
 }

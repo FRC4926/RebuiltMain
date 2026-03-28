@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.constants.HopperConstants;
+import frc.robot.constants.ShooterConstants;
 import frc.robot.util.LoggerUtil;
 
 public class HopperSubsystem extends SubsystemBase {
@@ -37,8 +38,13 @@ public class HopperSubsystem extends SubsystemBase {
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
         );
 
+        CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(HopperConstants.hopperStatorCurrentLimit)
+                .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(HopperConstants.hopperSupplyCurrentLimit)
+                .withSupplyCurrentLimitEnable(true);
 
-        CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(HopperConstants.hopperCurrentLimit);
+            
         hopperMotorLeft.getConfigurator().apply(currentLimitsConfigs);
         hopperMotorLeft.setNeutralMode(NeutralModeValue.Coast);
 
@@ -94,44 +100,45 @@ public class HopperSubsystem extends SubsystemBase {
         return runOnce(this::setVelocityZero);
     }
 
-    public double getStatorCurrentMotorLeft() {
+    public double getLeftStatorCurrent() {
         return hopperMotorLeft.getStatorCurrent().getValueAsDouble();
     }
 
-    public double getStatorCurrentMotorCenter() {
+    public double getCenterStatorCurrent() {
         return hopperMotorCenter.getStatorCurrent().getValueAsDouble();
     }
 
-    public double getStatorCurrentMotorRight() {
+    public double getRightStatorCurrent() {
         return hopperMotorRight.getStatorCurrent().getValueAsDouble();
     }
-    public Command hopperAutonCommand(){
-        return positiveEffortCommand();
+
+    
+    public double getLeftSupplyCurrent() {
+        return hopperMotorLeft.getSupplyCurrent().getValueAsDouble();
     }
+
+    public double getCenterSupplyCurrent() {
+        return hopperMotorCenter.getSupplyCurrent().getValueAsDouble();
+    }
+
+    public double getRightSupplyCurrent() {
+        return hopperMotorRight.getSupplyCurrent().getValueAsDouble();
+    }
+
+    public double getTotalHopperSupplyCureent()
+    {
+        return getLeftSupplyCurrent() + getCenterSupplyCurrent() + getRightSupplyCurrent();
+    }
+
     @Override
     public void periodic() {
-        // if (RobotContainer.driverController.a().getAsBoolean()) {
-        //     hopperMotorCenter.set(1);
-        //     hopperMotorLeft.set(-0.3);
-        //     hopperMotorRight.set(0.3);
-        // } else if (RobotContainer.driverController.x().getAsBoolean()) {
-        //     hopperMotorLeft.set(0);
-        //     hopperMotorRight.set(0);
-        //     hopperMotorCenter.set(-1);
-
-        // } else {
-        //     hopperMotorCenter.set(0);
-        //     hopperMotorLeft.set(0);
-        //     hopperMotorRight.set(0);
-        // }
-
         logger.put("Left RPM", getHopperLeftRPM());
         logger.put("Center RPM", getHopperCenterRPM());
         logger.put("Right RPM", getHopperRightRPM());
 
-        logger.put("Left Current", getStatorCurrentMotorLeft());
-        logger.put("Center Current", getStatorCurrentMotorCenter());
-        logger.put("Right Current", getStatorCurrentMotorRight());
+        logger.put("Left Stator Current", getLeftStatorCurrent());
+        logger.put("Center Stator Current", getCenterStatorCurrent());
+        logger.put("Right Stator Current", getRightStatorCurrent());
     }
 
 }

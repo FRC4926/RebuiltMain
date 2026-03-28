@@ -38,8 +38,6 @@ public class ShooterSubsystem extends SubsystemBase {
    
     LookupTableUtil lookupTableUtil = new LookupTableUtil();
 
-    public double multiplier = 1.0;
-
     private LoggerUtil logger = new LoggerUtil("Shooter Subsystem");
 
     private boolean manualShot = false;
@@ -65,9 +63,23 @@ public class ShooterSubsystem extends SubsystemBase {
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
         );
 
-        CurrentLimitsConfigs shooterCurrentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(ShooterConstants.shooterCurrentLimit);
-        CurrentLimitsConfigs feederCurrentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(ShooterConstants.feederCurrentLimit);
-        CurrentLimitsConfigs hoodCurrentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(ShooterConstants.hoodCurrentLimit);
+        CurrentLimitsConfigs shooterCurrentLimitsConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(ShooterConstants.shooterStatorCurrentLimit)
+                .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(ShooterConstants.shooterSupplyCurrentLimit)
+                .withSupplyCurrentLimitEnable(true);
+
+        CurrentLimitsConfigs feederCurrentLimitsConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(ShooterConstants.feederStatorCurrentLimit)
+                .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(ShooterConstants.feederSupplyCurrentLimit)
+                .withSupplyCurrentLimitEnable(true);
+
+        CurrentLimitsConfigs hoodCurrentLimitsConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(ShooterConstants.hoodStatorCurrentLimit)
+                .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(ShooterConstants.hoodSupplyCurrentLimit)
+                .withSupplyCurrentLimitEnable(true);
 
 
         shooterMotor1.getConfigurator().apply(shooterCurrentLimitsConfigs);
@@ -100,14 +112,6 @@ public class ShooterSubsystem extends SubsystemBase {
         ParentDevice.resetSignalFrequenciesForAll(shooterMotor1, shooterMotor2);
         ParentDevice.optimizeBusUtilizationForAll(feederMotor, hoodMotor);
 
-    }
-    
-    public Command incrementMultiplier() {
-        return runOnce(()->multiplier+=.1);
-    }
-
-    public Command decrementMultiplier() {
-        return runOnce(()->multiplier-=.1);
     }
 
     public void shooterIdle(){
@@ -234,7 +238,28 @@ public class ShooterSubsystem extends SubsystemBase {
         return hoodMotor.getStatorCurrent().getValueAsDouble();
     }
 
-        public double getHoodMotorVoltage() {
+    //supply current
+    public double getShooterMotor1SupplyCurrent() {
+        return shooterMotor1.getSupplyCurrent().getValueAsDouble();
+    }
+    public double getShooterMotor2SupplyCurrent() {
+        return shooterMotor2.getSupplyCurrent().getValueAsDouble();
+    }
+
+    public double getFeederMotorSupplyCurrent() {
+        return feederMotor.getSupplyCurrent().getValueAsDouble();
+    }
+
+    public double getHoodMotorSupplyCurrent() {
+        return hoodMotor.getSupplyCurrent().getValueAsDouble();
+    }
+
+    public double getTotalShooterSupplyCurrent()
+    {
+        return getShooterMotor1SupplyCurrent() + getShooterMotor2SupplyCurrent() + getFeederMotorSupplyCurrent() + getHoodMotorSupplyCurrent();
+    }
+
+    public double getHoodMotorVoltage() {
         return hoodMotor.getClosedLoopOutput().getValueAsDouble();
     }
 
@@ -284,13 +309,6 @@ public class ShooterSubsystem extends SubsystemBase {
         feederMotor.setControl(new DutyCycleOut(-0.6));
     }
 
-            
-    public Command autonShootCommand(CommandSwerveDrivetrain drivetrain, FieldCentric drive, HopperSubsystem hopper) {
-         return drivetrain.snapToHubAutonCommand(drive).until(() -> drivetrain.atSnapTarget())
-        .andThen(Commands.parallel(shootCommand(), hopper.hopperAutonCommand()).withTimeout(3))
-        .andThen(shooterIdleCommand()).andThen(hopper.zeroEffortCommand());
-    }
-
     public Command unJamShooterCommand() {
         return runOnce(this:: unJamShooter);
     }
@@ -335,7 +353,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        lookupTableUtil.updateEffectiveDistance(multiplier);
+        lookupTableUtil.updateEffectiveDistance();
         lookupTableUtil.updateCurrentRange();
 
         // double targetRPM = SmartDashboard.getNumber("Target RPM", 0); //40000.0
@@ -370,7 +388,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
         logger.put("Shooter 1 Stator Current", getShooterMotor1StatorCurrent());
         logger.put("Shooter 2 Stator Current", getShooterMotor2StatorCurrent());
-
         logger.put("Feed Stator Current", getFeedMotorStatorCurrent());
 
         logger.put("Hood Angle (deg)", getHoodAngleDegrees(), true);
@@ -383,14 +400,8 @@ public class ShooterSubsystem extends SubsystemBase {
         logger.put("Current Range", lookupTableUtil.getCurrentRange(), true);
 
         logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
-        logger.put("Multiplier", multiplier, true);
         logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
 
-    }
-
-    public Command removeMultiplier() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'removeMultiplier'");
     }
 
 }

@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constants.DriveConstants;
+import frc.robot.util.LoggerUtil;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -25,6 +26,9 @@ public class Robot extends TimedRobot {
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    private LoggerUtil logger = new LoggerUtil("Robot");
+
 
     /* log and replay timestamp and joystick data */
     private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
@@ -46,6 +50,13 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        logger.put("Total Supply Current", 
+            RobotContainer.drivetrain.getTotalDrivetrainSupplyCurrent() + 
+            RobotContainer.shooterSubsystem.getTotalShooterSupplyCurrent() + 
+            RobotContainer.intakeSubsystem.getIntakeTotalSupplyCurrent() + 
+            RobotContainer.hopperSubsystem.getTotalHopperSupplyCureent(),
+            true);
+
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
     }

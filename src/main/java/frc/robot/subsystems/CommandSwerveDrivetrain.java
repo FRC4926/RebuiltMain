@@ -10,8 +10,11 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
@@ -323,39 +326,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     //     }
     // }
 
-
-    @Override
-    public void periodic() {
-
-        
-        logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
-        logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());
-
-        logger.put("Hub PID Error", DriveConstants.snapToHubPID.getError());
-
-        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone(), true);
-
-        logger.put("Manual Alignment", overrideSnapToHub, true);
-        
-        /*
-         * Periodically try to apply the operator perspective.
-         * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
-         * This allows us to correct the perspective in case the robot code restarts mid-match.
-         * Otherwise, only check and apply the operator perspective if the DS is disabled.
-         * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
-         */
-        if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
-                m_hasAppliedOperatorPerspective = true;
-            });
-        }
-    }
-
     public FieldCentric snapToHubStatic(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
         return drive.withVelocityX(-y.get() * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-x.get() * DriveConstants.MaxSpeed) // Drive left with negative X (left)
@@ -390,6 +360,33 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
     }
 
+    public double getTotalDriveSupplyCurrent()
+    {
+        double total = 0;
+        for(SwerveModule<TalonFX, TalonFX, CANcoder> module: getModules())
+        {
+            total += module.getDriveMotor().getSupplyCurrent().getValueAsDouble();
+        }
+        
+        return total;
+    }
+
+
+    public double getTotalSteerSupplyCurrent()
+    {
+        double total = 0;
+        for(SwerveModule<TalonFX, TalonFX, CANcoder> module: getModules())
+        {
+            total += module.getSteerMotor().getSupplyCurrent().getValueAsDouble();
+        }
+        
+        return total;
+    }
+
+    public double getTotalDrivetrainSupplyCurrent()
+    {
+        return getTotalDriveSupplyCurrent() + getTotalSteerSupplyCurrent();
+    }
 
     public Command snapToHubAutonCommand(FieldCentric drive) {
         
@@ -500,6 +497,42 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+    }
+
+
+    @Override
+    public void periodic() {
+
+        
+        logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
+        logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());
+
+        logger.put("Hub PID Error", DriveConstants.snapToHubPID.getError());
+
+        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone(), true);
+
+        logger.put("Manual Alignment", overrideSnapToHub, true);
+
+        logger.put("Total Drive Supply Current", getTotalDriveSupplyCurrent());
+        logger.put("Total Steer Supply Current", getTotalSteerSupplyCurrent());
+        
+        /*
+         * Periodically try to apply the operator perspective.
+         * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
+         * This allows us to correct the perspective in case the robot code restarts mid-match.
+         * Otherwise, only check and apply the operator perspective if the DS is disabled.
+         * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
+         */
+        if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
+            DriverStation.getAlliance().ifPresent(allianceColor -> {
+                setOperatorPerspectiveForward(
+                    allianceColor == Alliance.Red
+                        ? kRedAlliancePerspectiveRotation
+                        : kBlueAlliancePerspectiveRotation
+                );
+                m_hasAppliedOperatorPerspective = true;
+            });
+        }
     }
 
 

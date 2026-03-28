@@ -9,6 +9,7 @@ public class HopperConstants {
     public static double centerEffort = 1;
     public static double sideEffort = 0.4;
 
-    public static int hopperCurrentLimit = 40;
+    public static int hopperStatorCurrentLimit = 40;
+    public static int hopperSupplyCurrentLimit = 40;
 
 }

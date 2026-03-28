@@ -48,11 +48,22 @@ public class IntakeSubsystem extends SubsystemBase {
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
         );
 
-        CurrentLimitsConfigs intakeCurrentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(IntakeConstants.intakeCurrentLimit);
+        CurrentLimitsConfigs intakeCurrentLimitsConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(IntakeConstants.intakeStatorCurrentLimit)
+                .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(IntakeConstants.intakeSupplyCurrentLimit)
+                .withSupplyCurrentLimitEnable(true);
+
+
         intakeMotor1.getConfigurator().apply(intakeCurrentLimitsConfigs);
         intakeMotor2.getConfigurator().apply(intakeCurrentLimitsConfigs);
 
-        CurrentLimitsConfigs pivotCurrentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(IntakeConstants.pivotCurrentLimit);
+        CurrentLimitsConfigs pivotCurrentLimitsConfigs = new CurrentLimitsConfigs()
+                .withStatorCurrentLimit(IntakeConstants.pivotStatorCurrentLimit)
+                .withStatorCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(IntakeConstants.pivotSupplyCurrentLimit)
+                .withSupplyCurrentLimitEnable(true);
+
         pivotMotor.getConfigurator().apply(pivotCurrentLimitsConfigs);
 
         intakeMotor1.setNeutralMode(NeutralModeValue.Coast);
@@ -186,27 +197,40 @@ public class IntakeSubsystem extends SubsystemBase {
         return (getIntake1RPM()+getIntake2RPM())/2;
     }
 
-    public double getStatorIntake1Current() {
+    public double getIntake1StatorCurrent() {
         return intakeMotor1.getStatorCurrent().getValueAsDouble();
     }
 
-    public double getStatorIntake2Current() {
+    public double getIntake2StatorCurrent() {
         return intakeMotor2.getStatorCurrent().getValueAsDouble();
     }
+    
 
-    public double getSupplyIntake1Current() {
+    public double getIntake1SupplyCurrent() {
         return intakeMotor1.getSupplyCurrent().getValueAsDouble();
     }
 
-    public double getSupplyIntake2Current() {
+    public double getIntake2SupplyCurrent() {
         return intakeMotor2.getSupplyCurrent().getValueAsDouble();
     }
-    public double getPivotVelocity() {
-        return pivotMotor.getVelocity().getValueAsDouble();
+
+
+
+    public double getPivotStatorCurrent() {
+        return pivotMotor.getStatorCurrent().getValueAsDouble();
     }
 
-    public double getPivotCurrent() {
-        return pivotMotor.getStatorCurrent().getValueAsDouble();
+    public double getPivotSupplyCurrent() {
+        return pivotMotor.getSupplyCurrent().getValueAsDouble();
+    }
+
+    public double getIntakeTotalSupplyCurrent()
+    {
+        return getIntake1SupplyCurrent() + getIntake2SupplyCurrent() + getPivotSupplyCurrent();
+    }
+
+    public double getPivotVelocity() {
+        return pivotMotor.getVelocity().getValueAsDouble();
     }
 
     public double getPivotAngle(){
@@ -229,17 +253,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // setPivotPosition(SmartDashboard.getNumber("Target Pivot Angle", 0.0));
-
         logger.put("Intake 1 RPM", getIntake1RPM());
         logger.put("Intake 2 RPM", getIntake2RPM());
         logger.put("Intake Average RPM", getIntakeAverageRPM());
         logger.put("Pivot Angle", getPivotAngle(), true);
-        logger.put("Pivot Angle Actual", pivotMotor.getPosition().getValueAsDouble());
-        logger.put("Intake 1 Stator Current", getStatorIntake1Current(), true);
-        logger.put("Intake 2 Stator Current", getStatorIntake2Current(), true);
-        // logger.put("Intake 1 Supply Current", getStatorIntake1Current());
-        // logger.put("Intake 2 Supply Current", getStatorIntake2Current());
-        logger.put("Pivot Stator Current", getPivotCurrent());
+
+
+        logger.put("Intake 1 Stator Current", getIntake1StatorCurrent());
+        logger.put("Intake 2 Stator Current", getIntake2StatorCurrent());
+        logger.put("Intake Pivot Stator Current", getPivotStatorCurrent());
     }
 }

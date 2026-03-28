@@ -126,11 +126,8 @@ public class RobotContainer {
 
         
         driverController.leftTrigger().whileTrue(shoot());
-        // driverController.leftTrigger().onFalse(shooterDefault());
-        
         
         driverController.rightTrigger().whileTrue(intakeSubsystem.intakeRunCommand().andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
-        // driverController.rightTrigger().onFalse(intakeSubsystem.zeroIntake());
 
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -138,28 +135,22 @@ public class RobotContainer {
 
 
         operatorController.button(1).whileTrue(shooterSubsystem.unJamShooterCommand().andThen(Commands.idle()));
-        // operatorController.button(1).onFalse(shooterDefault());
         
         operatorController.button(2).whileTrue(intakeSubsystem.unJamIntakeCommand().andThen(Commands.idle()));
-        // operatorController.button(2).onFalse(intakeSubsystem.zeroIntake());
 
         operatorController.button(3).onTrue(new InstantCommand(() -> intakeSubsystem.pivotMotor.setPosition(0)).ignoringDisable(true));
         operatorController.button(4).onTrue(intakeSubsystem.pivotUpCommand());
 
         operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
 
-        operatorController.button(11).onTrue(shooterSubsystem.incrementMultiplier());
-        operatorController.button(12).onTrue(shooterSubsystem.decrementMultiplier());
-
         driverController.leftBumper().onTrue(manualShoot());
-        driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)).andThen(shooterDefault()));
+        driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)));
 
 
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
         // new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
 
-        new Trigger(drivetrain::getTeleop).onTrue(shooterDefault());
 
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
         //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
@@ -192,27 +183,15 @@ public class RobotContainer {
                 Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand(), intakeSubsystem.pivotOscillateCommand(80)),
                 Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue()))));
     }
+
     private Command manualShoot(){
-        return hopperSubsystem.positiveEffortCommand()
-            .andThen(drivetrain.snapToHubCommandEnd(drive, () -> true))
+        return shooterSubsystem.setHighPIDValue()
+            .andThen(shooterSubsystem.canShootCommand())
             .andThen(Commands.parallel(
                 shooterSubsystem.manualShotCommand(), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
-    }
-
-    private Command autonShoot()
-    {
-        return hopperSubsystem.positiveEffortCommand()
-            .andThen(Commands.parallel(
-                shooterSubsystem.shootCommand(), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
-    }
-
-    public static Command shooterDefault()
-    {
-        return hopperSubsystem.zeroEffortCommand()
-            .andThen(intakeSubsystem.zeroIntake())
-            .alongWith(shooterSubsystem.shooterIdleCommand());
+                Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand(), intakeSubsystem.pivotOscillateCommand(80)),
+                Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue())));
     }
 
     public Command getAutonomousCommand() {

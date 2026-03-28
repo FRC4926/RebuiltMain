@@ -86,7 +86,7 @@ public class LookupTableUtil {
         }
     }
 
-    public void updateEffectiveDistance(double multiplier) {
+    public void updateEffectiveDistance() {
         // Translation2d hubShifts = new Translation2d();
         // Pose2d currentHubPose = getUnmodifiedHubPose();
 
@@ -120,7 +120,7 @@ public class LookupTableUtil {
 
         effectiveHubPose = getUnmodifiedHubPose();
         // distanceToHub = SmartDashboard.getNumber("Sim distance", 0.0);
-        distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose)*multiplier;
+        distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose);
         distanceToFeed = distanceToFeed(RobotContainer.drivetrain.getState().Pose);
     }
 

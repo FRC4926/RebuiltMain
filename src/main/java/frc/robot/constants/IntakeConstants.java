@@ -12,8 +12,12 @@ public class IntakeConstants {
     public static final int intake2CanId = 15; //intakeLeft
     public static final int pivotCanId = 13;
 
-    public static final double intakeCurrentLimit = 50;
-    public static final double pivotCurrentLimit = 40;
+    public static final double intakeStatorCurrentLimit = 50;
+    public static final double intakeSupplyCurrentLimit = 40;
+
+    public static final double pivotStatorCurrentLimit = 30;
+    public static final double pivotSupplyCurrentLimit = 30;
+
     
     public static final Slot0Configs pivotDownPIDSlot0Configs = new Slot0Configs()
         .withGravityType(GravityTypeValue.Arm_Cosine)
