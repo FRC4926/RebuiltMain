@@ -120,7 +120,8 @@ public class VisionSubsystem extends SubsystemBase {
         if (Robot.isSimulation()) {
             visionSim.update(RobotContainer.drivetrain.getState().Pose);
         } else {
-            SmartDashboard.putString("Alliance", DriverStation.getAlliance().get().toString());
+            // String allianceColor = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).toString();
+            // SmartDashboard.putString("Alliance", allianceColor);
         }
     } 
 }
