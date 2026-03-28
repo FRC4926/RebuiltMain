@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.constants.DriveConstants;
@@ -131,7 +132,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public double getRotRate() {
         SwerveDriveState state = RobotContainer.drivetrain.getState();
         Pose2d effectiveHubPose = lookupTableUtil.getEffectiveHubPose();
-        double desiredX = effectiveHubPose.getX() + getOffset();
+        double desiredX = effectiveHubPose.getX();
         double desiredY = effectiveHubPose.getY();
         double currentX = state.Pose.getX();
         double currentY = state.Pose.getY();
@@ -268,7 +269,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public Command shootCommand()
     {
-        return (Commands.idle().until(() -> canShoot())).andThen(run(this::shoot));
+        return (run(this::shoot));
+    }
+
+    public Command canShootCommand()
+    {
+        return Commands.idle().until(() -> canShoot());
     }
 
     public void unJamShooter()
@@ -302,6 +308,21 @@ public class ShooterSubsystem extends SubsystemBase {
         return Math.abs(ShooterConstants.manualRPM - getShooterAverageRPM()) < ShooterConstants.RPMTolerance && Math.abs(ShooterConstants.manualAngle - getHoodAngleDegrees()) < ShooterConstants.angleTolerance;
     }
 
+    public Command setHighPIDValue(){
+        return Commands.parallel(
+            new InstantCommand(() -> shooterMotor1.getConfigurator().apply(ShooterConstants.shooterPIDConfig2)),
+            new InstantCommand(() -> shooterMotor2.getConfigurator().apply(ShooterConstants.shooterPIDConfig2))
+        );
+    }
+
+    public Command setNormalPIDValue(){
+        return Commands.parallel(
+            new InstantCommand(() -> shooterMotor1.getConfigurator().apply(ShooterConstants.shooterPIDConfig)),
+            new InstantCommand(() -> shooterMotor2.getConfigurator().apply(ShooterConstants.shooterPIDConfig))
+        );
+        
+    }
+    
     public Command manualShotCommand()
     {
         return runOnce(this::manualShot).andThen(Commands.idle().until(() -> canShootManual())).andThen(run(() -> setFeedEffort(ShooterConstants.feederEffort)));

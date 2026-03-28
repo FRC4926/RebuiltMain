@@ -113,6 +113,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void init()
     {
+        // setGyro();
         DriveConstants.snapToHubPID.setTolerance(DriveConstants.snapToHubRotationTolerance);
         DriveConstants.snapToHubPID.enableContinuousInput(-Math.PI, Math.PI);
         try{
@@ -280,8 +281,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command applyRequestOnce(Supplier<SwerveRequest> request) {
         return runOnce(() -> this.setControl(request.get()));
     }
+
+    public Command applyRequestOnce(SwerveRequest request) {
+        return runOnce(() -> this.setControl(request));
+    }
+
     public boolean atSnapTarget() {
-        return Math.abs(DriveConstants.snapToHubPID.getError())<DriveConstants.snapToHubRotationTolerance;
+        return DriveConstants.snapToHubPID.atSetpoint();
     }
 
     /**
@@ -310,10 +316,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return Math.sqrt(Math.pow(a.getX()-b.getX(), 2)+Math.pow(a.getY()-b.getY(), 2));
     }
 
+    // public void setGyro()
+    // {
+    //     if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red)){
+    //         getPigeon2().setYaw(Math.PI);
+    //     }
+    // }
+
 
     @Override
     public void periodic() {
 
+        
         logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
         logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());
 
@@ -357,6 +371,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.applyRequest(() -> snapToHubStatic(drive, x, y));
     }
 
+    public Command snapToHubCommand(FieldCentric drive) {
+        
+        return this.applyRequest(() -> snapToHubStatic(drive));
+    }
+
     public Command snapToHubCommandEnd(FieldCentric drive, BooleanSupplier override) 
     {   
         return defer(() -> {
@@ -366,7 +385,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
             else
             {   
-                return this.applyRequest(() -> snapToHubStatic(drive)).until(() -> atSnapTarget());
+                return this.applyRequest(() -> snapToHubStatic(drive));
             }
         });
     }

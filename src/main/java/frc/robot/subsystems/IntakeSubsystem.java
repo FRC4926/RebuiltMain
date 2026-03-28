@@ -102,10 +102,16 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public Command oscillatePivotCommand()
     {
-        return Commands.sequence(pivotOscillateCommand(IntakeConstants.pivotOscillateUpPosition), 
+        return oscillateCommand(IntakeConstants.pivotOscillateUp1Position).repeatedly().withTimeout(3)
+                .andThen(oscillateCommand(IntakeConstants.pivotOscillateUp2Position).repeatedly());
+    }
+
+    public Command oscillateCommand(double oscillateUpPosition)
+    {
+       return Commands.sequence(pivotOscillateCommand(oscillateUpPosition), 
             new WaitCommand(IntakeConstants.pivotOscillateBetween), 
             pivotOscillateCommand(IntakeConstants.pivotOscillateDownPosition), 
-            new WaitCommand(IntakeConstants.pivotOscillateBetween)).repeatedly();
+            new WaitCommand(IntakeConstants.pivotOscillateBetween));
     }
 
     public Command pivotDownCommand(){
@@ -115,14 +121,12 @@ public class IntakeSubsystem extends SubsystemBase {
         return runOnce(this::setPivotUpPosition);
     }
 
-    //TODO make it add requirements
     public Command pivotStaticManualCommand(double angle){
-        return new InstantCommand(() -> setPivotPosition(angle));
+        return runOnce(() -> setPivotPosition(angle));
     }
 
-    //TODO make it add requirements
      public Command pivotOscillateCommand(double angle){
-        return new InstantCommand(() -> setOscillatePosition(angle));
+        return runOnce(() -> setOscillatePosition(angle));
     }
     public Command pivotZeroCommand(){
         return runOnce(this::setPivotZero);

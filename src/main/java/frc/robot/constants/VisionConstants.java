@@ -25,8 +25,8 @@ public class VisionConstants {
             new Transform3d(new Translation3d(-0.05190144, 0.17368266, 0.494284), new Rotation3d(0, 30*Math.PI/180, 15*Math.PI/180)), 1)
     };
 
-    public static final double kalmanPositionStdDevCoeefficient = 0.3; //0.6
-    public static final double kalmanRotStdDevCoeefficient = 0.6; //0.6
+    public static final double kalmanPositionStdDevCoeefficient = 0.33; //0.3
+    public static final double kalmanRotStdDevCoeefficient = Double.POSITIVE_INFINITY; //0.6
 
     // public static final double kalmanRotationStdDev = 0.99;
 

@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -53,6 +54,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(DriveConstants.MaxSpeed); 
 
     public static final CommandXboxController driverController = new CommandXboxController(0);
+    //public static final CommandPS5Controller driverController = new CommandPS5Controller(0);
     public static final CommandJoystick operatorController = new CommandJoystick(1);
 
     public static SendableChooser<Command> autonChooser;
@@ -87,7 +89,7 @@ public class RobotContainer {
         // NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
         // NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
 
-        NamedCommands.registerCommand("Shoot", autonShoot());
+        NamedCommands.registerCommand("Shoot", shoot());
         NamedCommands.registerCommand("ClearIntake", intakeSubsystem.clearIntake());
         NamedCommands.registerCommand("RunIntake", intakeSubsystem.pivotDownCommand().andThen(intakeSubsystem.intakeRunCommand()));
         NamedCommands.registerCommand("StopIntake", intakeSubsystem.zeroIntake());
@@ -110,9 +112,9 @@ public class RobotContainer {
             )
         );
 
-        // shooterSubsystem.setDefaultCommand(Commands.run(shooterSubsystem::shooterIdleCommand, shooterSubsystem));
-        hopperSubsystem.setDefaultCommand(Commands.run(hopperSubsystem::zeroEffortCommand, hopperSubsystem));
-        // intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(intakeSubsystem.pivotZeroCommand()));
+        shooterSubsystem.setDefaultCommand(shooterSubsystem.shooterIdleCommand().andThen(Commands.idle()));
+        hopperSubsystem.setDefaultCommand(hopperSubsystem.zeroEffortCommand().andThen(Commands.idle()));
+        intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(Commands.idle()));
         visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
 
         // Idle while the robot is disabled. This ensures the configured 6-7
@@ -124,23 +126,24 @@ public class RobotContainer {
 
         
         driverController.leftTrigger().whileTrue(shoot());
-        driverController.leftTrigger().onFalse(shooterDefault());
+        // driverController.leftTrigger().onFalse(shooterDefault());
         
-
         
-        driverController.rightTrigger().onTrue(intakeSubsystem.intakeRunCommand().andThen(intakeSubsystem.pivotDownCommand()));
-        driverController.rightTrigger().onFalse(intakeSubsystem.zeroIntake());
+        driverController.rightTrigger().whileTrue(intakeSubsystem.intakeRunCommand().andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
+        // driverController.rightTrigger().onFalse(intakeSubsystem.zeroIntake());
 
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
 
+        driverController.a().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));
 
-        operatorController.button(1).onTrue(shooterSubsystem.unJamShooterCommand());
-        operatorController.button(1).onFalse(shooterDefault());
+
+        operatorController.button(1).whileTrue(shooterSubsystem.unJamShooterCommand().andThen(Commands.idle()));
+        // operatorController.button(1).onFalse(shooterDefault());
         
-        operatorController.button(2).onTrue(intakeSubsystem.unJamIntakeCommand());
-        operatorController.button(2).onFalse(intakeSubsystem.zeroIntake());
+        operatorController.button(2).whileTrue(intakeSubsystem.unJamIntakeCommand().andThen(Commands.idle()));
+        // operatorController.button(2).onFalse(intakeSubsystem.zeroIntake());
 
-        operatorController.button(3).onTrue(new InstantCommand(() -> intakeSubsystem.pivotMotor.setPosition(0)));
+        operatorController.button(3).onTrue(new InstantCommand(() -> intakeSubsystem.pivotMotor.setPosition(0)).ignoringDisable(true));
         operatorController.button(4).onTrue(intakeSubsystem.pivotUpCommand());
 
         operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
@@ -172,18 +175,22 @@ public class RobotContainer {
         // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // Reset the field-centric heading on left bumper press.
-        // driverController.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        driverController.rightBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     private Command shoot()
     {
-        return hopperSubsystem.positiveEffortCommand()
-            .andThen(drivetrain.snapToHubCommandEnd(drive, () -> drivetrain.getOverride()))
+        return Commands.parallel(
+            drivetrain.snapToHubCommand(drive),
+            shooterSubsystem.setHighPIDValue()
+            .andThen(shooterSubsystem.canShootCommand())
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
+                Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand(), intakeSubsystem.pivotOscillateCommand(80)),
+                Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue()))));
     }
     private Command manualShoot(){
         return hopperSubsystem.positiveEffortCommand()

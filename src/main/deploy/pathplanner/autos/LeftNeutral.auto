@@ -80,12 +80,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Left5"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Shoot"

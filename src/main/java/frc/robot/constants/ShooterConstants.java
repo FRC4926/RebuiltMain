@@ -16,6 +16,13 @@ public class ShooterConstants {
 	    .withKD(0)
 	    .withKS(.19)
 	    .withKV(0.1225);
+
+    public static Slot0Configs shooterPIDConfig2 = new Slot0Configs()
+	    .withKP(0.838)
+	    .withKI(0)
+	    .withKD(0)
+	    .withKS(.19)
+	    .withKV(0.125);
 	    
     public static Slot0Configs hoodPIDConfig = new Slot0Configs()
 	    .withKP(80)
@@ -87,7 +94,7 @@ public class ShooterConstants {
 
     //RPM ranges each with their own angle LUT
     public static final InterpolatingDoubleTreeMap[] angleLookupTables = {distanceToAngle1, distanceToAngle2, distanceToAngle3};
-    public static final double[] RPMRanges = {3850, 4350, 4500}; //3850, 4350
+    public static final double[] RPMRanges = {3850, 4250, 4500}; //3850, 4350
     public static final double feedRPM = 4300;
     public static final double[] rangeDistanceThresholds = {2.53, 3.77, 6.0};
     public static final double distanceThres = 0.1;
