@@ -7,6 +7,12 @@
         {
           "type": "named",
           "data": {
+            "name": "PivotUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "StopIntake"
           }
         },
@@ -17,7 +23,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Right1"
+                  "pathName": "Left1"
                 }
               },
               {
@@ -45,7 +51,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right2"
+            "pathName": "Left2"
           }
         },
         {
@@ -55,7 +61,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RightTrench3"
+                  "pathName": "LeftTrench3"
                 }
               },
               {
@@ -70,7 +76,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RightTrench4"
+            "pathName": "LeftTrench4"
           }
         },
         {

@@ -7,6 +7,12 @@
         {
           "type": "named",
           "data": {
+            "name": "PivotUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "StopIntake"
           }
         },
@@ -29,6 +35,12 @@
                       "data": {
                         "waitTime": 0.5
                       }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "RunIntake"
+                      }
                     }
                   ]
                 }
@@ -49,7 +61,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Right3"
+                  "pathName": "RightTrench3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StopIntake"
                 }
               }
             ]
@@ -58,13 +76,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right4"
+            "pathName": "RightTrench4"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Right5"
+            "name": "Shoot"
           }
         }
       ]

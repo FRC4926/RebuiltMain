@@ -1,12 +1,12 @@
 {
-  "robotWidth": 0.8255,
-  "robotLength": 0.8255,
+  "robotWidth": 0.879,
+  "robotLength": 0.879,
   "holonomicMode": true,
   "pathFolders": [
     "New Folder"
   ],
   "autoFolders": [],
-  "defaultMaxVel": 3.0,
+  "defaultMaxVel": 4.0,
   "defaultMaxAccel": 4.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
@@ -20,15 +20,17 @@
   "driveMotorType": "krakenX60",
   "driveCurrentLimit": 60.0,
   "wheelCOF": 1.2,
-  "flModuleX": 0.343,
-  "flModuleY": 0.343,
-  "frModuleX": 0.343,
-  "frModuleY": -0.343,
-  "blModuleX": -0.343,
-  "blModuleY": 0.343,
-  "brModuleX": -0.343,
-  "brModuleY": -0.343,
+  "flModuleX": 0.276,
+  "flModuleY": 0.276,
+  "frModuleX": 0.276,
+  "frModuleY": -0.276,
+  "blModuleX": -0.276,
+  "blModuleY": 0.276,
+  "brModuleX": -0.276,
+  "brModuleY": -0.276,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": []
+  "robotFeatures": [
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.519,\"y\":0.0},\"size\":{\"width\":0.698,\"length\":0.2},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}"
+  ]
 }

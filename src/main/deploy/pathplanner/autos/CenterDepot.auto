@@ -5,13 +5,25 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "PivotUp"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopIntake"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Left1"
+                  "pathName": "CenterDepot1"
                 }
               },
               {
@@ -23,6 +35,12 @@
                       "data": {
                         "waitTime": 0.5
                       }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "RunIntake"
+                      }
                     }
                   ]
                 }
@@ -33,7 +51,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left2"
+            "pathName": "CenterDepot2"
           }
         },
         {
@@ -43,22 +61,22 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Left3"
+                  "pathName": "CenterDepot3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StopIntake"
                 }
               }
             ]
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Left4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Left5"
+            "name": "Shoot"
           }
         }
       ]
