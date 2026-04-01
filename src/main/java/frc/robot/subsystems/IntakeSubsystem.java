@@ -120,9 +120,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command oscillateCommand(double oscillateUpPosition)
     {
        return Commands.sequence(pivotOscillateCommand(oscillateUpPosition), 
-            new WaitCommand(IntakeConstants.pivotOscillateBetween), 
+            new WaitCommand(IntakeConstants.pivotOscillateBetweenTime), 
             pivotOscillateCommand(IntakeConstants.pivotOscillateDownPosition), 
-            new WaitCommand(IntakeConstants.pivotOscillateBetween));
+            new WaitCommand(IntakeConstants.pivotOscillateBetweenTime));
     }
 
     public Command pivotDownCommand(){

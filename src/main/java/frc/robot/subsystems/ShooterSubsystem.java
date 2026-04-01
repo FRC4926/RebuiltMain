@@ -38,7 +38,7 @@ public class ShooterSubsystem extends SubsystemBase {
    
     LookupTableUtil lookupTableUtil = new LookupTableUtil();
 
-    private LoggerUtil logger = new LoggerUtil("Shooter Subsystem");
+    private LoggerUtil logger = new LoggerUtil("Shooter Subsystem", true);
 
     private boolean manualShot = false;
 
@@ -115,8 +115,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void shooterIdle(){
-        shooterMotor1.set(ShooterConstants.idleSpeedSpeed);
-        shooterMotor2.set(ShooterConstants.idleSpeedSpeed);
+        shooterMotor1.set(ShooterConstants.idleShootSpeed);
+        shooterMotor2.set(ShooterConstants.idleShootSpeed);
 
         feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedSpeed));
     }
@@ -143,6 +143,17 @@ public class ShooterSubsystem extends SubsystemBase {
 
         double currentAngle = state.Pose.getRotation().getRadians();
         double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
+        double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
+        return rotRate;
+    }
+
+    public double getFeedRotRate() {
+        double currentAngle =  RobotContainer.drivetrain.getState().Pose.getRotation().getRadians();
+        double angle = 180.0;
+
+        if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red))
+            angle = 0.0;
+            
         double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
         return rotRate;
     }

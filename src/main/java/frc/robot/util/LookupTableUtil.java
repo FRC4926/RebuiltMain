@@ -22,6 +22,8 @@ public class LookupTableUtil {
     public LookupTableUtil()
     {
         // SmartDashboard.putNumber("Sim distance", 0.0);
+        SmartDashboard.putNumber("Manual Hood Angle", 0);
+        SmartDashboard.putNumber("Manual RMP", 0);
     }
 
     public double getHoodAngle()
@@ -31,12 +33,13 @@ public class LookupTableUtil {
             angle = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
         else
             angle = ShooterConstants.feedAngle;
-        
+        // return SmartDashboard.getNumber("Manual Hood Angle", 0);
         return angle;
     }
 
     public double getTargetRPM()
     {
+        // return SmartDashboard.getNumber("Manual RMP", 0);
         if (inAllianceZone())
             return ShooterConstants.RPMRanges[currentRange];
         else

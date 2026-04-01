@@ -143,7 +143,7 @@ public class RobotContainer {
 
         operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
 
-        driverController.leftBumper().onTrue(manualShoot());
+        driverController.leftBumper().whileTrue(manualShoot());
         driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)));
 
 
@@ -174,23 +174,26 @@ public class RobotContainer {
     private Command shoot()
     {
         return Commands.parallel(
-            drivetrain.snapToHubCommand(drive),
+            drivetrain.snapCommand(drive),
             shooterSubsystem.setHighPIDValue()
             .andThen(shooterSubsystem.canShootCommand())
+            .andThen(new WaitUntilCommand(() -> drivetrain.atSnapTarget()))
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
                 Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand(), intakeSubsystem.pivotOscillateCommand(80)),
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand()),
                 Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue()))));
     }
 
+
+    //change to be basically shoot
     private Command manualShoot(){
         return shooterSubsystem.setHighPIDValue()
             .andThen(shooterSubsystem.canShootCommand())
             .andThen(Commands.parallel(
                 shooterSubsystem.manualShotCommand(), 
                 Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand(), intakeSubsystem.pivotOscillateCommand(80)),
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand()),
                 Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue())));
     }
 

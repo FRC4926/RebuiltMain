@@ -16,13 +16,13 @@ public class VisionConstants {
     public record CameraWrapperConstants(String name, Transform3d robotToCamera, double trustFactor) {};
     public static final CameraWrapperConstants[] camConstants = {
         new CameraWrapperConstants("BackLeft",
-            new Transform3d(new Translation3d(-0.32964297, 0.280335875, 0.532235), new Rotation3d(0,0.0, 165*Math.PI/180)), 1),
+            new Transform3d(new Translation3d(-0.334, 0.280335875, 0.522), new Rotation3d(0,0.0, 165*Math.PI/180)), 1),
         new CameraWrapperConstants("BackRight",
-            new Transform3d(new Translation3d(-0.32964297, -0.280335875, 0.532235), new Rotation3d(0,0.0, 195*Math.PI/180)), 1),
+            new Transform3d(new Translation3d(-0.334, -0.280335875, 0.522), new Rotation3d(0,0.0, 195*Math.PI/180)), 1),
         new CameraWrapperConstants("Arducam_OV9281_USB_Camera",
-            new Transform3d(new Translation3d(-0.05190144, -0.17368266, 0.494284), new Rotation3d(0, 30*Math.PI/180, -15*Math.PI/180)), 1),
+            new Transform3d(new Translation3d(-0.05190144, -0.203, 0.494284), new Rotation3d(0, -30*Math.PI/180, -15*Math.PI/180)), 1),
          new CameraWrapperConstants("FrontLeft",
-            new Transform3d(new Translation3d(-0.05190144, 0.17368266, 0.494284), new Rotation3d(0, 30*Math.PI/180, 15*Math.PI/180)), 1)
+            new Transform3d(new Translation3d(-0.05190144, 0.203, 0.494284), new Rotation3d(0, -30*Math.PI/180, 15*Math.PI/180)), 1)
     };
 
     public static final double kalmanPositionStdDevCoeefficient = 0.33; //0.3

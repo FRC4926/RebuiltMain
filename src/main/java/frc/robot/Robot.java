@@ -8,6 +8,7 @@ import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.ParentDevice;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -56,6 +57,8 @@ public class Robot extends TimedRobot {
             RobotContainer.intakeSubsystem.getIntakeTotalSupplyCurrent() + 
             RobotContainer.hopperSubsystem.getTotalHopperSupplyCureent(),
             true);
+
+        logger.put("Battery Voltage", RobotController.getBatteryVoltage());
 
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();

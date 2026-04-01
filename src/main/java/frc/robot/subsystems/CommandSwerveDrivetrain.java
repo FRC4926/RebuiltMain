@@ -78,7 +78,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private LoggerUtil logger = new LoggerUtil("Drive Subsystem");
 
-    public boolean overrideSnapToHub = true;
+    public boolean overrideSnapToHub = false;
 
     public static boolean teleop = false;
 
@@ -333,7 +333,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public FieldCentric snapToHubStatic(FieldCentric drive) {
-        return drive.withRotationalRate(RobotContainer.shooterSubsystem.getRotRate()); // Drive counterclockwise with negative X (left)
+        return drive.withRotationalRate(RobotContainer.shooterSubsystem.getRotRate());
+    }
+
+    public FieldCentric snapToFeed(FieldCentric drive) {
+        return drive.withRotationalRate(RobotContainer.shooterSubsystem.getFeedRotRate());
     }
 
     public Command snapToHubCommand(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
@@ -341,9 +345,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.applyRequest(() -> snapToHubStatic(drive, x, y));
     }
 
-    public Command snapToHubCommand(FieldCentric drive) {
-        
-        return this.applyRequest(() -> snapToHubStatic(drive));
+    public Command snapCommand(FieldCentric drive) 
+    {
+        return defer(()->{
+            if (RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone())
+                return this.applyRequest(() -> snapToHubStatic(drive));
+            else
+                return this.applyRequest(() -> snapToFeed(drive));
+        });
     }
 
     public Command snapToHubCommandEnd(FieldCentric drive, BooleanSupplier override) 
