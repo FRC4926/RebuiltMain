@@ -55,19 +55,44 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "CenterDepot3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CenterDepot4"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "CenterDepot3"
+                  "pathName": "CenterDepot5"
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "StopIntake"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.2
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "StopIntake"
+                      }
+                    }
+                  ]
                 }
               }
             ]

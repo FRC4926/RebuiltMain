@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -90,6 +91,7 @@ public class RobotContainer {
         // NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
 
         NamedCommands.registerCommand("Shoot", shoot());
+        NamedCommands.registerCommand("TrenchShot", manualShoot());
         NamedCommands.registerCommand("ClearIntake", intakeSubsystem.clearIntake());
         NamedCommands.registerCommand("RunIntake", intakeSubsystem.pivotDownCommand().andThen(intakeSubsystem.intakeRunCommand()));
         NamedCommands.registerCommand("StopIntake", intakeSubsystem.zeroIntake());
@@ -143,6 +145,8 @@ public class RobotContainer {
 
         operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
 
+        operatorController.button(6).onTrue(new InstantCommand(() -> shooterSubsystem.hoodMotor.setPosition(0)).ignoringDisable(true));
+
         driverController.leftBumper().whileTrue(manualShoot());
         driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)));
 
@@ -177,7 +181,7 @@ public class RobotContainer {
             drivetrain.snapCommand(drive),
             shooterSubsystem.setHighPIDValue()
             .andThen(shooterSubsystem.canShootCommand())
-            .andThen(new WaitUntilCommand(() -> drivetrain.atSnapTarget()))
+            .andThen((new WaitUntilCommand(() -> drivetrain.atSnapTarget())).withTimeout(1))
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
                 Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 

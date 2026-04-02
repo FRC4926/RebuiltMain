@@ -290,6 +290,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public boolean atSnapTarget() {
+        if (overrideSnapToHub)
+        {
+            return true;
+        }
         return DriveConstants.snapToHubPID.atSetpoint();
     }
 
@@ -348,7 +352,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command snapCommand(FieldCentric drive) 
     {
         return defer(()->{
-            if (RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone())
+            if (overrideSnapToHub)
+                return Commands.none();
+            else if (RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone())
                 return this.applyRequest(() -> snapToHubStatic(drive));
             else
                 return this.applyRequest(() -> snapToFeed(drive));
