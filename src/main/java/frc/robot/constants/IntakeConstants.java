@@ -12,8 +12,8 @@ public class IntakeConstants {
     public static final int intake2CanId = 15; //intakeLeft
     public static final int pivotCanId = 13;
 
-    public static final double intakeStatorCurrentLimit = 60;
-    public static final double intakeSupplyCurrentLimit = 50;
+    public static final double intakeStatorCurrentLimit = 90;
+    public static final double intakeSupplyCurrentLimit = 60;
 
     public static final double pivotStatorCurrentLimit = 30;
     public static final double pivotSupplyCurrentLimit = 30;

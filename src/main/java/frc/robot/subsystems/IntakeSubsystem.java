@@ -42,7 +42,7 @@ public class IntakeSubsystem extends SubsystemBase {
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
         );
          intakeMotor2.getConfigurator().apply(
-            new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
+            new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)
         );
          pivotMotor.getConfigurator().apply(
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
@@ -78,7 +78,7 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotMotor.setPosition(0);
 
         intakeMotor1.getConfigurator().apply(IntakeConstants.intakePIDSlot0Configs);
-        // intakeMotor2.getConfigurator().apply(IntakeConstants.intakePIDSlot0Configs);
+        intakeMotor2.getConfigurator().apply(IntakeConstants.intakePIDSlot0Configs);
 
         // intakeMotor2.setControl(new Follower(IntakeConstants.intake1CanId, MotorAlignmentValue.Opposed));
 
@@ -98,17 +98,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void setReferenceVelocity() {
         intakeMotor1.setControl(new DutyCycleOut(IntakeConstants.intakeMotorEffort));
-        // intakeMotor2.setControl(new DutyCycleOut(IntakeConstants.intakeMotorEffort));
+        intakeMotor2.setControl(new DutyCycleOut(IntakeConstants.intakeMotorEffort));
     }
 
     public void intakeRun() {
         intakeMotor1.setControl(IntakeConstants.intakeRunControl);
-        // intakeMotor2.setControl(IntakeConstants.intakeRunControl);
+        intakeMotor2.setControl(IntakeConstants.intakeRunControl);
     }
 
     public void setReferenceVelocity(double effort) {
         intakeMotor1.setControl(new DutyCycleOut(effort));
-        // intakeMotor2.setControl(new DutyCycleOut(effort));
+        intakeMotor2.setControl(new DutyCycleOut(effort));
     }
 
     public Command oscillatePivotCommand()
@@ -155,7 +155,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void zeroVelocity(){
         intakeMotor1.setControl(new DutyCycleOut(0));
-        // intakeMotor2.setControl(new DutyCycleOut(0));
+        intakeMotor2.setControl(new DutyCycleOut(0));
     }
 
     public void zeroPivot(){
@@ -248,7 +248,10 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command unJamIntakeCommand() {
-        return runOnce(() -> intakeMotor1.setControl(new DutyCycleOut(-IntakeConstants.intakeMotorEffort)));
+        return runOnce(() -> {
+            intakeMotor1.setControl(new DutyCycleOut(-IntakeConstants.intakeMotorEffort));
+            intakeMotor2.setControl(new DutyCycleOut(-IntakeConstants.intakeMotorEffort));
+        });
     }
 
     @Override
