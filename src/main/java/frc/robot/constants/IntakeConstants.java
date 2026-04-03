@@ -54,7 +54,7 @@ public class IntakeConstants {
     public static final double pivotUpPosition = 138;
     public static final double pivotDownPosition = -1;
     public static final double pivotOscillateUp1Position = 45;
-    public static final double pivotOscillateUp2Position = 45;
+    public static final double pivotOscillateUp2Position = 65;
     public static final double pivotOscillateDownPosition = 10;
 
     public static final double pivotOscillateBetweenTime = 0.5;
