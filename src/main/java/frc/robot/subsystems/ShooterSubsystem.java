@@ -115,10 +115,10 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void shooterIdle(){
-        shooterMotor1.set(ShooterConstants.idleShootSpeed);
-        shooterMotor2.set(ShooterConstants.idleShootSpeed);
+        shooterMotor1.set(ShooterConstants.idleShootEffort);
+        shooterMotor2.set(ShooterConstants.idleShootEffort);
 
-        feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedSpeed));
+        feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedEffort));
     }
 
     public void setShooterRPMManual(double RPM){

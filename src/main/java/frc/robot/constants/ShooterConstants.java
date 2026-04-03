@@ -111,8 +111,8 @@ public class ShooterConstants {
 
     public static final double feedAngle = 22.5;
 
-    public static final double idleShootSpeed = 0.1;
-    public static final double idleFeedSpeed = -0.05;
+    public static final double idleShootEffort = 0.5;
+    public static final double idleFeedEffort = -0.05;
 
     public static final double RPMTolerance = 80;
     public static final double angleTolerance = 0.5;
