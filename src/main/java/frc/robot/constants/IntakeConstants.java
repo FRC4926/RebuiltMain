@@ -21,7 +21,7 @@ public class IntakeConstants {
     
     public static final Slot0Configs pivotDownPIDSlot0Configs = new Slot0Configs()
         .withGravityType(GravityTypeValue.Arm_Cosine)
-        .withKP(4)
+        .withKP(2.5)
         .withKI(0)
         .withKD(0)
         .withKG(0.0035);

@@ -147,6 +147,9 @@ public class RobotContainer {
 
         operatorController.button(6).onTrue(new InstantCommand(() -> shooterSubsystem.hoodMotor.setPosition(0)).ignoringDisable(true));
 
+        operatorController.button(11).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.incrementOffset()));
+        operatorController.button(12).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.decrementOffset()));
+
         driverController.leftBumper().whileTrue(manualShoot());
         driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)));
 

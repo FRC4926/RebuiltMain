@@ -36,7 +36,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public final TalonFX feederMotor  = new TalonFX(ShooterConstants.feederCanID);
     public final TalonFX hoodMotor  = new TalonFX(ShooterConstants.hoodCanID);
    
-    LookupTableUtil lookupTableUtil = new LookupTableUtil();
+    public LookupTableUtil lookupTableUtil = new LookupTableUtil();
 
     private LoggerUtil logger = new LoggerUtil("Shooter Subsystem", true);
 
@@ -412,6 +412,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
         logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
         logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
+        logger.put("Offset", lookupTableUtil.getOffset(), true);
+
 
     }
 
