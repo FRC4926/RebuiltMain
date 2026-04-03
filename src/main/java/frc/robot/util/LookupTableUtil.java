@@ -18,7 +18,7 @@ public class LookupTableUtil {
     private double distanceToHub = 0.0;
     private double distanceToFeed = 0.0;
     private int currentRange = 0;
-    private double offset = 0.5;
+    private double offset = 0.8;
 
     public LookupTableUtil()
     {

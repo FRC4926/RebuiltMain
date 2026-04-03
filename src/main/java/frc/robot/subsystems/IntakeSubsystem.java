@@ -80,7 +80,7 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeMotor1.getConfigurator().apply(IntakeConstants.intakePIDSlot0Configs);
         // intakeMotor2.getConfigurator().apply(IntakeConstants.intakePIDSlot0Configs);
 
-        intakeMotor2.setControl(new Follower(IntakeConstants.intake1CanId, MotorAlignmentValue.Opposed));
+        // intakeMotor2.setControl(new Follower(IntakeConstants.intake1CanId, MotorAlignmentValue.Opposed));
 
         ParentDevice.resetSignalFrequenciesForAll(intakeMotor1, intakeMotor2);
         ParentDevice.optimizeBusUtilizationForAll(pivotMotor);
@@ -261,6 +261,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
         logger.put("Intake 1 Stator Current", getIntake1StatorCurrent());
         logger.put("Intake 2 Stator Current", getIntake2StatorCurrent());
+
+        logger.put("Intake 1 Supply Current", getIntake1SupplyCurrent());
+        logger.put("Intake 2 Supply Current", getIntake2SupplyCurrent());
+
         logger.put("Intake Pivot Stator Current", getPivotStatorCurrent());
     }
 }
