@@ -188,7 +188,7 @@ public class RobotContainer {
             .andThen(Commands.parallel(
                 shooterSubsystem.shootCommand(), 
                 Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), /* intakeSubsystem.intakeRunCommand(), */ intakeSubsystem.oscillatePivotCommand()),
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand()),
                 Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue()))));
     }
 
