@@ -135,12 +135,12 @@ public class LookupTableUtil {
 
     public void incrementOffset()
     {
-        offset += 0.1;
+        offset += 0.05;
     }
 
     public void decrementOffset()
     {
-        offset -= 0.1;
+        offset -= 0.05;
     }
 
 
