@@ -337,11 +337,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public FieldCentric snapToHubStatic(FieldCentric drive) {
-        return drive.withRotationalRate(RobotContainer.shooterSubsystem.getRotRate());
+        return drive
+            .withVelocityX(0)
+            .withVelocityY(0)
+            .withRotationalRate(RobotContainer.shooterSubsystem.getRotRate());
     }
 
     public FieldCentric snapToFeed(FieldCentric drive) {
-        return drive.withRotationalRate(RobotContainer.shooterSubsystem.getFeedRotRate());
+        return drive
+            .withVelocityX(0)
+            .withVelocityY(0)
+            .withRotationalRate(RobotContainer.shooterSubsystem.getFeedRotRate());
     }
 
     public Command snapToHubCommand(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
