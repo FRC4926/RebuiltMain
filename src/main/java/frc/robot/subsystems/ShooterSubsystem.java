@@ -149,7 +149,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public double getFeedRotRate() {
         double currentAngle =  RobotContainer.drivetrain.getState().Pose.getRotation().getRadians();
-        double angle = 180.0;
+        double angle = Math.PI;
 
         if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red))
             angle = 0.0;
