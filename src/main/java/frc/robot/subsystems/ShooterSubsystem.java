@@ -36,7 +36,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public final TalonFX feederMotor  = new TalonFX(ShooterConstants.feederCanID);
     public final TalonFX hoodMotor  = new TalonFX(ShooterConstants.hoodCanID);
    
-    LookupTableUtil lookupTableUtil = new LookupTableUtil();
+    public LookupTableUtil lookupTableUtil = new LookupTableUtil();
 
     private LoggerUtil logger = new LoggerUtil("Shooter Subsystem", true);
 
@@ -115,10 +115,10 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void shooterIdle(){
-        shooterMotor1.set(ShooterConstants.idleShootSpeed);
-        shooterMotor2.set(ShooterConstants.idleShootSpeed);
+        shooterMotor1.set(ShooterConstants.idleShootEffort);
+        shooterMotor2.set(ShooterConstants.idleShootEffort);
 
-        feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedSpeed));
+        feederMotor.setControl(new DutyCycleOut(ShooterConstants.idleFeedEffort));
     }
 
     public void setShooterRPMManual(double RPM){
@@ -149,7 +149,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public double getFeedRotRate() {
         double currentAngle =  RobotContainer.drivetrain.getState().Pose.getRotation().getRadians();
-        double angle = 180.0;
+        double angle = Math.PI;
 
         if (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red))
             angle = 0.0;
@@ -412,6 +412,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
         logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
         logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
+        logger.put("Offset", lookupTableUtil.getOffset(), true);
+
 
     }
 

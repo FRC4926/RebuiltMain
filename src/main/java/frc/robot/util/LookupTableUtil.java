@@ -18,6 +18,7 @@ public class LookupTableUtil {
     private double distanceToHub = 0.0;
     private double distanceToFeed = 0.0;
     private int currentRange = 0;
+    private double offset = 0.8;
 
     public LookupTableUtil()
     {
@@ -123,8 +124,23 @@ public class LookupTableUtil {
 
         effectiveHubPose = getUnmodifiedHubPose();
         // distanceToHub = SmartDashboard.getNumber("Sim distance", 0.0);
-        distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose);
+        distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose) + getOffset();
         distanceToFeed = distanceToFeed(RobotContainer.drivetrain.getState().Pose);
+    }
+
+    public double getOffset()
+    {
+        return offset;
+    }
+
+    public void incrementOffset()
+    {
+        offset += 0.05;
+    }
+
+    public void decrementOffset()
+    {
+        offset -= 0.05;
     }
 
 

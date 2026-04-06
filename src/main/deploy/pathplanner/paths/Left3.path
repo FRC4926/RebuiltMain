@@ -4,15 +4,15 @@
     {
       "anchor": {
         "x": 7.684,
-        "y": 4.652
+        "y": 4.53
       },
       "prevControl": null,
       "nextControl": {
         "x": 7.898976432702863,
-        "y": 4.524386782101729
+        "y": 4.402386782101729
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "l2"
     },
     {
       "anchor": {
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -90.0
   },
   "useDefaultConstraints": false
 }
