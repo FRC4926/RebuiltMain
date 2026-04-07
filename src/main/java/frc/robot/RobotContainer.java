@@ -96,6 +96,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("RunIntake", intakeSubsystem.pivotDownCommand().andThen(intakeSubsystem.intakeRunCommand()));
         NamedCommands.registerCommand("StopIntake", intakeSubsystem.zeroIntake());
         NamedCommands.registerCommand("PivotUp", intakeSubsystem.pivotUpCommand());
+        NamedCommands.registerCommand("PushAndZeroPivot", intakeSubsystem.pushAndZeroPivotCommand());
 
         autonChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Autonomous", autonChooser);
@@ -147,8 +148,10 @@ public class RobotContainer {
 
         operatorController.button(6).onTrue(new InstantCommand(() -> shooterSubsystem.hoodMotor.setPosition(0)).ignoringDisable(true));
 
-        operatorController.button(11).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.incrementOffset()));
-        operatorController.button(12).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.decrementOffset()));
+        operatorController.button(11).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.incrementOffset()).ignoringDisable(true));
+        operatorController.button(12).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.decrementOffset()).ignoringDisable(true));
+
+        operatorController.button(23).whileTrue(intakeSubsystem.pushAndZeroPivotCommand());
 
         driverController.leftBumper().whileTrue(manualShoot());
         driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)));
@@ -180,16 +183,20 @@ public class RobotContainer {
 
     private Command shoot()
     {
-        return Commands.parallel(
-            drivetrain.snapCommand(drive),
-            shooterSubsystem.setNormalPIDValue()
-            .andThen(shooterSubsystem.canShootCommand())
-            .andThen((new WaitUntilCommand(() -> drivetrain.atSnapTarget())).withTimeout(1))
-            .andThen(Commands.parallel(
-                shooterSubsystem.shootCommand(), 
-                Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand()),
-                Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue()))));
+        return Commands.parallel(shooterSubsystem.canShootCommand(), drivetrain.snapCommand(drive).until(() -> drivetrain.atSnapTarget()).withTimeout(1.5)) //check if can shoot
+            .andThen(
+                Commands.parallel(
+                    shooterSubsystem.shootCommand(), 
+                    Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
+                    Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand()),
+                    drivetrain.snapCommand(drive) //drivetrain.applyRequest(() -> brake)
+                    ));
+    }
+
+    private Command alignShoot()
+    {
+        return drivetrain.snapCommand(drive).until(() -> drivetrain.atSnapTarget()).withTimeout(1.5) //check if can shoot
+            .andThen(drivetrain.applyRequest(() -> brake));
     }
 
 

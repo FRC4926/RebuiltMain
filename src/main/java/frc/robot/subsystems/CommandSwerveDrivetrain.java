@@ -530,13 +530,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         logger.put("Hub PID Error", DriveConstants.snapToHubPID.getError());
 
-        logger.put("In Alliance", RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone(), true);
+        logger.put("Feeding", !RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone(), true);
 
         logger.put("Manual Alignment", overrideSnapToHub, true);
 
         logger.put("Total Drive Supply Current", getTotalDriveSupplyCurrent());
         logger.put("Total Steer Supply Current", getTotalSteerSupplyCurrent());
-        
+
+        logger.put("Snap Error", DriveConstants.snapToHubPID.getError());
+        logger.put("At Target", DriveConstants.snapToHubPID.atSetpoint());
+
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.

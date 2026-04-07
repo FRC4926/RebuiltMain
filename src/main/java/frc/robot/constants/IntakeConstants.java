@@ -1,11 +1,16 @@
 package frc.robot.constants;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.Slot2Configs;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+
+import edu.wpi.first.units.measure.Voltage;
 
 public class IntakeConstants {
     public static final int intake1CanId = 14; //intakeRight
@@ -56,6 +61,10 @@ public class IntakeConstants {
     public static final double pivotOscillateUp1Position = 45;
     public static final double pivotOscillateUp2Position = 85;
     public static final double pivotOscillateDownPosition = 10;
+
+    public static final VoltageOut zeroPivotVoltage = new VoltageOut(-2);
+    public static final double pivotStallStatorCurrent = 30;
+    public static final double pivotStallMaxVelocityRPS = -1;
 
     public static final double pivotOscillateBetweenTime = 0.5;
 

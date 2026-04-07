@@ -1,32 +1,22 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.RobotContainer;
 import frc.robot.constants.IntakeConstants;
-import frc.robot.constants.ShooterConstants;
 import frc.robot.util.LoggerUtil;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 
 public class IntakeSubsystem extends SubsystemBase {
     public final TalonFX intakeMotor1  = new TalonFX(IntakeConstants.intake1CanId); //intakeRight
@@ -139,9 +129,7 @@ public class IntakeSubsystem extends SubsystemBase {
      public Command pivotOscillateCommand(double angle){
         return runOnce(() -> setOscillatePosition(angle));
     }
-    public Command pivotZeroCommand(){
-        return runOnce(this::setPivotZero);
-    }
+
     public Command intakeRunCommand(){
         return runOnce(this::intakeRun);
     }
@@ -150,7 +138,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command clearIntake() {
-        return runOnce(this::zeroPivot);
+        return runOnce(this::applyZeroPivotEffort);
     }
 
     public void zeroVelocity(){
@@ -158,7 +146,7 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeMotor2.setControl(new DutyCycleOut(0));
     }
 
-    public void zeroPivot(){
+    public void applyZeroPivotEffort(){
         pivotMotor.setControl(new DutyCycleOut(0));
     }
 
@@ -167,9 +155,6 @@ public class IntakeSubsystem extends SubsystemBase {
     }
     public void setPivotUpPosition() {
         pivotMotor.setControl(new PositionVoltage(rotationsFromDegrees(IntakeConstants.pivotUpPosition)).withSlot(1));
-    }
-    public void setPivotZero(){
-        pivotMotor.setControl(new DutyCycleOut(0));
     }
 
     private double rotationsFromDegrees(double degrees)
@@ -214,8 +199,6 @@ public class IntakeSubsystem extends SubsystemBase {
         return intakeMotor2.getSupplyCurrent().getValueAsDouble();
     }
 
-
-
     public double getPivotStatorCurrent() {
         return pivotMotor.getStatorCurrent().getValueAsDouble();
     }
@@ -254,13 +237,21 @@ public class IntakeSubsystem extends SubsystemBase {
         });
     }
 
+    public Command pushAndZeroPivotCommand() {
+        return Commands.sequence(
+            runOnce(() -> pivotMotor.setControl(IntakeConstants.zeroPivotVoltage)),
+            Commands.idle().until(() -> getPivotVelocity() > IntakeConstants.pivotStallMaxVelocityRPS && getPivotStatorCurrent() >= IntakeConstants.pivotStallStatorCurrent),
+            runOnce(() -> pivotMotor.setPosition(0)),
+            runOnce(() -> pivotMotor.setControl(new DutyCycleOut(0)))
+        );
+    }
+
     @Override
     public void periodic() {
         logger.put("Intake 1 RPM", getIntake1RPM());
         logger.put("Intake 2 RPM", getIntake2RPM());
         logger.put("Intake Average RPM", getIntakeAverageRPM());
         logger.put("Pivot Angle", getPivotAngle(), true);
-
 
         logger.put("Intake 1 Stator Current", getIntake1StatorCurrent());
         logger.put("Intake 2 Stator Current", getIntake2StatorCurrent());
