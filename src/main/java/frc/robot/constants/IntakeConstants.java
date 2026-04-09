@@ -53,7 +53,7 @@ public class IntakeConstants {
         .withKS(0)
         .withKV(0.108);
 
-    public static final double targetRPS = 4000.0/60.0;
+    public static final double targetRPS = 6000.0/60.0;
     public static final double intakeMotorEffort = 1;
     public static final double gearRatio = 62.1176470588; //(22/17)*48
     public static final double pivotUpPosition = 138;

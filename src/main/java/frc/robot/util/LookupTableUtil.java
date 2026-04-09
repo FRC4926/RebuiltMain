@@ -18,13 +18,13 @@ public class LookupTableUtil {
     private double distanceToHub = 0.0;
     private double distanceToFeed = 0.0;
     private int currentRange = 0;
-    private double offset = 0.8;
+    private double offset = 0.6;
 
     public LookupTableUtil()
     {
         // SmartDashboard.putNumber("Sim distance", 0.0);
         SmartDashboard.putNumber("Manual Hood Angle", 0);
-        SmartDashboard.putNumber("Manual RMP", 0);
+        SmartDashboard.putNumber("Manual RPM", 0);
     }
 
     public double getHoodAngle()
@@ -34,17 +34,17 @@ public class LookupTableUtil {
             angle = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
         else
             angle = ShooterConstants.feedAngle;
-        // return SmartDashboard.getNumber("Manual Hood Angle", 0);
-        return angle;
+        return SmartDashboard.getNumber("Manual Hood Angle", 0);
+        // return angle;
     }
 
     public double getTargetRPM()
     {
-        // return SmartDashboard.getNumber("Manual RMP", 0);
-        if (inAllianceZone())
-            return ShooterConstants.RPMRanges[currentRange];
-        else
-            return ShooterConstants.feedRPM;
+        return SmartDashboard.getNumber("Manual RPM", 0);
+        // if (inAllianceZone())
+        //     return ShooterConstants.RPMRanges[currentRange];
+        // else
+        //     return ShooterConstants.feedRPM;
     }
 
     public double distanceToHub(Pose2d robotPose)

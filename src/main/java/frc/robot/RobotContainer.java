@@ -130,8 +130,9 @@ public class RobotContainer {
         
         driverController.leftTrigger().whileTrue(shoot());
         
-        driverController.rightTrigger().whileTrue(intakeSubsystem.intakeRunCommand().andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
-
+        driverController.rightTrigger().whileTrue(hopperSubsystem.positiveEffortCommand().andThen(new WaitCommand(.5)).andThen(intakeSubsystem.intakeRunCommand()).andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
+        // driverController.rightTrigger().whileTrue(intakeSubsystem.intakeRunCommand().andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
+        
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
 
         driverController.a().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));
@@ -183,13 +184,13 @@ public class RobotContainer {
 
     private Command shoot()
     {
-        return Commands.parallel(shooterSubsystem.canShootCommand(), drivetrain.snapCommand(drive).until(() -> drivetrain.atSnapTarget()).withTimeout(1.5)) //check if can shoot
+        return Commands.parallel(shooterSubsystem.canShootCommand(), drivetrain.snapCommand(drive).until(() -> drivetrain.atSnapTarget())) //check if can shoot
             .andThen(
                 Commands.parallel(
                     shooterSubsystem.shootCommand(), 
                     Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
                     Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand()),
-                    drivetrain.snapCommand(drive) //drivetrain.applyRequest(() -> brake)
+                    drivetrain.snapCommand(drive)
                     ));
     }
 
@@ -202,13 +203,11 @@ public class RobotContainer {
 
     //change to be basically shoot
     private Command manualShoot(){
-        return shooterSubsystem.setHighPIDValue()
-            .andThen(shooterSubsystem.canShootCommand())
+        return shooterSubsystem.canShootManualCommand()
             .andThen(Commands.parallel(
                 shooterSubsystem.manualShotCommand(), 
                 Commands.sequence(new WaitCommand(0.5), hopperSubsystem.positiveEffortCommand()), 
-                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand()),
-                Commands.sequence(new WaitCommand(2), shooterSubsystem.setNormalPIDValue())));
+                Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeRunCommand(), intakeSubsystem.oscillatePivotCommand())));
     }
 
     public Command getAutonomousCommand() {

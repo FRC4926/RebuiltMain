@@ -29,10 +29,10 @@ public class IntakeSubsystem extends SubsystemBase {
         // SmartDashboard.putNumber("Target Pivot Angle", 0.0);
 
         intakeMotor1.getConfigurator().apply(
-            new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
-        );
-         intakeMotor2.getConfigurator().apply(
             new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)
+        );
+        intakeMotor2.getConfigurator().apply(
+            new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)
         );
          pivotMotor.getConfigurator().apply(
             new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive)

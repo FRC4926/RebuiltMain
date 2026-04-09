@@ -117,7 +117,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void init()
     {
         // setGyro();
-        DriveConstants.snapToHubPID.setTolerance(DriveConstants.snapToHubRotationTolerance);
+        DriveConstants.snapToHubPID.setTolerance(1*Math.PI/180.0);
         DriveConstants.snapToHubPID.enableContinuousInput(-Math.PI, Math.PI);
         try{
             config = RobotConfig.fromGUISettings();
@@ -294,7 +294,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         {
             return true;
         }
-        return DriveConstants.snapToHubPID.atSetpoint();
+
+        return false;
+
+        // return DriveConstants.snapToHubPID.atSetpoint() //&& getState().Speeds.omegaRadiansPerSecond < (2.0*Math.PI/180.0);
+        // return Math.abs(DriveConstants.snapToHubPID.getError()) < 10*Math.PI/180.0;
+    }
+
+    public boolean atSnapTargetPrecise() {
+        if (overrideSnapToHub)
+        {
+            return true;
+        }
+
+        // return DriveConstants.snapToHubPID.atSetpoint() //&& getState().Speeds.omegaRadiansPerSecond < (2.0*Math.PI/180.0);
+        return Math.abs(DriveConstants.snapToHubPID.getError()) < 0.5*Math.PI/180.0;
     }
 
     /**
@@ -459,6 +473,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     }
 
+    public Command zeroDriveCommandOnce(RobotCentric drive)
+    {
+        return this.applyRequestOnce(zeroDrive(drive));
+    }
+
+    public Command zeroDriveCommand(RobotCentric drive)
+    {
+        return this.applyRequest(() -> zeroDrive(drive));
+    }
+
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 
@@ -522,9 +546,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
 
     @Override
-    public void periodic() {
-
-        
+    public void periodic() {        
         logger.put("Yaw", getPigeon2().getYaw().getValueAsDouble() % 360);
         logger.put("Pitch", getPigeon2().getPitch().getValueAsDouble());
 
@@ -537,8 +559,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         logger.put("Total Drive Supply Current", getTotalDriveSupplyCurrent());
         logger.put("Total Steer Supply Current", getTotalSteerSupplyCurrent());
 
+        logger.put("Snap Error Abs", Math.abs(DriveConstants.snapToHubPID.getError()));
         logger.put("Snap Error", DriveConstants.snapToHubPID.getError());
+        
         logger.put("At Target", DriveConstants.snapToHubPID.atSetpoint());
+
+        logger.put("Rotational velocity", getState().Speeds.omegaRadiansPerSecond);
 
         /*
          * Periodically try to apply the operator perspective.

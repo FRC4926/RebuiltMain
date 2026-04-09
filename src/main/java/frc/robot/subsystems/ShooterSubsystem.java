@@ -42,6 +42,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     private boolean manualShot = false;
 
+    private double snapPIDCalc = 0.0;
+
     public ShooterSubsystem() {
 
         // SmartDashboard.putNumber("Target RPM", 0); //4000
@@ -112,6 +114,7 @@ public class ShooterSubsystem extends SubsystemBase {
         ParentDevice.resetSignalFrequenciesForAll(shooterMotor1, shooterMotor2);
         ParentDevice.optimizeBusUtilizationForAll(feederMotor, hoodMotor);
 
+        setNormalPIDValue();
     }
 
     public void shooterIdle(){
@@ -133,7 +136,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }    
     
-    public double getRotRate() {
+    public void calcRotRate() {
         SwerveDriveState state = RobotContainer.drivetrain.getState();
         Pose2d effectiveHubPose = lookupTableUtil.getEffectiveHubPose();
         double desiredX = effectiveHubPose.getX();
@@ -143,8 +146,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
         double currentAngle = state.Pose.getRotation().getRadians();
         double angle = Math.atan2(desiredY - currentY, desiredX - currentX);
-        double rotRate = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
-        return rotRate;
+        snapPIDCalc = DriveConstants.snapToHubPID.calculate(currentAngle, angle);
+    }
+
+    public double getRotRate()
+    {
+        return snapPIDCalc;
     }
 
     public double getFeedRotRate() {
@@ -313,6 +320,12 @@ public class ShooterSubsystem extends SubsystemBase {
         return Commands.idle().until(() -> canShoot());
     }
 
+    public Command canShootManualCommand()
+    {
+        return Commands.idle().until(() -> canShootManual());
+    }
+
+
     public void unJamShooter()
     {
         shooterMotor1.setControl(new DutyCycleOut(-0.2));
@@ -329,12 +342,21 @@ public class ShooterSubsystem extends SubsystemBase {
         manualShot = true;
         setHoodAngleDegrees(ShooterConstants.manualAngle);
         setShooterRPMManual(ShooterConstants.manualRPM);
-        setFeedEffort(-0.2);
+        // setHoodAngleDegrees(lookupTableUtil.getHoodAngle());
+        // setShooterRPMManual(lookupTableUtil.getTargetRPM());
+        setFeedEffort(ShooterConstants.feederEffort);
     }
 
     public boolean canShootManual()
     {
+        manualShot = true;
+        setHoodAngleDegrees(ShooterConstants.manualAngle);
+        setShooterRPMManual(ShooterConstants.manualRPM);
+        // setHoodAngleDegrees(lookupTableUtil.getHoodAngle());
+        // setShooterRPMManual(lookupTableUtil.getTargetRPM());
         return Math.abs(ShooterConstants.manualRPM - getShooterAverageRPM()) < ShooterConstants.RPMTolerance && Math.abs(ShooterConstants.manualAngle - getHoodAngleDegrees()) < ShooterConstants.angleTolerance;
+        // return Math.abs(lookupTableUtil.getTargetRPM() - getShooterAverageRPM()) < ShooterConstants.RPMTolerance && Math.abs(lookupTableUtil.getHoodAngle() - getHoodAngleDegrees()) < ShooterConstants.angleTolerance;
+
     }
 
     public Command setHighPIDValue(){
@@ -354,7 +376,7 @@ public class ShooterSubsystem extends SubsystemBase {
     
     public Command manualShotCommand()
     {
-        return runOnce(this::manualShot).andThen(Commands.idle().until(() -> canShootManual())).andThen(run(() -> setFeedEffort(ShooterConstants.feederEffort)));
+        return run(this::manualShot);
     }
 
     public void setManual(boolean val)
@@ -366,6 +388,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public void periodic() {
         lookupTableUtil.updateEffectiveDistance();
         lookupTableUtil.updateCurrentRange();
+        calcRotRate();
 
         // double targetRPM = SmartDashboard.getNumber("Target RPM", 0); //40000.0
 
@@ -394,6 +417,9 @@ public class ShooterSubsystem extends SubsystemBase {
         logger.put("Shooter Avg RPM", getShooterAverageRPM());
         logger.put("Shooter 1 RPM", getShooter1RPM());
         logger.put("Shooter 2 RPM", getShooter2RPM());
+
+        logger.put("Feeder RPM", feederMotor.getVelocity().getValueAsDouble()*60.0);
+
 
         logger.put("RPM Error", (getRPMError()));
 
