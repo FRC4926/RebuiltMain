@@ -96,6 +96,11 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeMotor2.setControl(IntakeConstants.intakeRunControl);
     }
 
+    public void intakeShoot() {
+        intakeMotor1.setControl(IntakeConstants.intakeShootControl);
+        intakeMotor2.setControl(IntakeConstants.intakeShootControl);
+    }
+
     public void setReferenceVelocity(double effort) {
         intakeMotor1.setControl(new DutyCycleOut(effort));
         intakeMotor2.setControl(new DutyCycleOut(effort));
@@ -133,6 +138,11 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command intakeRunCommand(){
         return runOnce(this::intakeRun);
     }
+
+    public Command intakeShootCommand(){
+        return runOnce(this::intakeRun);
+    }
+
     public Command zeroIntake() {
         return runOnce(this::zeroVelocity);
     }

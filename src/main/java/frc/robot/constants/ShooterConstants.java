@@ -85,11 +85,10 @@ public class ShooterConstants {
     public static final InterpolatingDoubleTreeMap distanceToAngle3 = new InterpolatingDoubleTreeMap();
     static 
     {
-		distanceToAngle3.put(3.825, 17.25);
-        distanceToAngle3.put(4.11, 17.75);
-        distanceToAngle3.put(4.44, 18.5);
-        distanceToAngle3.put(4.765, 20.25);
-        distanceToAngle3.put(5.095, 24.0);
+		distanceToAngle3.put(3.825, 16.5);
+        distanceToAngle3.put(4.11, 18.6);
+        distanceToAngle3.put(4.44, 20.25);
+        distanceToAngle3.put(4.765, 21.25);
         distanceToAngle3.put(6.0, 24.0);
 
     }
@@ -104,10 +103,10 @@ public class ShooterConstants {
 
     //RPM ranges each with their own angle LUT
     public static final InterpolatingDoubleTreeMap[] angleLookupTables = {distanceToAngle1, distanceToAngle2, distanceToAngle3};
-    public static final double[] RPMRanges = {3800, 4200, 4800}; //3850, 4350
+    public static final double[] RPMRanges = {3800, 4200, 4500};
     public static final double feedRPM = 4300;
     public static final double[] rangeDistanceThresholds = {2.937, 3.825, 6.0};
-    public static final double distanceThres = 0.15;
+    public static final double distanceThres = 0.05; //.15
 
     public static final double feedAngle = 22.5;
 
@@ -122,4 +121,14 @@ public class ShooterConstants {
     //manual
     public static final double manualRPM = 4200;
     public static final double manualAngle = 18.0;
+
+    //one lookup code
+    public static final double speed1 = 3800;
+    public static final double speed2 = 4500;
+
+    public static final double distance1 = 1.4;
+    public static final double distance2 = 4.765;
+
+    public static final double angle1 = 8;
+    public static final double angle2 = 21.25;
 }

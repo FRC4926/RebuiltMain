@@ -53,11 +53,13 @@ public class IntakeConstants {
         .withKS(0)
         .withKV(0.108);
 
-    public static final double targetRPS = 6000.0/60.0;
+    public static final double targetRPS = 5400.0/60.0;
+    public static final double targetShootRPS = 4000.0/60.0;
     public static final double intakeMotorEffort = 1;
     public static final double gearRatio = 62.1176470588; //(22/17)*48
     public static final double pivotUpPosition = 138;
-    public static final double pivotDownPosition = -1;
+    
+    public static final double pivotDownPosition = -5;
     public static final double pivotOscillateUp1Position = 45;
     public static final double pivotOscillateUp2Position = 85;
     public static final double pivotOscillateDownPosition = 10;
@@ -69,4 +71,6 @@ public class IntakeConstants {
     public static final double pivotOscillateBetweenTime = 0.5;
 
     public static final ControlRequest intakeRunControl = new VelocityVoltage(targetRPS).withSlot(0);
+    public static final ControlRequest intakeShootControl = new VelocityVoltage(targetShootRPS).withSlot(0);
+
 }

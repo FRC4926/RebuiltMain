@@ -117,7 +117,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void init()
     {
         // setGyro();
-        DriveConstants.snapToHubPID.setTolerance(1*Math.PI/180.0);
+        DriveConstants.snapToHubPID.setTolerance(0);
         DriveConstants.snapToHubPID.enableContinuousInput(-Math.PI, Math.PI);
         try{
             config = RobotConfig.fromGUISettings();
@@ -295,10 +295,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return true;
         }
 
-        return false;
+        // return false;
 
-        // return DriveConstants.snapToHubPID.atSetpoint() //&& getState().Speeds.omegaRadiansPerSecond < (2.0*Math.PI/180.0);
-        // return Math.abs(DriveConstants.snapToHubPID.getError()) < 10*Math.PI/180.0;
+        // return DriveConstants.snapToHubPID.atSetpoint() // getState().Speeds.omegaRadiansPerSecond < (2.0*Math.PI/180.0);
+        return Math.abs(DriveConstants.snapToHubPID.getError()) < 2*Math.PI/180.0;
     }
 
     public boolean atSnapTargetPrecise() {
@@ -307,8 +307,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return true;
         }
 
-        // return DriveConstants.snapToHubPID.atSetpoint() //&& getState().Speeds.omegaRadiansPerSecond < (2.0*Math.PI/180.0);
-        return Math.abs(DriveConstants.snapToHubPID.getError()) < 0.5*Math.PI/180.0;
+        return Math.abs(DriveConstants.snapToHubPID.getError()) < 1*Math.PI/180.0 && Math.abs(getState().Speeds.omegaRadiansPerSecond) < (1.0*Math.PI/180.0);
+        // return Math.abs(DriveConstants.snapToHubPID.getError()) < 0.5*Math.PI/180.0;
     }
 
     /**

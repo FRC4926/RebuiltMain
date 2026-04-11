@@ -384,6 +384,23 @@ public class ShooterSubsystem extends SubsystemBase {
         manualShot = val;
     }
 
+    public double calculateC(double xi){
+        double c = (xi - ShooterConstants.distance1)/(ShooterConstants.distance2-ShooterConstants.distance1);
+        return c;
+    }
+
+    public double calculateYi(){
+        double c = calculateC(lookupTableUtil.getDistanceToHub());
+        double yi = c*(ShooterConstants.angle2-ShooterConstants.angle1)+ShooterConstants.angle1;
+        return yi;
+    }
+
+    public double calculateZi(){
+        double c = calculateC(lookupTableUtil.getDistanceToHub());
+        double zi = c*(ShooterConstants.speed2-ShooterConstants.speed1)+ShooterConstants.speed1;
+        return zi;
+    }
+
     @Override
     public void periodic() {
         lookupTableUtil.updateEffectiveDistance();
