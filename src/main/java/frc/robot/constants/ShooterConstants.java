@@ -122,4 +122,13 @@ public class ShooterConstants {
     //manual
     public static final double manualRPM = 4200;
     public static final double manualAngle = 18.0;
+
+    public static final double speed1 = 3800;
+    public static final double speed2 = 4500;
+
+    public static final double distance1 = 0;
+    public static final double distance2 = 18;
+
+    public static final double angle1 = 0;
+    public static final double angle2 = 25;
 }
