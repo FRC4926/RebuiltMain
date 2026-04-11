@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constants.DriveConstants;
 import frc.robot.util.LoggerUtil;
+import frc.robot.util.TimerUtil;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -59,6 +60,12 @@ public class Robot extends TimedRobot {
             true);
 
         logger.put("Battery Voltage", RobotController.getBatteryVoltage());
+
+        logger.put("Match Time Left: ", TimerUtil.getMatchTimeLeft());
+        logger.put("Won Auton ", TimerUtil.getWonAuton());
+
+
+        
 
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();

@@ -57,7 +57,7 @@ public class IntakeConstants {
     public static final double targetShootRPS = 4000.0/60.0;
     public static final double intakeMotorEffort = 1;
     public static final double gearRatio = 62.1176470588; //(22/17)*48
-    public static final double pivotUpPosition = 138;
+    public static final double pivotUpPosition = 124;
     
     public static final double pivotDownPosition = -5;
     public static final double pivotOscillateUp1Position = 45;

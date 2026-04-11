@@ -400,7 +400,6 @@ public class ShooterSubsystem extends SubsystemBase {
         double zi = c*(ShooterConstants.speed2-ShooterConstants.speed1)+ShooterConstants.speed1;
         return zi;
     }
-
     @Override
     public void periodic() {
         lookupTableUtil.updateEffectiveDistance();

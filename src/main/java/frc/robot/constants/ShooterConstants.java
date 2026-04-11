@@ -111,7 +111,7 @@ public class ShooterConstants {
     public static final double feedAngle = 22.5;
 
     public static final double idleShootEffort = 0.5;
-    public static final double idleFeedEffort = -0.05;
+    public static final double idleFeedEffort = -0.1;
 
     public static final double RPMTolerance = 80;
     public static final double angleTolerance = 0.5;
@@ -122,7 +122,7 @@ public class ShooterConstants {
     public static final double manualRPM = 4200;
     public static final double manualAngle = 18.0;
 
-    //one lookup code
+    //calculations
     public static final double speed1 = 3800;
     public static final double speed2 = 4500;
 

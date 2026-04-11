@@ -36,6 +36,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ObjectDetectionSubsytem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.util.TimerUtil;
 
 public class RobotContainer {
 
@@ -90,7 +91,7 @@ public class RobotContainer {
         // NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
         // NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
 
-        NamedCommands.registerCommand("Shoot", shoot());
+        NamedCommands.registerCommand("Shoot", shoot().until(() -> (TimerUtil.getMatchTimeLeft() < 2.5)));
         NamedCommands.registerCommand("TrenchShot", manualShoot());
         NamedCommands.registerCommand("ClearIntake", intakeSubsystem.clearIntake());
         NamedCommands.registerCommand("RunIntake", intakeSubsystem.pivotDownCommand().andThen(intakeSubsystem.intakeRunCommand()));
@@ -131,7 +132,6 @@ public class RobotContainer {
         driverController.leftTrigger().whileTrue(shoot());
         
         driverController.rightTrigger().whileTrue(hopperSubsystem.positiveEffortCommand().andThen(new WaitCommand(.3)).andThen(intakeSubsystem.intakeRunCommand()).andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
-        // driverController.rightTrigger().whileTrue(intakeSubsystem.intakeRunCommand().andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
         
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -161,6 +161,8 @@ public class RobotContainer {
         // driverController.y().whileTrue(drivetrain.trenchFlyCommand());
 
         // new Trigger(shooterSubsystem::shouldUpdateShooter).whileTrue(shooterSubsystem.updateShooterCommand());
+
+        new Trigger(drivetrain::getTeleop).onTrue(new WaitCommand(5).andThen(new InstantCommand(() -> TimerUtil.updateAutonWinner())));
 
 
         // driverController.b().whileTrue(drivetrain.applyRequest(() ->
