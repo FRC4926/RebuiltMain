@@ -65,7 +65,7 @@ public class IntakeConstants {
     public static final double pivotOscillateDownPosition = 10;
 
     public static final VoltageOut zeroPivotVoltage = new VoltageOut(-2);
-    public static final double pivotStallStatorCurrent = 30;
+    public static final double pivotStallStatorCurrent = 25;
     public static final double pivotStallMaxVelocityRPS = -1;
 
     public static final double pivotOscillateBetweenTime = 0.5;

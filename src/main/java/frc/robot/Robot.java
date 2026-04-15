@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constants.DriveConstants;
 import frc.robot.util.LoggerUtil;
 import frc.robot.util.TimerUtil;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -61,14 +62,13 @@ public class Robot extends TimedRobot {
 
         logger.put("Battery Voltage", RobotController.getBatteryVoltage());
 
-        logger.put("Match Time Left: ", TimerUtil.getMatchTimeLeft());
-        logger.put("Won Auton ", TimerUtil.getWonAuton());
-
-
-        
+        logger.put("Period time left", getTime());
+        logger.put("Hub active", hubActive);
+        logger.put("Win status", TimerUtil.FMSworked);
 
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
+
     }
 
     @Override
@@ -104,11 +104,15 @@ public class Robot extends TimedRobot {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
 
-
+        daTimer.start();
     }
 
     @Override
-    public void teleopPeriodic() {}
+    public void teleopPeriodic() {
+
+        timerPeriodic();
+
+    }
 
     @Override
     public void teleopExit() {}
@@ -124,7 +128,45 @@ public class Robot extends TimedRobot {
     @Override
     public void testExit() {}
 
+    // ---------------------------
+    //  THE GREAT TIMER FUNCTIONS
+    // ---------------------------
+
+    private boolean hubActive = true;
+    private int[] periods = {10, 35, 60, 85, 110, 140};
+    private int periodOn = 0;
+    private int timerOffset = 0;
+    private Timer daTimer = new Timer();
+    private boolean pullWinFlag = true;
+
+    public void timerPeriodic(){
+        if(getTime() < 0){
+            updateTimer();
+        }
+
+        if (daTimer.get() > 10.1 && pullWinFlag){
+            hubActive = !TimerUtil.updateAutonWinner();
+            pullWinFlag = false;
+        }
+    }
+
+    public void updateTimer(){
+        periodOn++;
+
+        timerOffset = periods[periodOn];
+        hubActive = !hubActive;
+    }
+
+    public int getTime(){
+        return timerOffset - (int)daTimer.get();
+    }
+
+    // ---------------------------
+    //  continue
+    // ---------------------------
+
     @Override
+
     public void simulationInit()
     {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
@@ -139,6 +181,8 @@ public class Robot extends TimedRobot {
         RobotContainer.drivetrain.updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+        
+        
     }
 
     @Override

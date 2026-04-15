@@ -149,8 +149,11 @@ public class RobotContainer {
 
         operatorController.button(6).onTrue(new InstantCommand(() -> shooterSubsystem.hoodMotor.setPosition(0)).ignoringDisable(true));
 
+
         operatorController.button(11).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.incrementOffset()).ignoringDisable(true));
         operatorController.button(12).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.decrementOffset()).ignoringDisable(true));
+
+        operatorController.button(17).onTrue(intakeSubsystem.toggleOscillateStage());
 
         operatorController.button(23).whileTrue(intakeSubsystem.pushAndZeroPivotCommand());
 

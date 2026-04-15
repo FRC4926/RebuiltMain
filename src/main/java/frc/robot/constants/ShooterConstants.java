@@ -61,10 +61,10 @@ public class ShooterConstants {
     static 
     {
         distanceToAngle1.put(0.0, 8.0);
-	    distanceToAngle1.put(1.4, 8.0);
-        distanceToAngle1.put(1.75, 9.5);
-        distanceToAngle1.put(2.063, 11.0);
-        distanceToAngle1.put(2.34, 12.25);
+	    distanceToAngle1.put(1.393, 8.0);
+        distanceToAngle1.put(1.707, 9.5);
+        distanceToAngle1.put(2.003, 11.0);
+        distanceToAngle1.put(2.31, 12.25);
         distanceToAngle1.put(2.623, 13.25);
         distanceToAngle1.put(2.937, 14.5);
         distanceToAngle1.put(3.24, 15.625);
@@ -90,7 +90,6 @@ public class ShooterConstants {
         distanceToAngle3.put(4.44, 20.25);
         distanceToAngle3.put(4.765, 21.25);
         distanceToAngle3.put(6.0, 24.0);
-
     }
 
     // public static final InterpolatingDoubleTreeMap distanceToAngleFeed = new InterpolatingDoubleTreeMap();

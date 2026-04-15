@@ -562,7 +562,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         logger.put("Snap Error Abs", Math.abs(DriveConstants.snapToHubPID.getError()));
         logger.put("Snap Error", DriveConstants.snapToHubPID.getError());
         
-        logger.put("At Target", DriveConstants.snapToHubPID.atSetpoint());
+        logger.put("At Target", atSnapTarget());
+        logger.put("At Target Precise", atSnapTargetPrecise());
 
         logger.put("Rotational velocity", getState().Speeds.omegaRadiansPerSecond);
 

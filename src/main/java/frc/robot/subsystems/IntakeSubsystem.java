@@ -13,8 +13,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.RobotContainer;
 import frc.robot.constants.IntakeConstants;
 import frc.robot.util.LoggerUtil;
 
@@ -24,6 +26,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public final TalonFX pivotMotor  = new TalonFX(IntakeConstants.pivotCanId);
     
     private LoggerUtil logger = new LoggerUtil("Intake Subsystem");
+
+    private boolean skipOscillateStage = false;
 
     public IntakeSubsystem() {
         // SmartDashboard.putNumber("Target Pivot Angle", 0.0);
@@ -76,6 +80,14 @@ public class IntakeSubsystem extends SubsystemBase {
         ParentDevice.optimizeBusUtilizationForAll(pivotMotor);
     }
 
+    public boolean getSkipOscillateStage() {
+        return skipOscillateStage;
+    }
+
+    public Command toggleOscillateStage() {
+        return new InstantCommand(() -> skipOscillateStage = !skipOscillateStage);
+    }
+
     public double getIntake1RPM()
     {
         return intakeMotor1.getVelocity().getValueAsDouble()*60.0;
@@ -106,10 +118,12 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeMotor2.setControl(new DutyCycleOut(effort));
     }
 
-    public Command oscillatePivotCommand()
-    {
-        return oscillateCommand(IntakeConstants.pivotOscillateUp1Position).repeatedly().withTimeout(3)
+    public Command oscillatePivotCommand() {
+        return defer(() -> {
+            double ocsillate1Position = (skipOscillateStage || !RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone()) ? IntakeConstants.pivotOscillateUp1Position: IntakeConstants.pivotOscillateUp2Position;
+            return oscillateCommand(ocsillate1Position).repeatedly().withTimeout(3)
                 .andThen(oscillateCommand(IntakeConstants.pivotOscillateUp2Position).repeatedly());
+        });
     }
 
     public Command oscillateCommand(double oscillateUpPosition)
@@ -270,5 +284,10 @@ public class IntakeSubsystem extends SubsystemBase {
         logger.put("Intake 2 Supply Current", getIntake2SupplyCurrent());
 
         logger.put("Intake Pivot Stator Current", getPivotStatorCurrent());
+
+        logger.put("PushAndZero: Velocity Done", getPivotVelocity() > IntakeConstants.pivotStallMaxVelocityRPS);
+        logger.put("PushAndZero: Current Good", getPivotStatorCurrent() >= IntakeConstants.pivotStallStatorCurrent);
+    
+        logger.put("SkipOscillate", getSkipOscillateStage());
     }
 }
