@@ -26,7 +26,7 @@ public class VisionConstants {
     };
 
     public static final double kalmanPositionStdDevCoeefficient = 0.33; //0.3
-    public static final double kalmanRotStdDevCoeefficient = Double.POSITIVE_INFINITY; //0.6
+    public static final double kalmanRotStdDevCoeefficient = 1.5; //0.6
 
     // public static final double kalmanRotationStdDev = 0.99;
 
