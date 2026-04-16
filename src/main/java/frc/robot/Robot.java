@@ -151,6 +151,8 @@ public class Robot extends TimedRobot {
     }
 
     public void updateTimer(){
+        if (periodOn >= periods.length-1) return;
+
         periodOn++;
 
         timerOffset = periods[periodOn];

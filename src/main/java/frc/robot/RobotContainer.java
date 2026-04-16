@@ -4,9 +4,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -17,17 +15,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.DriveConstants;
-import frc.robot.constants.IntakeConstants;
 import frc.robot.constants.ShooterConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -91,8 +84,9 @@ public class RobotContainer {
         // NamedCommands.registerCommand("AutoFaceHub", drivetrain.snapToHuAutonCommand(drive));
         // NamedCommands.registerCommand("ZeroDrive", new InstantCommand(() -> drivetrain.zeroDrive(relativeDrive)));
 
-        NamedCommands.registerCommand("Shoot", shoot().until(() -> (TimerUtil.getMatchTimeLeft() < 2.5)));
-        NamedCommands.registerCommand("TrenchShot", manualShoot());
+        NamedCommands.registerCommand("IdleShoot", shooterSubsystem.shooterIdleCommand());
+        NamedCommands.registerCommand("Shoot", shoot().until(() -> (TimerUtil.getMatchTimeLeft() < 2.5)).andThen(shooterSubsystem.shooterIdleCommand()));
+        NamedCommands.registerCommand("TrenchShot", intakeSubsystem.toggleOscillateStage().andThen(manualShoot().withTimeout(4.25)).andThen(intakeSubsystem.toggleOscillateStage()).andThen(shooterSubsystem.shooterIdleCommand()));
         NamedCommands.registerCommand("ClearIntake", intakeSubsystem.clearIntake());
         NamedCommands.registerCommand("RunIntake", intakeSubsystem.pivotDownCommand().andThen(intakeSubsystem.intakeRunCommand()));
         NamedCommands.registerCommand("StopIntake", intakeSubsystem.zeroIntake());
@@ -153,9 +147,13 @@ public class RobotContainer {
         operatorController.button(11).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.incrementOffset()).ignoringDisable(true));
         operatorController.button(12).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.decrementOffset()).ignoringDisable(true));
 
+        operatorController.button(13).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.incrementOffsetHood()).ignoringDisable(true));
+        operatorController.button(14).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.decrementOffsetHood()).ignoringDisable(true));
+
+
         operatorController.button(17).onTrue(intakeSubsystem.toggleOscillateStage());
 
-        operatorController.button(23).whileTrue(intakeSubsystem.pushAndZeroPivotCommand());
+        // operatorController.button(23).whileTrue(intakeSubsystem.pushAndZeroPivotCommand());
 
         driverController.leftBumper().whileTrue(manualShoot());
         driverController.leftBumper().onFalse(new InstantCommand(() -> shooterSubsystem.setManual(false)));
@@ -208,7 +206,9 @@ public class RobotContainer {
 
     //change to be basically shoot
     private Command manualShoot(){
-        return shooterSubsystem.canShootManualCommand()
+        return drivetrain.zeroDriveCommandOnce(relativeDrive)
+            .andThen(drivetrain.applyRequestOnce(() -> brake))
+            .andThen(shooterSubsystem.canShootManualCommand())
             .andThen(Commands.parallel(
                 shooterSubsystem.manualShotCommand(), 
                 Commands.sequence(new WaitCommand(0.25), hopperSubsystem.positiveEffortCommand()), 

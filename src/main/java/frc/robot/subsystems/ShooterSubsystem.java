@@ -455,7 +455,7 @@ public class ShooterSubsystem extends SubsystemBase {
         logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
         logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
         logger.put("Offset", lookupTableUtil.getOffset(), true);
-
+        logger.put("Hood Offset (deg)", lookupTableUtil.getOffsetHood(), true);
 
     }
 

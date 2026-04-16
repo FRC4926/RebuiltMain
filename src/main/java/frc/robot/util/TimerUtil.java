@@ -1,6 +1,5 @@
 package frc.robot.util;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class TimerUtil {
@@ -25,43 +24,31 @@ public class TimerUtil {
 
     public static boolean updateAutonWinner()
     {
-        String gameData = DriverStation.getGameSpecificMessage();
-        Alliance allianceColor = getAlliance();
-
-        if (gameData.length() > 0)
-        {
-            switch (gameData.charAt(0)) {
-                case 'B':
-                    if (allianceColor.equals(Alliance.Blue))
-                    {
-                        wonAuton = true;
-                        FMSworked = "win state recieved!";
-                    } else
-                    {
-                        wonAuton = false;
-                        FMSworked = "win state recieved!";
-                    }
-                    break;
-            
-                case 'R':
-                    if (allianceColor.equals(Alliance.Red))
-                    {
-                        wonAuton = true;
-                        FMSworked = "win state recieved!";
-                    } else
-                    {
-                        wonAuton = false;
-                        FMSworked = "win state recieved!";
-                    }
-                    break;
-            
-                default:
-                    wonAuton = false;
-                    FMSworked = "no idea bruh";
-
-                    break;
-            }
+        String gameDataS = DriverStation.getGameSpecificMessage();
+        if (gameDataS.length() != 1) {
+            wonAuton = false;
+            FMSworked = "no idea bruh";
+            return false;
         }
+
+        char gameData = gameDataS.charAt(0);
+
+        if (gameData != 'R' && gameData != 'B') {
+            wonAuton = false;
+            FMSworked = "no idea bruh";
+            return false;
+        }
+
+        Alliance allianceColorA = getAlliance();
+        char allianceColor = 'R';
+        if (allianceColorA.equals(Alliance.Blue)) {
+            allianceColor = 'B';
+        }
+        
+        FMSworked = "win state recieved!";
+
+        wonAuton = allianceColor == gameData;
+
         return wonAuton;
     }
 

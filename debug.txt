@@ -1,41 +1,4 @@
-﻿﻿﻿ Qualification - 14:1, Field Time: 26/3/21 16:46:58
- -- FRC Driver Station - Version 26.0roboRIO connection times --  12:50:23.927 PM
-roboRIO disconnected:  12:50:46.734 PM
-roboRIO disconnected:  12:52:37.893 PM
-roboRIO disconnected:  12:55:16.208 PM
---------
-Duration : 07:13.40 sec
-Errors : 9
-Warnings : 102
-Messages : 117
-Brownouts : 1
-
-PDP #:   kJoule
----------------------
-     0:      0.00
-     1:      0.00
-     2:      0.00
-     3:      0.00
-     4:      0.00
-     5:      0.00
-     6:      0.00
-     7:      0.00
-     8:      0.00
-     9:      0.00
-    10:      0.00
-    11:      0.00
-    12:      0.00
-    13:      0.00
-    14:      0.00
-    15:      0.00
-    16:      0.00
-    17:      0.00
-    18:      0.00
-    19:      0.00
-    20:      0.00
-    21:      0.00
-    22:      0.00
-    23:      0.00
---------------------
-Total:     0.00
-
+﻿﻿﻿8:50:45.608 PM
+ Error at edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:457): The startCompetition() method (or methods called by it) should have handled the exception above.    See https://wpilib.org/stacktrace for more information. ERROR  1  The startCompetition() method (or methods called by it) should have handled the exception above.  edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:457)    The above stacktrace can help determine where the error occurred.  Warning at edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:450): The robot program quit unexpectedly. This is usually due to a code error. Warning  1  The robot program quit unexpectedly. This is usually due to a code error.
+  The above stacktrace can help determine where the error occurred.
+  See https://wpilib.org/stacktrace for more information.  edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:450)    	at frc.robot.Main.main(Main.java:13)  	at edu.wpi.first.wpilibj.RobotBase.startRobot(RobotBase.java:527)  	at edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:436)  	at edu.wpi.first.wpilibj.TimedRobot.startCompetition(TimedRobot.java:152)  	at edu.wpi.first.wpilibj.IterativeRobotBase.loopFunc(IterativeRobotBase.java:387)  	at frc.robot.Robot.teleopPeriodic(Robot.java:113)  	at frc.robot.Robot.timerPeriodic(Robot.java:144)  	at frc.robot.Robot.updateTimer(Robot.java:156)  Error at frc.robot.Robot.updateTimer(Robot.java:156): Unhandled exception: java.lang.ArrayIndexOutOfBoundsException: Index 6 out of bounds for length 6 ERROR  1  Unhandled exception: java.lang.ArrayIndexOutOfBoundsException: Index 6 out of bounds for length 6  frc.robot.Robot.updateTimer(Robot.java:156) 
