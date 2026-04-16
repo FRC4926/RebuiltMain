@@ -19,6 +19,7 @@ public class LookupTableUtil {
     private double distanceToFeed = 0.0;
     private int currentRange = 0;
     private double offset = 0.0;
+    private double offsetHood = 0.0;
 
     public LookupTableUtil()
     {
@@ -31,7 +32,7 @@ public class LookupTableUtil {
     {
         double angle = 0.0;
         if (inAllianceZone())
-            angle = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub);
+            angle = ShooterConstants.angleLookupTables[currentRange].get(distanceToHub) + offsetHood;
         else
             angle = ShooterConstants.feedAngle;
         // return SmartDashboard.getNumber("Manual Hood Angle", 0);
@@ -141,6 +142,21 @@ public class LookupTableUtil {
     public void decrementOffset()
     {
         offset -= 0.05;
+    }
+
+    public double getOffsetHood()
+    {
+        return offsetHood;
+    }
+
+    public void incrementOffsetHood()
+    {
+        offsetHood += 0.5;
+    }
+
+    public void decrementOffsetHood()
+    {
+        offsetHood -= 0.5;
     }
 
 
