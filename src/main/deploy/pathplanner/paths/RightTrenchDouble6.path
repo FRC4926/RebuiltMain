@@ -4,28 +4,28 @@
     {
       "anchor": {
         "x": 6.358,
-        "y": 4.715250000000001
+        "y": 3.285
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.731011882975273,
-        "y": 5.819207400885909
+        "x": 6.731004229526471,
+        "y": 2.1810400131495293
       },
       "isLocked": false,
-      "linkedName": "ltd5"
+      "linkedName": "rtd5"
     },
     {
       "anchor": {
-        "x": 5.9612727272727275,
-        "y": 7.230113636363637
+        "x": 5.961,
+        "y": 0.77
       },
       "prevControl": {
-        "x": 6.486679289359959,
-        "y": 6.562182815264003
+        "x": 6.4864038160484085,
+        "y": 1.437932981174702
       },
       "nextControl": {
-        "x": 5.806707541870111,
-        "y": 7.426606902053468
+        "x": 5.806435622432744,
+        "y": 0.5735060988548331
       },
       "isLocked": false,
       "linkedName": null
@@ -36,8 +36,8 @@
         "y": 0.51
       },
       "prevControl": {
-        "x": 5.5384318181818175,
-        "y": 0.45846590909091006
+        "x": 5.5384317051124805,
+        "y": 0.5615368497269395
       },
       "nextControl": null,
       "isLocked": false,
@@ -64,7 +64,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 1.0,
-    "rotation": -68.0
+    "rotation": 68.0
   },
   "useDefaultConstraints": false
 }
