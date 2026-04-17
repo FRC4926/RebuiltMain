@@ -65,6 +65,8 @@ public class Robot extends TimedRobot {
         logger.put("Period time left", getTime());
         logger.put("Hub active", hubActive);
         logger.put("Win status", TimerUtil.FMSworked);
+        logger.put("Raw Timer Value", daTimer.get());
+        logger.put("Match Time Left", TimerUtil.getMatchTimeLeft());
 
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
@@ -98,13 +100,13 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         RobotContainer.drivetrain.setTeleop(true);
-
+        RobotContainer.shooterSubsystem.setManual(false);
 
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
 
-        daTimer.start();
+        daTimer.restart();
     }
 
     @Override
