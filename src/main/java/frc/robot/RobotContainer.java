@@ -134,7 +134,7 @@ public class RobotContainer {
 
         operatorController.button(1).whileTrue(shooterSubsystem.unJamShooterCommand().andThen(Commands.idle()));
         
-        operatorController.button(2).whileTrue(intakeSubsystem.unJamIntakeCommand().andThen(Commands.idle()));
+        operatorController.button(2).whileTrue(hopperSubsystem.negativeEffortCommand().andThen(intakeSubsystem.unJamIntakeCommand()).andThen(Commands.idle()));
 
         operatorController.button(3).onTrue(new InstantCommand(() -> intakeSubsystem.pivotMotor.setPosition(0)).ignoringDisable(true));
         operatorController.button(4).onTrue(intakeSubsystem.pivotUpCommand());
