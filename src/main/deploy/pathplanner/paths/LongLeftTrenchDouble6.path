@@ -3,50 +3,61 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.358,
-        "y": 3.285
+        "x": 6.208636363636364,
+        "y": 4.22
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.694862169575662,
-        "y": 2.0346345507131516
+        "x": 6.581648246611637,
+        "y": 5.323957400885908
       },
       "isLocked": false,
-      "linkedName": "rtd5"
+      "linkedName": "llt5"
     },
     {
       "anchor": {
-        "x": 6.115875,
-        "y": 0.9326477272727276
+        "x": 6.074647727272727,
+        "y": 7.508397727272728
       },
       "prevControl": {
-        "x": 6.712378247071033,
-        "y": 1.5162365804386904
+        "x": 6.600054289359958,
+        "y": 6.840466906173094
       },
       "nextControl": {
-        "x": 5.723323536617202,
-        "y": 0.5485950679635532
+        "x": 5.92008254187011,
+        "y": 7.704890992962559
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.3224886363636355,
-        "y": 0.5306818181818187
+        "x": 4.322,
+        "y": 7.52
       },
       "prevControl": {
-        "x": 5.16790909090909,
-        "y": 0.4895227272727284
+        "x": 5.579431818181818,
+        "y": 7.46846590909091
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ltd6"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 4.58,
+        "y": 4.0
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.03590664272890485,
+      "maxWaypointRelativePos": 1.317773788150806,
+      "name": "Point Towards Zone"
+    }
+  ],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.0,
@@ -58,13 +69,13 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 85.0
+    "rotation": -85.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 1.0,
-    "rotation": 68.0
+    "rotation": -112.0
   },
   "useDefaultConstraints": false
 }

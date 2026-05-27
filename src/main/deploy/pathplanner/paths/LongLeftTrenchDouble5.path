@@ -33,15 +33,15 @@
     {
       "anchor": {
         "x": 6.208636363636364,
-        "y": 4.540034090909091
+        "y": 4.22
       },
       "prevControl": {
         "x": 6.2807840909090915,
-        "y": 5.972681818181818
+        "y": 5.6526477272727265
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ltd5"
+      "linkedName": "llt5"
     }
   ],
   "rotationTargets": [
@@ -56,8 +56,8 @@
       "minWaypointRelativePos": 0.9802513464991023,
       "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 1.5,
-        "maxAcceleration": 1.5,
+        "maxVelocity": 1.75,
+        "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,

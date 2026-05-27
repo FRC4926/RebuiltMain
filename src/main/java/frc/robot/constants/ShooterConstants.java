@@ -115,7 +115,7 @@ public class ShooterConstants {
     public static final double RPMTolerance = 80;
     public static final double angleTolerance = 0.5;
 
-    public static final double timeTillOscillation = 2.0;
+    public static final double timeTillOscillation = 0.5;
 
     //manual
     public static final double manualRPM = 4200;

@@ -121,7 +121,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command oscillatePivotCommand() {
         return defer(() -> {
             double ocsillate1Position = (skipOscillateStage || !RobotContainer.shooterSubsystem.lookupTableUtil.inAllianceZone()) ? IntakeConstants.pivotOscillateUp1Position: IntakeConstants.pivotOscillateUp2Position;
-            return oscillateCommand(ocsillate1Position).repeatedly().withTimeout(3)
+            return oscillateCommand(ocsillate1Position).repeatedly().withTimeout(0.5)
                 .andThen(oscillateCommand(IntakeConstants.pivotOscillateUp2Position).repeatedly());
         });
     }
