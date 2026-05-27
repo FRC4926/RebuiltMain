@@ -125,7 +125,7 @@ public class RobotContainer {
         
         driverController.leftTrigger().whileTrue(shoot());
         
-        driverController.rightTrigger().whileTrue(hopperSubsystem.positiveEffortCommand().andThen(new WaitCommand(.3)).andThen(intakeSubsystem.intakeRunCommand()).andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
+        driverController.rightTrigger().whileTrue(hopperSubsystem.positiveEffortCommand().andThen(new WaitCommand(.2)).andThen(intakeSubsystem.intakeRunCommand()).andThen(intakeSubsystem.pivotDownCommand()).andThen(Commands.idle()));
         
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
 

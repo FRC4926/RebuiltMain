@@ -33,15 +33,15 @@
     {
       "anchor": {
         "x": 6.208636363636364,
-        "y": 4.554
+        "y": 4.22
       },
       "prevControl": {
         "x": 6.2807840909090915,
-        "y": 5.986647727272727
+        "y": 5.6526477272727265
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ltd5.0"
+      "linkedName": "llt5"
     }
   ],
   "rotationTargets": [
