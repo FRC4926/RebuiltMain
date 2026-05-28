@@ -72,9 +72,9 @@ public class HopperSubsystem extends SubsystemBase {
     }
 
     public void positiveEffort() {
-        hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.sideEffort));
+        // hopperMotorLeft.setControl(new DutyCycleOut(HopperConstants.sideEffort));
         hopperMotorCenter.setControl(new DutyCycleOut(HopperConstants.centerEffort));
-        hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.sideEffort));
+        // hopperMotorRight.setControl(new DutyCycleOut(HopperConstants.sideEffort));
     }
 
     public void negativeEffort() {
