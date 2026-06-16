@@ -364,7 +364,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .withRotationalRate(RobotContainer.shooterSubsystem.getFeedRotRate());
     }
 
-    public Command snapToHubCommand(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
+    public Command snapToHubSOTMCommand(FieldCentric drive, Supplier<Double> x, Supplier<Double> y) {
         
         return this.applyRequest(() -> snapToHubStatic(drive, x, y));
     }

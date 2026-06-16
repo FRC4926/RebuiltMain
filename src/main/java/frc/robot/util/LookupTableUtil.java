@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -20,6 +21,9 @@ public class LookupTableUtil {
     private int currentRange = 0;
     private double offset = 0.0;
     private double offsetHood = 0.0;
+
+    private SlewRateLimiter vxlimit = new SlewRateLimiter(0.2);
+    private SlewRateLimiter vylimit = new SlewRateLimiter(0.2);
 
     public LookupTableUtil()
     {
@@ -92,15 +96,26 @@ public class LookupTableUtil {
     }
 
     public void updateEffectiveDistance() {
-        // Translation2d hubShifts = new Translation2d();
-        // Pose2d currentHubPose = getUnmodifiedHubPose();
+        effectiveHubPose = getUnmodifiedHubPose();
+        distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose) + getOffset();
+        distanceToFeed = distanceToFeed(RobotContainer.drivetrain.getState().Pose);
+    }
 
-        // Pose2d robotPose2d = RobotContainer.drivetrain.getState().Pose;
-        // double vx = RobotContainer.drivetrain.getState().Speeds.vxMetersPerSecond;
-        // double vy = RobotContainer.drivetrain.getState().Speeds.vyMetersPerSecond;
+    public void updateEffectiveDistanceSOTM() {
+        Translation2d hubShifts = new Translation2d();
+        Pose2d currentHubPose = getUnmodifiedHubPose();
+
+        Pose2d robotPose2d = RobotContainer.drivetrain.getState().Pose;
+        double vx = RobotContainer.drivetrain.getState().Speeds.vxMetersPerSecond;
+        double vy = RobotContainer.drivetrain.getState().Speeds.vyMetersPerSecond;
+        vx = vxlimit.calculate(vx);
+        vy = vylimit.calculate(vy);
+
+        
 
         // double distance = distanceBetween(robotPose2d, currentHubPose);
         // double time = ShooterConstants.distanceToTOF.get(distance);
+        double time = 2;
 
         // //10 loops before manual break
         // for(int i = 0; i < 10; i++)
@@ -120,11 +135,10 @@ public class LookupTableUtil {
         //     }
         // }
 
-        // hubShifts = new Translation2d(getUnmodifiedHubPose().getX()-vx*time, getUnmodifiedHubPose().getY()-vy*time);
-        // effectiveHubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
+        double sign = DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red) ? 1 : -1;
+        hubShifts = new Translation2d(sign*vx*time, sign*vy*time);
+        effectiveHubPose = getUnmodifiedHubPose().plus(new Transform2d(hubShifts, new Rotation2d()));
 
-        effectiveHubPose = getUnmodifiedHubPose();
-        // distanceToHub = SmartDashboard.getNumber("Sim distance", 0.0);
         distanceToHub = distanceToHub(RobotContainer.drivetrain.getState().Pose) + getOffset();
         distanceToFeed = distanceToFeed(RobotContainer.drivetrain.getState().Pose);
     }

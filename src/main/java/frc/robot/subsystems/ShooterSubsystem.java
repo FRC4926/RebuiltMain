@@ -41,6 +41,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private LoggerUtil logger = new LoggerUtil("Shooter Subsystem", true);
 
     private boolean manualShot = false;
+    private boolean isShootingOnTheMove = false;
 
     private double snapPIDCalc = 0.0;
 
@@ -204,6 +205,14 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public Command manualRPMCommand(double RPM) {
         return runOnce(() -> setShooterRPMManual(RPM));
+    }
+
+    public Command enableSOTM() {
+        return new InstantCommand(() -> isShootingOnTheMove = true);
+    }
+
+    public Command disableSOTM() {
+        return new InstantCommand(() -> isShootingOnTheMove = false);
     }
 
     public double getShooter1RPM()
@@ -402,7 +411,11 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     @Override
     public void periodic() {
-        lookupTableUtil.updateEffectiveDistance();
+        if (isShootingOnTheMove) {
+            lookupTableUtil.updateEffectiveDistanceSOTM();
+        } else {
+            lookupTableUtil.updateEffectiveDistance();
+        }
         lookupTableUtil.updateCurrentRange();
         calcRotRate();
 
@@ -452,7 +465,7 @@ public class ShooterSubsystem extends SubsystemBase {
         logger.put("Commanded RPM", lookupTableUtil.getTargetRPM());
         logger.put("Current Range", lookupTableUtil.getCurrentRange(), true);
 
-        logger.put("Hub", lookupTableUtil.getUnmodifiedHubPose());
+        logger.put("Hub", lookupTableUtil.getEffectiveHubPose());
         logger.put("DISTANCE", lookupTableUtil.getDistanceToHub(), true);
         logger.put("Offset", lookupTableUtil.getOffset(), true);
         logger.put("Hood Offset (deg)", lookupTableUtil.getOffsetHood(), true);

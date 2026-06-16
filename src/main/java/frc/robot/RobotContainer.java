@@ -110,7 +110,7 @@ public class RobotContainer {
             )
         );
 
-        shooterSubsystem.setDefaultCommand(shooterSubsystem.shooterIdleCommand().andThen(Commands.idle()));
+        shooterSubsystem.setDefaultCommand(shooterSubsystem.shooterIdleCommand().andThen(shooterSubsystem.disableSOTM()).andThen(Commands.idle()));
         hopperSubsystem.setDefaultCommand(hopperSubsystem.zeroEffortCommand().andThen(Commands.idle()));
         intakeSubsystem.setDefaultCommand(intakeSubsystem.zeroIntake().andThen(Commands.idle()));
         visionSubsystem.setDefaultCommand(visionSubsystem.addVisionMeasurementsCommand(drivetrain));
@@ -129,8 +129,10 @@ public class RobotContainer {
         
         driverController.x().whileTrue(drivetrain.applyRequest(() -> brake));
 
-        driverController.a().whileTrue(drivetrain.snapToHubCommand(drive, driverController::getLeftX, driverController::getLeftY));
+        driverController.y().whileTrue(drivetrain.snapToHubSOTMCommand(drive, driverController::getLeftX, driverController::getLeftY));
 
+        driverController.a().whileTrue(sotm());
+        driverController.a().onFalse(shooterSubsystem.disableSOTM());
 
         operatorController.button(1).whileTrue(shooterSubsystem.unJamShooterCommand().andThen(Commands.idle()));
         
@@ -183,6 +185,18 @@ public class RobotContainer {
         driverController.rightBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    private Command sotm() {
+        return Commands.parallel(shooterSubsystem.enableSOTM(),
+            drivetrain.snapToHubSOTMCommand(drive, driverController::getLeftX, driverController::getLeftY),
+            Commands.sequence(shooterSubsystem.canShootCommand(), 
+                Commands.parallel(
+                    shooterSubsystem.shootCommand(), 
+                    Commands.sequence(new WaitCommand(0.25), hopperSubsystem.positiveEffortCommand()), 
+                    Commands.sequence(new WaitCommand(ShooterConstants.timeTillOscillation), intakeSubsystem.intakeShootCommand(), intakeSubsystem.oscillatePivotCommand())
+                ))
+        );
     }
 
     private Command shoot()
