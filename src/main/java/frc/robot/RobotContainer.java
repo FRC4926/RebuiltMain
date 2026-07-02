@@ -131,8 +131,8 @@ public class RobotContainer {
 
         driverController.y().whileTrue(drivetrain.snapToHubSOTMCommand(drive, driverController::getLeftX, driverController::getLeftY));
 
-        driverController.a().whileTrue(sotm());
-        driverController.a().onFalse(shooterSubsystem.disableSOTM());
+        // driverController.a().whileTrue(sotm());
+        // driverController.a().onFalse(shooterSubsystem.disableSOTM());
 
         operatorController.button(1).whileTrue(shooterSubsystem.unJamShooterCommand().andThen(Commands.idle()));
         

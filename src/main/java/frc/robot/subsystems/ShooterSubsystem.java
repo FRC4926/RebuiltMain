@@ -411,11 +411,11 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     @Override
     public void periodic() {
-        if (isShootingOnTheMove) {
-            lookupTableUtil.updateEffectiveDistanceSOTM();
-        } else {
+        // if (isShootingOnTheMove) {
+        //     lookupTableUtil.updateEffectiveDistanceSOTM();
+        // } else {
             lookupTableUtil.updateEffectiveDistance();
-        }
+        // }
         lookupTableUtil.updateCurrentRange();
         calcRotRate();
 

@@ -15,12 +15,6 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "PivotUp"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
                         "name": "StopIntake"
                       }
                     }
