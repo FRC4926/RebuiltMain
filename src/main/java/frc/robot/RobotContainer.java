@@ -104,8 +104,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(driveY.calculate(-driverController.getLeftY()) * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(driveX.calculate(-driverController.getLeftX()) * DriveConstants.MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(driveY.calculate(-Math.pow(driverController.getLeftY(),2)) * DriveConstants.MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(driveX.calculate(-Math.pow(driverController.getLeftX(),2)) * DriveConstants.MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-rot.calculate(driverController.getRightX()) * DriveConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
@@ -144,6 +144,7 @@ public class RobotContainer {
         operatorController.button(5).onTrue(drivetrain.toggleOverrideCommand());
 
         operatorController.button(6).onTrue(new InstantCommand(() -> shooterSubsystem.hoodMotor.setPosition(0)).ignoringDisable(true));
+
 
 
         operatorController.button(11).onTrue(new InstantCommand(() -> shooterSubsystem.lookupTableUtil.incrementOffset()).ignoringDisable(true));
